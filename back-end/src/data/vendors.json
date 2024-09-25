@@ -1,0 +1,103 @@
+{
+  "data": [
+    {
+      "image": "users/1.jpg",
+      "name": "Everett C. Green",
+      "products": 1670,
+      "storeName": "Everet tCGreen",
+      "createDate": "01-05-2021",
+      "walletBalance": 975431,
+      "revenue": 9761266
+    },
+    {
+      "image": "users/2.jpg",
+      "name": "Caroline L. Harris",
+      "products": 9710,
+      "storeName": "CarolineL Harris",
+      "createDate": "10-10-2021",
+      "walletBalance": 35678,
+      "revenue": 549846
+    },
+    {
+      "image": "users/3.jpg",
+      "name": "lucy j. Morile",
+      "products": 8756,
+      "storeName": "Lucy Morile",
+      "createDate": "21-10-2020",
+      "walletBalance": 26741,
+      "revenue": 688818
+    },
+    {
+      "image": "users/4.jpg",
+      "name": "Jennifer A. Straight",
+      "products": 5456,
+      "storeName": "Jennifer Straight",
+      "createDate": "15-06-2021",
+      "walletBalance": 6424,
+      "revenue": 5686154
+    },
+    {
+      "image": "users/5.jpg",
+      "name": "Louise J. Stiles",
+      "products": 4314,
+      "storeName": "Kevin Millett",
+      "createDate": "20-08-2019",
+      "walletBalance": 23456,
+      "revenue": 898659
+    },
+    {
+      "image": "users/1.jpg",
+      "name": "Scott T. Thomas",
+      "products": 1225,
+      "storeName": "Lucy Morile",
+      "createDate": "19-07-2019",
+      "walletBalance": 36534,
+      "revenue": 8745233
+    },
+    {
+      "image": "users/2.jpg",
+      "name": "Ricky M. Gaynor",
+      "products": 2011,
+      "storeName": "Kevin Millett",
+      "createDate": "06-19-2021",
+      "walletBalance": 12345,
+      "revenue": 94453545
+    },
+    {
+      "image": "users/3.jpg",
+      "name": "Dillon J. Bradshaw",
+      "products": 357,
+      "storeName": "Dillon Bradshaw",
+      "createDate": "26-10-2019",
+      "walletBalance": 74653,
+      "revenue": 68432165
+    },
+    {
+      "image": "users/4.jpg",
+      "name": "Lorna M. Bonner",
+      "products": 957,
+      "storeName": "Lorna Bonner",
+      "createDate": "28-05-2020",
+      "walletBalance": 32451,
+      "revenue": 4235421
+    },
+    {
+      "image": "users/5.jpg",
+      "name": "Richard A. Johnson",
+      "products": 7532,
+      "storeName": "Richard Johnson",
+      "createDate": "08-04-2020",
+      "walletBalance": 576132,
+      "revenue": 64861358
+    },
+    {
+      "image": "users/1.jpg",
+      "name": "Lorraine D. McDowell",
+      "products": 7854,
+      "storeName": "Lorraine McDowell",
+      "createDate": "08-05-2020",
+      "walletBalance": 32451,
+      "revenue": 6205472
+    }
+  ]
+}
