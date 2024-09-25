@@ -1,0 +1,25 @@
+
+
+Theme Version 1.2 (28/12/2023) :
+
+update : update nuxt & node Version(frontend)
+
+
+Theme Version 1.2 (22/Aug/2023) :
+
+update : Resolve i18n issue
+
+
+
+Theme Version 1.2 (21/apr/2023) :
+
+Update : update in i18n
+
+
+Theme Version 1.1 Updates(2 march 2023 frontend) :
+
+- updated theme to nuxt-3 (working with ssr-true)
+
+- Replaced vuex with pinia
+
+- updated packages, replaced non-compatible once with new ones.
