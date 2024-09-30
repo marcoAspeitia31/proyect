@@ -29,6 +29,7 @@ import log_in from "../pages/application/log_in.vue";
 import forgot_password from "../pages/application/forgot_password.vue";
 import register from "../pages/application/register.vue";
 
+// Declaración de las rutas
 const routes = [
   {
     path: "/",
@@ -204,9 +205,22 @@ const routes = [
   },
 ];
 
+// Configuración del router
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes,
+});
+
+// **Guardia de navegación global para redirección**
+router.beforeEach((to, from, next) => {
+  const isAuthenticated = localStorage.getItem("user"); // Verifica si el usuario está autenticado
+
+  // Si la ruta no es login o forgot_password, pero no está autenticado, redirige a login
+  if (to.name !== "log_in" && to.name !== "forgot_password" && !isAuthenticated) {
+    next({ name: "log_in" }); // Redirige a la página de inicio de sesión
+  } else {
+    next(); // Deja continuar la navegación
+  }
 });
 
 export default router;

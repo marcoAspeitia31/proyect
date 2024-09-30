@@ -36,7 +36,7 @@
               <input
                 class="demo-input Typeahead-input form-control-plaintext w-100"
                 type="text"
-                placeholder="Search Voxo .."
+                placeholder="Buscar en SuperKompras .."
                 name="q"
                 title=""
                 autofocus
@@ -48,7 +48,7 @@
               ></vueFeather>
 
               <div class="spinner-border Typeahead-spinner" role="status">
-                <span class="sr-only">Loading...</span>
+                <span class="sr-only">Cargando...</span>
               </div>
             </div>
             <div class="Typeahead-menu"></div>
@@ -65,41 +65,12 @@
           <li class="onhover-dropdown">
             <div class="notification-box">
               <span class="lnr lnr-alarm"></span>
-              <span class="badge rounded-pill badge-theme">4</span>
+              <span class="badge rounded-pill badge-theme"></span>
             </div>
             <ul class="notification-dropdown onhover-show-div">
               <li>
                 <span class="lnr lnr-alarm"></span>
-                <h6 class="f-18 mb-0">Notitications</h6>
-              </li>
-              <li>
-                <p>
-                  <i class="fa fa-circle me-3 font-primary"></i>Delivery
-                  processing <span class="pull-right">10 min.</span>
-                </p>
-              </li>
-              <li>
-                <p>
-                  <i class="fa fa-circle me-3 font-success"></i>Order
-                  Complete<span class="pull-right">1 hr</span>
-                </p>
-              </li>
-              <li>
-                <p>
-                  <i class="fa fa-circle me-3 font-info"></i>Tickets
-                  Generated<span class="pull-right">3 hr</span>
-                </p>
-              </li>
-              <li>
-                <p>
-                  <i class="fa fa-circle me-3 font-danger"></i>Delivery
-                  Complete<span class="pull-right">6 hr</span>
-                </p>
-              </li>
-              <li>
-                <a class="btn btn-primary" href="javascript:void(0)"
-                  >Check all notification</a
-                >
+                <h6 class="f-18 mb-0">Notificaciones</h6>
               </li>
             </ul>
           </li>
@@ -115,57 +86,7 @@
             <ul class="chat-dropdown onhover-show-div">
               <li>
                 <span class="lnr lnr-bubble"></span>
-                <h6 class="f-18 mb-0">Message Box</h6>
-              </li>
-              <li>
-                <div class="media">
-                  <img
-                    class="img-fluid rounded-circle me-3"
-                    src="@/assets/images/user/1.jpg"
-                    alt="user1"
-                  />
-                  <div class="status-circle online"></div>
-                  <div class="media-body">
-                    <span>Erica Hughes</span>
-                    <p>Lorem Ipsum is simply dummy...</p>
-                  </div>
-                  <p class="f-12 font-success">58 mins ago</p>
-                </div>
-              </li>
-              <li>
-                <div class="media">
-                  <img
-                    class="img-fluid rounded-circle me-3"
-                    src="@/assets/images/user/2.png"
-                    alt="user2"
-                  />
-                  <div class="status-circle online"></div>
-                  <div class="media-body">
-                    <span>Kori Thomas</span>
-                    <p>Lorem Ipsum is simply dummy...</p>
-                  </div>
-                  <p class="f-12 font-success">1 hr ago</p>
-                </div>
-              </li>
-              <li>
-                <div class="media">
-                  <img
-                    class="img-fluid rounded-circle me-3"
-                    src="@/assets/images/user/3.png"
-                    alt="user3"
-                  />
-                  <div class="status-circle offline"></div>
-                  <div class="media-body">
-                    <span>Ain Chavez</span>
-                    <p>Lorem Ipsum is simply dummy...</p>
-                  </div>
-                  <p class="f-12 font-danger">32 mins ago</p>
-                </div>
-              </li>
-              <li class="text-center">
-                <a class="btn btn-primary" href="javascript:void(0)"
-                  >View All</a
-                >
+                <h6 class="f-18 mb-0">Cuadro de mensaje</h6>
               </li>
             </ul>
           </li>
@@ -187,7 +108,7 @@
                 alt=""
               />
               <div class="user-name-hide media-body">
-                <span>Emay Walter</span>
+                <span>Alexander Byron</span>
                 <p class="mb-0 font-roboto">
                   Admin<i class="middle fa fa-angle-down"></i>
                 </p>
@@ -197,25 +118,13 @@
               <li>
                 <router-link to="/all_users" href="javascript:void(0)">
                   <vueFeather type="users"></vueFeather>
-                  <span>Users</span>
-                </router-link>
-              </li>
-              <li>
-                <router-link to="/order_list" href="javascript:void(0)">
-                  <vueFeather type="archive"></vueFeather>
-                  <span>Orders</span>
-                </router-link>
-              </li>
-              <li>
-                <router-link to="/support_ticket" href="javascript:void(0)">
-                  <vueFeather type="phone"></vueFeather>
-                  <span>Spports Tickets</span>
+                  <span>Usuarios</span>
                 </router-link>
               </li>
               <li>
                 <router-link to="/profile_setting" href="javascript:void(0)">
                   <vueFeather type="settings"></vueFeather>
-                  <span>Settings</span>
+                  <span>Configuracion</span>
                 </router-link>
               </li>
               <li>
@@ -225,7 +134,7 @@
                   href="javascript:void(0)"
                 >
                   <vueFeather type="log-out"></vueFeather>
-                  <span>Log out</span>
+                  <span>Cerrar Sesion</span>
                 </a>
               </li>
             </ul>

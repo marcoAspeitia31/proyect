@@ -8,7 +8,7 @@
         class="align-items-center btn btn-theme"
       >
         <vueFeather type="plus-square" />
-        Add New
+        Agregar nuevo
       </router-link>
     </form>
   </div>

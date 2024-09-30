@@ -10,59 +10,59 @@
                 <div class="row">
                   <div class="mb-4 row align-items-center">
                     <label class="form-label-title col-sm-2 mb-0"
-                      >First Name</label
+                      >Nombre</label
                     >
                     <div class="col-sm-10">
                       <input
                         class="form-control"
                         type="text"
-                        placeholder="Enter Your First Name"
+                        placeholder="Ingresa tu nombre"
                       />
                     </div>
                   </div>
 
                   <div class="mb-4 row align-items-center">
                     <label class="form-label-title col-sm-2 mb-0"
-                      >Last Name</label
+                      >Apellidos</label
                     >
                     <div class="col-sm-10">
                       <input
                         class="form-control"
                         type="text"
-                        placeholder="Enter Your Last Name"
+                        placeholder="Ingresa tu apellido"
                       />
                     </div>
                   </div>
 
                   <div class="mb-4 row align-items-center">
                     <label class="form-label-title col-sm-2 mb-0"
-                      >Your Phone Number</label
+                      >Numero telefonico</label
                     >
                     <div class="col-sm-10">
                       <input
                         class="form-control"
                         type="number"
-                        placeholder="Enter Your Number"
+                        placeholder="Ingreso tu numero"
                       />
                     </div>
                   </div>
 
                   <div class="mb-4 row align-items-center">
                     <label class="form-label-title col-sm-2 mb-0"
-                      >Enter Email Address</label
+                      >Correo electronico</label
                     >
                     <div class="col-sm-10">
                       <input
                         class="form-control"
                         type="email"
-                        placeholder="Enter Your Email Address"
+                        placeholder="Ingresa tu correo electronico"
                       />
                     </div>
                   </div>
 
                   <div class="mb-4 row align-items-center">
                     <label class="col-sm-2 col-form-label form-label-title"
-                      >Photo</label
+                      >Foto</label
                     >
                     <div class="col-sm-10">
                       <input
@@ -76,26 +76,26 @@
 
                   <div class="mb-4 row align-items-center">
                     <label class="form-label-title col-sm-2 mb-0"
-                      >Password</label
+                      >Contraseña</label
                     >
                     <div class="col-sm-10">
                       <input
                         class="form-control"
                         type="password"
-                        placeholder="Enter Your Password"
+                        placeholder="Ingresa la contraseña"
                       />
                     </div>
                   </div>
 
                   <div class="mb-4 row align-items-center">
                     <label class="form-label-title col-sm-2 mb-0"
-                      >Confirm Password</label
+                      >Confirmar contraseña</label
                     >
                     <div class="col-sm-10">
                       <input
                         class="form-control"
                         type="password"
-                        placeholder="Enter Your Confirm Passowrd"
+                        placeholder="Ingresa para confirmar la contraseña"
                       />
                     </div>
                   </div>
@@ -105,115 +105,15 @@
           </div>
           <!-- Details End -->
 
-          <!-- Address Start -->
-          <div class="card">
-            <div class="card-body">
-              <div class="card-header-2 mb-3">
-                <h5>Address</h5>
-              </div>
-
-              <div class="save-details-box">
-                <div class="row g-4">
-                  <div class="col-xl-4 col-md-6">
-                    <div class="save-details">
-                      <div class="save-name">
-                        <h5>Mark Jugal</h5>
-                      </div>
-
-                      <div class="save-position">
-                        <h6>Home</h6>
-                      </div>
-
-                      <div class="save-address">
-                        <p>549 Sulphur Springs Road</p>
-                        <p>Downers Grove, IL</p>
-                        <p>60515</p>
-                      </div>
-
-                      <div class="mobile">
-                        <p class="mobile">Mobile No. +1-123-456-7890</p>
-                      </div>
-
-                      <div class="button">
-                        <a href="javascript:void(0)" class="btn btn-sm">Edit</a>
-                        <a href="javascript:void(0)" class="btn btn-sm"
-                          >Remove</a
-                        >
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="col-xl-4 col-md-6">
-                    <div class="save-details">
-                      <div class="save-name">
-                        <h5>Method Zaki</h5>
-                      </div>
-
-                      <div class="save-position">
-                        <h6>Office</h6>
-                      </div>
-
-                      <div class="save-address">
-                        <p>549 Sulphur Springs Road</p>
-                        <p>Downers Grove, IL</p>
-                        <p>60515</p>
-                      </div>
-
-                      <div class="mobile">
-                        <p class="mobile">Mobile No. +1-123-456-7890</p>
-                      </div>
-
-                      <div class="button">
-                        <a href="javascript:void(0)" class="btn btn-sm">Edit</a>
-                        <a href="javascript:void(0)" class="btn btn-sm">
-                          Remove</a
-                        >
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="col-xl-4 col-md-6">
-                    <div class="save-details">
-                      <div class="save-name">
-                        <h5>Mark Jugal</h5>
-                      </div>
-
-                      <div class="save-position">
-                        <h6>Home</h6>
-                      </div>
-
-                      <div class="save-address">
-                        <p>549 Sulphur Springs Road</p>
-                        <p>Downers Grove, IL</p>
-                        <p>60515</p>
-                      </div>
-
-                      <div class="mobile">
-                        <p class="mobile">Mobile No. +1-123-456-7890</p>
-                      </div>
-
-                      <div class="button">
-                        <a href="javascript:void(0)" class="btn btn-sm">Edit</a>
-                        <a href="javascript:void(0)" class="btn btn-sm"
-                          >Remove</a
-                        >
-                      </div>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
           </div>
-          <!-- Address End -->
-        </div>
-      </div>
-    </div>
-  </div>
 </template>
 
 <script>
 export default {
-  title: "Voxo-Profile Setting",
+  title: "SK-Configuracion",
 };
 </script>
 

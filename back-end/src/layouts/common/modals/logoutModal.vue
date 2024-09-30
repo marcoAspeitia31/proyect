@@ -11,8 +11,8 @@
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-body">
-          <h5 class="modal-title" id="staticBackdropLabel">Logging Out</h5>
-          <p>Are you sure you want to log out?</p>
+          <h5 class="modal-title" id="staticBackdropLabel">Cerrar Sesion</h5>
+          <p>¿Estás segur@ de que quieres cerrar sesión?</p>
           <button
             type="button"
             class="btn-close"
@@ -30,7 +30,7 @@
               data-bs-dismiss="modal"
               class="btn btn--yes btn-primary"
             >
-              Yes
+              Si
             </button>
           </div>
         </div>

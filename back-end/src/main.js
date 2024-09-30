@@ -11,11 +11,21 @@ import "@/assets/css/vendors/font-awesome.css";
 import vueFeather from "vue-feather";
 import CKEditor from "@ckeditor/ckeditor5-vue";
 import VueApexCharts from "vue3-apexcharts";
+import { VueFire, VueFireAuth } from 'vuefire'; // Importar VueFire y VueFireAuth
+
+// Crear la aplicación con Vue 3
 const app = createApp(App);
+
+// Registrar plugins y componentes
 app.use(store);
 app.use(CKEditor);
+app.use(VueFire, {
+  modules: [VueFireAuth],  // Registrar el módulo VueFireAuth si lo necesitas
+});
 app.component("vueFeather", vueFeather);
 app.component("apexchart", VueApexCharts);
 app.mixin(titleMixin);
 app.use(router);
+
+// Montar la aplicación
 app.mount("#app");

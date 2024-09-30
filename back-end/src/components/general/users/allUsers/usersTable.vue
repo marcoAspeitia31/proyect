@@ -9,31 +9,27 @@
                 <input
                   class="checkbox_animated"
                   type="checkbox"
-                  v-model="checkAll"
-                  value="checkAll"
-                  id="checkall"
+                  v-model="allSelected"
                 />
               </span>
-              User
+              ID
             </th>
-            <th>Name</th>
-            <th>Phone</th>
+            <th>Nombre</th>
             <th>Email</th>
-            <th>Country</th>
-            <th>Last Login</th>
-            <th>Options</th>
+            <th>Contraseña</th>
+            <th>Rol</th>
+            <th>Status</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(user, index) in users" :key="index">
+          <tr v-for="(user, index) in users" :key="user.id">
             <td>
               <div class="form-check user-checkbox">
                 <input
                   class="checkbox_animated check-it"
-                  v-model="checkBoxes"
+                  v-model="selectedUsers"
                   type="checkbox"
                   :value="index"
-                  id="flexCheckDefault"
                 />
               </div>
               <span>
@@ -53,17 +49,15 @@
             <td>
               <ul>
                 <li>
-                  <router-link to="/order_detail" href="javascript:void(0)">
+                  <router-link to="/order_detail">
                     <span class="lnr lnr-eye"></span>
                   </router-link>
                 </li>
-
                 <li>
                   <a href="javascript:void(0)">
                     <span class="lnr lnr-pencil"></span>
                   </a>
                 </li>
-
                 <li>
                   <a href="javascript:void(0)">
                     <span class="lnr lnr-trash"></span>
@@ -83,23 +77,23 @@ export default {
   props: ["users"],
   data() {
     return {
-      checkAll: "",
-      checkBoxes: [],
+      selectedUsers: []
     };
   },
-  watch: {
-    checkAll: function () {
-      if (this.checkAll) {
-        for (var i = 0; i < this.users.length; i++) this.checkBoxes.push(i);
-      } else this.checkBoxes = [];
-    },
+  computed: {
+    allSelected: {
+      get() {
+        return this.selectedUsers.length === this.users.length;
+      },
+      set(value) {
+        this.selectedUsers = value ? this.users.map((_, index) => index) : [];
+      }
+    }
   },
   methods: {
     getImageUrl(path) {
-      return require("@/assets/images/" + path);
-    },
-  },
+      return require(`@/assets/images/${path}`);
+    }
+  }
 };
 </script>
-
-<style></style>

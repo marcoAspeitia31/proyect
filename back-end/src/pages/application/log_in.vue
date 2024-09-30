@@ -6,7 +6,7 @@
           <div class="materialContainer">
             <div class="box">
               <div class="login-title">
-                <h2>Login</h2>
+                <h2>Iniciar Sesion</h2>
               </div>
               <div class="input">
                 <label
@@ -14,8 +14,9 @@
                   :style="[
                     { 'line-height': selected['username'] ? '18px' : '60px' },
                   ]"
-                  >Username</label
                 >
+                  Nombre de usuario
+                </label>
                 <input
                   type="text"
                   name="username"
@@ -29,16 +30,17 @@
                   class="spin"
                   :style="[{ width: selected['username'] ? '100%' : '0%' }]"
                 ></span>
-                <div class="valid-feedback">Please fill the name</div>
               </div>
+
               <div class="input">
                 <label
                   for="password"
                   :style="[
                     { 'line-height': selected['password'] ? '18px' : '60px' },
                   ]"
-                  >Password</label
                 >
+                  Contraseña
+                </label>
                 <input
                   type="password"
                   name="password"
@@ -51,14 +53,15 @@
                   class="spin"
                   :style="[{ width: selected['password'] ? '100%' : '0%' }]"
                 ></span>
-                <div class="valid-feedback">Please fill the name</div>
               </div>
+
               <a
                 href="javascript:void(0)"
                 @click.prevent="$router.push('/forgot_password')"
                 class="pass-forgot"
-                >Forgot your password?</a
               >
+                ¿Recuperar Contraseña?
+              </a>
 
               <div class="button login">
                 <button
@@ -66,51 +69,10 @@
                   @click.prevent="handleLogin"
                   type="submit"
                 >
-                  <span>Log In</span>
+                  <span>Ingresar</span>
                   <i class="fa fa-check"></i>
                 </button>
               </div>
-
-              <p class="sign-category">
-                <span>Or sign in with</span>
-              </p>
-
-              <div class="row gx-md-3 gy-3">
-                <div class="col-md-6">
-                  <a href="https://www.facebook.com/" target="_blank">
-                    <div class="social-media fb-media">
-                      <img
-                        src="@/assets/images/facebook.png"
-                        class="img-fluid"
-                        alt=""
-                      />
-                      <h6>Facebook</h6>
-                    </div>
-                  </a>
-                </div>
-                <div class="col-md-6">
-                  <a href="https://mail.google.com/" target="_blank">
-                    <div class="social-media google-media">
-                      <img
-                        src="@/assets/images/google.png"
-                        class="img-fluid"
-                        alt=""
-                      />
-                      <h6>Google</h6>
-                    </div>
-                  </a>
-                </div>
-              </div>
-
-              <p>
-                Not a member?
-                <nuxt-link
-                  to="/register"
-                  class="theme-color"
-                  href="javascript:void(0)"
-                  >Sign up now</nuxt-link
-                >
-              </p>
             </div>
           </div>
         </div>
@@ -120,53 +82,63 @@
 </template>
 
 <script>
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth"; // Importa Firebase Auth
+
 export default {
-  title: "Voxo-Log In",
+  title: "SK Iniciar Sesion",
   data() {
     return {
       values: {
-        username: "test@gmail.com",
-        password: "test@123",
+        username: "", // Email del usuario
+        password: "", // Contraseña del usuario
       },
-      loginUsername: "test@gmail.com",
-      loginPassword: "test@123",
-      selected: { username: false, password: false },
-      submitted: false,
+      selected: { username: false, password: false }, // Para manejar la selección de los inputs
+      submitted: false, // Para controlar si el formulario ha sido enviado
     };
   },
   methods: {
-    handleLogin() {
-      console.log(
-        "set user",
-        this.values.username,
-        this.values.password,
-        this.loginUsername,
-        this.loginPassword
-      );
-      this.submitted = false;
-      if (
-        this.values.username === this.loginUsername &&
-        this.values.password === this.loginPassword
-      ) {
+    async handleLogin() {
+      const auth = getAuth();
+      try {
+        // Iniciar sesión con el método de Firebase Authentication
+        const userCredential = await signInWithEmailAndPassword(
+          auth,
+          this.values.username,
+          this.values.password
+        );
+        const user = userCredential.user;
+
+        alert('Inicio de sesión exitoso');
+        // Guardar el usuario en localStorage para mantener la sesión
+        localStorage.setItem("user", JSON.stringify(user));
+        // Actualizar el estado global de la sesión en Vuex
         this.$store.dispatch("functionalities/setUser", { user: true });
+        // Redirigir al usuario al home después de iniciar sesión
         this.$router.push("/");
+      } catch (error) {
+        console.error("Error al iniciar sesión: ", error);
+        alert('Las credenciales son incorrectas o no existe el usuario.');
       }
     },
     handleFocusOut(field) {
+      // Maneja cuando el campo pierde el foco
       this.values[field] === "" && (this.selected[field] = false);
     },
     select(textbox) {
+      // Maneja cuando el campo es seleccionado
       this.selected[textbox] = true;
     },
   },
   created() {
+    // Verifica si el usuario ya está logueado al cargar el componente
     var user = localStorage.getItem("user") || false;
     this.$store.dispatch("functionalities/setUser", { user: user });
     if (user) {
-      this.$router.push("/");
+      this.$router.push("/"); // Si el usuario ya está logueado, lo redirige al home
     }
   },
   mounted() {
+    // Maneja la selección inicial de los campos si ya tienen valores
     this.values.username.length != 0
       ? (this.selected.username = true)
       : (this.selected.username = false);
@@ -177,4 +149,52 @@ export default {
 };
 </script>
 
-<style></style>
+<style>
+/* Agrega tus estilos personalizados aquí */
+.input {
+  margin-bottom: 20px;
+  position: relative;
+}
+
+input,
+select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
+  transition: border-color 0.3s;
+}
+
+label {
+  font-size: 16px;
+  color: #333;
+  display: block;
+  margin-bottom: 5px;
+}
+
+button {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #45a049;
+}
+
+.pass-forgot {
+  display: block;
+  margin-top: 10px;
+  color: #007bff;
+  cursor: pointer;
+}
+
+.pass-forgot:hover {
+  text-decoration: underline;
+}
+</style>

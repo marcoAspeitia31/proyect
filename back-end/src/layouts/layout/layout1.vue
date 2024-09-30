@@ -22,11 +22,6 @@
         <footer1 />
       </div>
     </div>
-    <div class="customizer-links" @click.prevent="toggleDirection">
-      <button class="rtl-btn" :class="direction == 'rtl' ? 'rtl' : ''">
-        {{ direction == "ltr" ? "RTL" : "LTR" }}
-      </button>
-    </div>
     <div
       class="bg-overlay active"
       v-if="overlay"
@@ -62,11 +57,6 @@ export default {
   methods: {
     closeOverlay() {
       this.$store.dispatch("clickEvents/closeOverlay");
-    },
-    toggleDirection() {
-      this.direction === "ltr"
-        ? (this.direction = "rtl")
-        : (this.direction = "ltr");
     },
     handleWindowWidth() {
       this.windowWidth = screen.availWidth;

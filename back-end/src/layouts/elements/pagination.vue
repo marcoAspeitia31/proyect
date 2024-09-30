@@ -1,57 +1,9 @@
-<template>
-  <div class="pagination-box">
-    <nav class="ms-auto me-auto" aria-label="...">
-      <ul class="pagination pagination-primary">
-        <li class="page-item" :class="[{ disabled: currentPage == 1 }]">
-          <a
-            class="page-link"
-            href="javascript:void(0)"
-            @click.prevent="
-              changePage(currentPage - 1 > 0 ? currentPage - 1 : changePage)
-            "
-            >Previous</a
-          >
-        </li>
-
-        <li
-          class="page-item"
-          :class="[{ active: currentPage == page }]"
-          v-for="(page, index) in pages"
-          :key="index"
-        >
-          <a
-            class="page-link"
-            href="javascript:void(0)"
-            @click.prevent="changePage(page)"
-            >{{ page }}</a
-          >
-        </li>
-        <li
-          class="page-item"
-          :class="[{ disabled: currentPage == totalPages }]"
-        >
-          <a
-            class="page-link"
-            href="javascript:void(0)"
-            @click.prevent="
-              changePage(
-                currentPage + 1 <= totalPages ? currentPage + 1 : changePage
-              )
-            "
-            >Next</a
-          >
-        </li>
-      </ul>
-    </nav>
-  </div>
-</template>
-
 <script>
 export default {
   props: ["allData"],
   data() {
     return {
-      totalPages: 10,
+      totalPages: 0, // Inicializar en 0 para evitar errores si no hay datos
       currentPage: 1,
       contentToShow: 10,
       pages: [],
@@ -59,34 +11,52 @@ export default {
   },
   methods: {
     changePage(toPage) {
-      let toSend = {
-        toPage: toPage,
-        totalPages: this.totalPages,
-        currentPage: this.currentPage,
-        allData: this.allData,
-      };
-      toPage <= this.totalPages && toPage > 0 && (this.currentPage = toPage);
-      this.$store
-        .dispatch("functionalities/changePage", toSend)
-        .then((response) => {
-          this.pages = [...response];
-          this.currentPage = toPage;
-        });
+      // Asegúrate de que 'toPage' esté dentro del rango de páginas
+      if (toPage > 0 && toPage <= this.totalPages) {
+        let toSend = {
+          toPage: toPage,
+          totalPages: this.totalPages,
+          currentPage: this.currentPage,
+          allData: this.allData,
+        };
+
+        // Actualizar la página actual solo si está dentro del rango
+        this.currentPage = toPage;
+
+        // Enviar la solicitud para cambiar la página
+        this.$store.dispatch("functionalities/changePage", toSend)
+          .then((response) => {
+            this.pages = [...response];
+          })
+          .catch((error) => {
+            console.error("Error al cambiar de página:", error);
+          });
+      }
     },
   },
   mounted() {
-    this.totalPages = Math.ceil(this.allData.length / this.contentToShow);
-    let toSend = {
-      toPage: 1,
-      totalPages: this.totalPages,
-      currentPage: 1,
-      allData: this.allData,
-    };
-    this.$store
-      .dispatch("functionalities/changePage", toSend)
-      .then((response) => (this.pages = [...response]));
+    // Verifica si 'allData' está definido y tiene longitud antes de calcular
+    if (Array.isArray(this.allData) && this.allData.length > 0) {
+      this.totalPages = Math.ceil(this.allData.length / this.contentToShow);
+
+      // Enviar la solicitud inicial para cargar la primera página
+      let toSend = {
+        toPage: 1,
+        totalPages: this.totalPages,
+        currentPage: 1,
+        allData: this.allData,
+      };
+
+      this.$store.dispatch("functionalities/changePage", toSend)
+        .then((response) => {
+          this.pages = [...response];
+        })
+        .catch((error) => {
+          console.error("Error al cargar la primera página:", error);
+        });
+    } else {
+      console.warn("allData no está disponible o no tiene elementos.");
+    }
   },
 };
 </script>
-
-<style></style>

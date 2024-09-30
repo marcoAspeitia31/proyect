@@ -39,11 +39,11 @@ export default {
     return {
       tabs: [
         {
-          name: "Account",
+          name: "Cuenta",
           link: "account",
         },
         {
-          name: "Permissions",
+          name: "Permisos",
           link: "permissions",
         },
       ],
