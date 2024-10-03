@@ -23,7 +23,7 @@ import pagination from "@/layouts/elements/pagination.vue";
 import { mapState } from "vuex";
 export default {
   components: { vendor_list_table, pagination },
-  title: "Voxo-Vendor List",
+  title: "SK-Registrar",
   data() {
     return {
       vendorsData: Vendors.data,

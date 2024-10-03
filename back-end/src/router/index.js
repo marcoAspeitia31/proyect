@@ -43,7 +43,7 @@ const routes = [
     component: allUsers,
     meta: {
       layout: layout1,
-      breadcrumb: { type: 1, title: "All Users", buttonPath: "/add_new_user" },
+      breadcrumb: { type: 1, title: "Total de usuarios", buttonPath: "/add_new_user" },
     },
   },
   {
@@ -52,7 +52,7 @@ const routes = [
     component: add_new_user,
     meta: {
       layout: layout1,
-      breadcrumb: { type: 2, title: "Add New User" },
+      breadcrumb: { type: 2, title: "Añadir usuario" },
     },
   },
   {

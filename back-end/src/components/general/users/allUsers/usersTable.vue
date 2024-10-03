@@ -12,17 +12,15 @@
                   v-model="allSelected"
                 />
               </span>
-              ID
             </th>
             <th>Nombre</th>
             <th>Email</th>
-            <th>Contraseña</th>
             <th>Rol</th>
             <th>Status</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(user, index) in users" :key="user.id">
+          <tr v-for="(user, index) in users" :key="index">
             <td>
               <div class="form-check user-checkbox">
                 <input
@@ -32,39 +30,15 @@
                   :value="index"
                 />
               </div>
-              <span>
-                <img :src="getImageUrl(user.image)" alt="users" />
-              </span>
             </td>
             <td>
               <a href="javascript:void(0)">
                 <span class="d-block">{{ user.name }}</span>
-                <span>{{ user.place }}</span>
               </a>
             </td>
-            <td>{{ user.phone }}</td>
             <td>{{ user.email }}</td>
-            <td class="font-primary">{{ user.country }}</td>
-            <td>{{ user.lastLogin }}</td>
-            <td>
-              <ul>
-                <li>
-                  <router-link to="/order_detail">
-                    <span class="lnr lnr-eye"></span>
-                  </router-link>
-                </li>
-                <li>
-                  <a href="javascript:void(0)">
-                    <span class="lnr lnr-pencil"></span>
-                  </a>
-                </li>
-                <li>
-                  <a href="javascript:void(0)">
-                    <span class="lnr lnr-trash"></span>
-                  </a>
-                </li>
-              </ul>
-            </td>
+            <td>{{ user.role }}</td>
+            <td class="font-primary">{{ user.status }}</td>
           </tr>
         </tbody>
       </table>
@@ -89,11 +63,28 @@ export default {
         this.selectedUsers = value ? this.users.map((_, index) => index) : [];
       }
     }
-  },
-  methods: {
-    getImageUrl(path) {
-      return require(`@/assets/images/${path}`);
-    }
   }
 };
 </script>
+
+<style>
+.table-responsive {
+  margin-top: 20px;
+}
+
+.user-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.user-table th,
+.user-table td {
+  padding: 10px;
+  text-align: left;
+}
+
+.user-checkbox {
+  display: flex;
+  align-items: center;
+}
+</style>

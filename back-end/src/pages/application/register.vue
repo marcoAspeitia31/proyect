@@ -76,7 +76,7 @@
 </template>
 
 <script>
-import { db, ref, set } from '../../../firebase';
+import { db, ref, set } from '@/firebase';
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import bcrypt from 'bcryptjs';
 

@@ -11,11 +11,9 @@
               <div class="input">
                 <label
                   for="username"
-                  :style="[
-                    { 'line-height': selected['username'] ? '18px' : '60px' },
-                  ]"
+                  :style="[{ 'line-height': selected['username'] ? '18px' : '60px' }]"
                 >
-                  Nombre de usuario
+                  Email
                 </label>
                 <input
                   type="text"
@@ -35,9 +33,7 @@
               <div class="input">
                 <label
                   for="password"
-                  :style="[
-                    { 'line-height': selected['password'] ? '18px' : '60px' },
-                  ]"
+                  :style="[{ 'line-height': selected['password'] ? '18px' : '60px' }]"
                 >
                   Contraseña
                 </label>
@@ -82,7 +78,7 @@
 </template>
 
 <script>
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth"; // Importa Firebase Auth
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 
 export default {
   title: "SK Iniciar Sesion",
@@ -93,7 +89,6 @@ export default {
         password: "", // Contraseña del usuario
       },
       selected: { username: false, password: false }, // Para manejar la selección de los inputs
-      submitted: false, // Para controlar si el formulario ha sido enviado
     };
   },
   methods: {
@@ -109,8 +104,6 @@ export default {
         const user = userCredential.user;
 
         alert('Inicio de sesión exitoso');
-        // Guardar el usuario en localStorage para mantener la sesión
-        localStorage.setItem("user", JSON.stringify(user));
         // Actualizar el estado global de la sesión en Vuex
         this.$store.dispatch("functionalities/setUser", { user: true });
         // Redirigir al usuario al home después de iniciar sesión
@@ -131,20 +124,12 @@ export default {
   },
   created() {
     // Verifica si el usuario ya está logueado al cargar el componente
-    var user = localStorage.getItem("user") || false;
-    this.$store.dispatch("functionalities/setUser", { user: user });
-    if (user) {
-      this.$router.push("/"); // Si el usuario ya está logueado, lo redirige al home
-    }
+    this.$store.dispatch("functionalities/setUser", { user: false });
   },
   mounted() {
     // Maneja la selección inicial de los campos si ya tienen valores
-    this.values.username.length != 0
-      ? (this.selected.username = true)
-      : (this.selected.username = false);
-    this.values.password.length != 0
-      ? (this.selected.password = true)
-      : (this.selected.password = false);
+    this.selected.username = this.values.username.length != 0;
+    this.selected.password = this.values.password.length != 0;
   },
 };
 </script>

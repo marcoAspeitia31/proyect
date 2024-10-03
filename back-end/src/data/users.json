@@ -1,11 +1,12 @@
 {
-  "users": {
-    "": {
-      "name": "",
-      "email": "",
-      "password": "",
-      "rol":"",
-      "status":""
+  "proyecto": {
+    "users": {
+      "": {
+        "name": "",
+        "email": "",
+        "password": "",
+        "status": ""
+      }
     }
   }
 }

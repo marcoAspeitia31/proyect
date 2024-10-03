@@ -3,40 +3,33 @@
     <table class="user-table vendor-table table table-striped">
       <thead>
         <tr>
-          <th>Vendor</th>
-          <th>Products</th>
-          <th>Store Name</th>
-          <th>Create Date</th>
-          <th>Wallet Balance</th>
-          <th>Revenue</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Password</th>
+          <th>Confirm Password</th>
+          <th>Status</th>
           <th>Options</th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(vendor, index) in vendors" :key="index">
+        <tr v-for="(user, index) in users" :key="index">
+          <td>{{ user.name }}</td>
+          <td>{{ user.email }}</td>
+          <!-- Se muestra el password enmascarado -->
+          <td>******</td>
+          <!-- Input para confirmar el password -->
           <td>
-            <span>
-              <img :src="getImageUrl(vendor.image)" alt="users" />
-            </span>
-            <a href="javascript:void(0)">
-              <span class="d-block">{{  vendor.name  }}</span>
-            </a>
+            <input 
+              type="password" 
+              v-model="user.confirmPassword" 
+              placeholder="Confirm Password"
+            />
           </td>
-
-          <td>{{  vendor.products  }}</td>
-
-          <td>{{  vendor.storeName  }}</td>
-
-          <td class="font-primary">{{  vendor.createDate  }}</td>
-
-          <td>${{  vendor.walletBalance  }}</td>
-
-          <td>${{  vendor.revenue  }}</td>
-
+          <td>{{ user.status }}</td>
           <td>
             <ul>
               <li>
-                <router-link to="/order_detail" href="javascript:void(0)">
+                <router-link to="/user_detail" href="javascript:void(0)">
                   <span class="lnr lnr-eye"></span>
                 </router-link>
               </li>
@@ -62,12 +55,7 @@
 
 <script>
 export default {
-  props: ["vendors"],
-  methods: {
-    getImageUrl(path) {
-      return require("@/assets/images/" + path);
-    },
-  },
+  props: ["users"],
 };
 </script>
 
