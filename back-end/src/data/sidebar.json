@@ -29,8 +29,25 @@
           "name": "Añadir Usuarios",
           "path": "/add_new_user",
           "type": "link"
+        },
+        {
+          "name": "Lista de usuarios",
+          "path": "/user_List",
+          "type": "link"
+          
+        },
+        {
+          "name": "Gestion de Roles",
+          "path": "/rols_crud",
+          "type": "link"
         }
       ]
+    },
+    {
+      "name": "Gestion Sucursales",
+      "path": "/gestion-sucursales",
+      "type": "link",
+      "icon": "home"
     },
     {
       "name": "Recuperar Contraseña",

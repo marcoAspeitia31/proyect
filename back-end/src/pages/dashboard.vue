@@ -106,7 +106,7 @@
     </div>
     <!-- Earning chart end-->
 
-    <!-- Earning chart start-->
+    <!-- Report chart start-->
     <div class="col-xl-8">
       <div class="card o-hidden">
         <div class="card-header border-0 pb-1">
@@ -127,12 +127,16 @@
         </div>
       </div>
     </div>
+    <!-- Report chart end-->
   </div>
 </template>
 
 <script>
 import charts from "@/data/charts.js";
-import { getAuth } from "firebase/auth"; // Asegúrate de importar esto
+import { getDatabase, ref, get } from "firebase/database"; 
+import { firebaseApp } from "@/firebase"; // Asegúrate de tener la configuración correcta
+
+const db = getDatabase(firebaseApp);
 
 export default {
   title: "SK-Dashboard",
@@ -146,10 +150,18 @@ export default {
   },
   methods: {
     async fetchTotalUsers() {
-      const auth = getAuth();
       try {
-        const users = await auth.listUsers(); // Obtener la lista de usuarios
-        this.totalUsers = users.users.length; // Contar usuarios
+        // Obtener la referencia de la base de datos a la colección de usuarios
+        const snapshot = await get(ref(db, "/projects/superkomprasBackoffice/users/"));
+        
+        if (snapshot.exists()) {
+          const usersData = snapshot.val();
+          // Contar el número de usuarios
+          this.totalUsers = Object.keys(usersData).length;
+        } else {
+          console.warn("No se encontraron usuarios en la base de datos.");
+          this.totalUsers = 0; // Asegurarse de manejar el caso donde no haya usuarios
+        }
       } catch (error) {
         console.error("Error al obtener usuarios:", error);
       }
@@ -161,4 +173,18 @@ export default {
 };
 </script>
 
-<style></style>
+<style scoped>
+/* Estilos personalizados para el dashboard */
+.b-b-primary { border-bottom-color: #007bff; }
+.b-b-danger { border-bottom-color: #dc3545; }
+.b-b-secondary { border-bottom-color: #6c757d; }
+.b-b-success { border-bottom-color: #28a745; }
+.custome-1-bg { background-color: #e9ecef; }
+.custome-2-bg { background-color: #f8d7da; }
+.custome-3-bg { background-color: #e2e3e5; }
+.custome-4-bg { background-color: #d4edda; }
+
+#bar-chart-earning, #report-chart {
+  min-height: 350px;
+}
+</style>

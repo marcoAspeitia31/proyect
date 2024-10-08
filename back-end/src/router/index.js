@@ -4,7 +4,6 @@ import layout1 from "../layouts/layout/layout1.vue";
 import dashboard from "../pages/dashboard.vue";
 import allUsers from "../pages/general/users/all_users.vue";
 import add_new_user from "../pages/general/users/add_new_user.vue";
-
 import order_list from "../pages/application/orders/order_list.vue";
 import order_detail from "../pages/application/orders/order_detail.vue";
 import order_tracking from "../pages/application/orders/order_tracking.vue";
@@ -28,6 +27,9 @@ import list_page from "../pages/application/list_page.vue";
 import log_in from "../pages/application/log_in.vue";
 import forgot_password from "../pages/application/forgot_password.vue";
 import register from "../pages/application/register.vue";
+import userList from '@/components/general/users/allUsers/userList.vue';
+import RolsCrud from "@/components/general/users/rolsCrud.vue";
+import SucursalesCrud from '@/pages/application/store/SucursalesCrud.vue'; 
 
 // Declaración de las rutas
 const routes = [
@@ -203,6 +205,24 @@ const routes = [
     name: "register",
     component: register,
   },
+  {
+    path: '/user_list',
+    name: 'userList',
+    component: userList, 
+    meta: { layout: layout1, breadcrumb: { type: 2, title: "Lista de Usuarios" } },
+  },
+  {
+    path: "/rols_Crud",
+    name: "rolsCrud",
+    component: RolsCrud,
+    meta: { layout: layout1, breadcrumb: { type: 2, title: "Gestionar Roles" } },
+  },
+  {
+    path: '/gestion-sucursales',
+    name: 'SucursalesCrud',
+    component: SucursalesCrud,
+    meta: { layout: layout1, breadcrumb: { type: 2, title: "Gestion Sucurales" } },
+  }
 ];
 
 // Configuración del router

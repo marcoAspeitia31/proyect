@@ -1,7 +1,8 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
-import { getDatabase, ref, set } from "firebase/database"; // Importa la Realtime Database
+import { getDatabase, ref, set, get, onValue, update } from "firebase/database"; 
 
+// Configuración de Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyARsgZH-lJgpJ9FITMqjAQY6L0oVy90pSI",
   authDomain: "appmovil-fef11.firebaseapp.com",
@@ -13,8 +14,15 @@ const firebaseConfig = {
   measurementId: "G-7DX7NPT5D4"
 };
 
-
+// Inicializa Firebase
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+
+// Inicializa Analytics solo si está disponible
+let analytics;
+if (typeof window !== "undefined" && window.location.hostname !== "localhost") {
+  analytics = getAnalytics(app);
+}
+
 const db = getDatabase(app);
-export { app, analytics, db, ref, set };
+
+export { app, analytics, db, ref, set, get, onValue, update };

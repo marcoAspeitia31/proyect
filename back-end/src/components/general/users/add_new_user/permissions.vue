@@ -4,7 +4,7 @@
       <h5>Permisos Relacionados con el Usuario</h5>
     </div>
     <div class="mb-4 row align-items-center">
-      <label class="col-md-2 col-sm-4 mb-0">Agregar Producto</label>
+      <label class="col-md-2 col-sm-4 mb-0">Agregar Permiso</label>
       <div class="col-md-9 col-sm-7">
         <form class="radio-section">
           <label>

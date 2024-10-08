@@ -36,7 +36,7 @@
               <input
                 class="demo-input Typeahead-input form-control-plaintext w-100"
                 type="text"
-                placeholder="Buscar en SuperKompras .."
+                placeholder="Buscar en SuperKompras.."
                 name="q"
                 title=""
                 autofocus

@@ -79,6 +79,7 @@
 
 <script>
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import Swal from "sweetalert2"; // Importa SweetAlert2
 
 export default {
   title: "SK Iniciar Sesion",
@@ -103,14 +104,27 @@ export default {
         );
         const user = userCredential.user;
 
-        alert('Inicio de sesión exitoso');
+        // Mostrar alerta de inicio de sesión exitoso con SweetAlert
+        Swal.fire({
+          icon: "success",
+          title: "¡Inicio de sesión exitoso!",
+          text: "Bienvenido de nuevo",
+          showConfirmButton: false,
+          timer: 1500
+        });
+
         // Actualizar el estado global de la sesión en Vuex
         this.$store.dispatch("functionalities/setUser", { user: true });
         // Redirigir al usuario al home después de iniciar sesión
         this.$router.push("/");
       } catch (error) {
         console.error("Error al iniciar sesión: ", error);
-        alert('Las credenciales son incorrectas o no existe el usuario.');
+        // Mostrar alerta de error con SweetAlert
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Las credenciales son incorrectas o no existe el usuario.",
+        });
       }
     },
     handleFocusOut(field) {
@@ -135,7 +149,7 @@ export default {
 </script>
 
 <style>
-/* Agrega tus estilos personalizados aquí */
+/* Estilos personalizados */
 .input {
   margin-bottom: 20px;
   position: relative;
