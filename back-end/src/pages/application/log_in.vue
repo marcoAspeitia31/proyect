@@ -79,6 +79,7 @@
 
 <script>
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { db, ref, get } from '@/firebase'; // Importar Firebase Realtime Database
 import Swal from "sweetalert2"; // Importa SweetAlert2
 
 export default {
@@ -96,6 +97,8 @@ export default {
     async handleLogin() {
       const auth = getAuth();
       try {
+        console.log("Intentando iniciar sesión...");
+
         // Iniciar sesión con el método de Firebase Authentication
         const userCredential = await signInWithEmailAndPassword(
           auth,
@@ -104,19 +107,45 @@ export default {
         );
         const user = userCredential.user;
 
-        // Mostrar alerta de inicio de sesión exitoso con SweetAlert
-        Swal.fire({
-          icon: "success",
-          title: "¡Inicio de sesión exitoso!",
-          text: "Bienvenido de nuevo",
-          showConfirmButton: false,
-          timer: 1500
-        });
+        // Obtener los datos del usuario desde Firebase Realtime Database
+        const userRef = ref(db, `/projects/superkomprasBackoffice/users/${user.uid}`);
+        const userSnapshot = await get(userRef);
 
-        // Actualizar el estado global de la sesión en Vuex
-        this.$store.dispatch("functionalities/setUser", { user: true });
-        // Redirigir al usuario al home después de iniciar sesión
-        this.$router.push("/");
+        if (userSnapshot.exists()) {
+          const userData = userSnapshot.val();
+
+          // Guardar el rol y permisos en el estado global de Vuex
+          this.$store.dispatch("functionalities/setUser", {
+            user: {
+              uid: user.uid,
+              email: user.email,
+              rol: userData.rol,
+              permissions: userData.permissions
+            }
+          });
+
+          // Guardar en localStorage después del login exitoso
+          localStorage.setItem("user", JSON.stringify({
+            uid: user.uid,
+            email: user.email,
+            rol: userData.rol,
+            permissions: userData.permissions
+          }));
+
+          // Mostrar alerta de inicio de sesión exitoso con SweetAlert
+          Swal.fire({
+            icon: "success",
+            title: "¡Inicio de sesión exitoso!",
+            text: "Bienvenido de nuevo",
+            showConfirmButton: false,
+            timer: 1500
+          });
+
+          // Redirigir al usuario al home después de iniciar sesión
+          this.$router.push("/");
+        } else {
+          throw new Error("No se encontraron datos del usuario.");
+        }
       } catch (error) {
         console.error("Error al iniciar sesión: ", error);
         // Mostrar alerta de error con SweetAlert
@@ -136,11 +165,8 @@ export default {
       this.selected[textbox] = true;
     },
   },
-  created() {
-    // Verifica si el usuario ya está logueado al cargar el componente
-    this.$store.dispatch("functionalities/setUser", { user: false });
-  },
   mounted() {
+    console.log("El componente de inicio de sesión se montó correctamente");
     // Maneja la selección inicial de los campos si ya tienen valores
     this.selected.username = this.values.username.length != 0;
     this.selected.password = this.values.password.length != 0;
@@ -148,7 +174,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 /* Estilos personalizados */
 .input {
   margin-bottom: 20px;

@@ -1,55 +1,54 @@
-
-
 import { createStore } from 'vuex';
 import { rolesPermissions } from '@/utils/permissions.js';
-import { auth, db } from '@/firebase'; // Asegúrate de tener configurado Firebase
+import { auth, db } from '@/firebase'; // Ensure Firebase is properly configured
 import { ref, onValue, push, update, remove } from 'firebase/database';
+import Swal from 'sweetalert2';
 
 export default createStore({
   state: {
     currentUser: {
       name: '',
       email: '',
-      rol: '',
+      role: '',
       permissions: []
     },
-    sucursales: [] // Estado para almacenar la lista de sucursales
+    branches: [] // State to store the list of branches
   },
   mutations: {
     setCurrentUser(state, user) {
       state.currentUser = user;
-      state.currentUser.permissions = rolesPermissions[user.rol] || [];
+      state.currentUser.permissions = rolesPermissions[user.role] || [];
     },
     clearCurrentUser(state) {
       state.currentUser = {
         name: '',
         email: '',
-        rol: '',
+        role: '',
         permissions: []
       };
     },
-    setSucursales(state, sucursales) {
-      state.sucursales = sucursales;
+    setBranches(state, branches) {
+      state.branches = branches;
     },
-    addSucursal(state, sucursal) {
-      state.sucursales.push(sucursal);
+    addBranch(state, branch) {
+      state.branches.push(branch);
     },
-    updateSucursal(state, updatedSucursal) {
-      const index = state.sucursales.findIndex(s => s.id === updatedSucursal.id);
+    updateBranch(state, updatedBranch) {
+      const index = state.branches.findIndex(b => b.id === updatedBranch.id);
       if (index !== -1) {
-        state.sucursales.splice(index, 1, updatedSucursal);
+        state.branches.splice(index, 1, updatedBranch);
       }
     },
-    removeSucursal(state, sucursalId) {
-      state.sucursales = state.sucursales.filter(s => s.id !== sucursalId);
+    removeBranch(state, branchId) {
+      state.branches = state.branches.filter(b => b.id !== branchId);
     }
   },
   actions: {
     fetchCurrentUser({ commit }) {
-      // Usando Firebase Authentication para obtener el usuario actual
+      // Using Firebase Authentication to get the current user
       auth.onAuthStateChanged((user) => {
         if (user) {
-          // Obtener datos adicionales del usuario desde Firebase Database
+          // Fetch additional user data from Firebase Database
           const userRef = ref(db, `/projects/superkomprasBackoffice/users/${user.uid}`);
           onValue(userRef, (snapshot) => {
             const data = snapshot.val();
@@ -57,72 +56,72 @@ export default createStore({
               commit('setCurrentUser', {
                 name: data.name,
                 email: data.email,
-                rol: data.rol
+                role: data.role
               });
             }
           }, (error) => {
-            console.error("Error al obtener los datos del usuario:", error);
+            console.error("Error fetching user data:", error);
           });
         } else {
           commit('clearCurrentUser');
         }
       });
     },
-    fetchSucursales({ commit }) {
-      const sucursalesRef = ref(db, '/projects/superkomprasBackoffice/sucursales');
-      onValue(sucursalesRef, (snapshot) => {
+    fetchBranches({ commit }) {
+      const branchesRef = ref(db, '/projects/superkomprasBackoffice/stores');
+      onValue(branchesRef, (snapshot) => {
         const data = snapshot.val();
-        const sucursales = [];
+        const branches = [];
         if (data) {
           for (let id in data) {
-            sucursales.push({ ...data[id], id });
+            branches.push({ ...data[id], id });
           }
         }
-        commit('setSucursales', sucursales);
+        commit('setBranches', branches);
       }, (error) => {
-        console.error("Error al obtener las sucursales:", error);
+        console.error("Error fetching branches:", error);
       });
     },
-    createSucursal({ commit }, sucursalData) {
-      const sucursalesRef = ref(db, '/projects/superkomprasBackoffice/sucursales');
-      push(sucursalesRef, sucursalData)
+    createBranch({ commit }, branchData) {
+      const branchesRef = ref(db, '/projects/superkomprasBackoffice/stores');
+      push(branchesRef, branchData)
         .then((snapshot) => {
-          commit('addSucursal', { ...sucursalData, id: snapshot.key });
-          alert('Sucursal creada correctamente');
+          commit('addBranch', { ...branchData, id: snapshot.key });
+          Swal.fire('Success', 'Branch created successfully', 'success');
         })
         .catch((error) => {
-          console.error("Error al crear la sucursal:", error);
-          alert('Hubo un error al crear la sucursal.');
+          console.error("Error creating branch:", error);
+          Swal.fire('Error', 'There was an error creating the branch', 'error');
         });
     },
-    updateSucursal({ commit }, sucursal) {
-      const sucursalRef = ref(db, `/projects/superkomprasBackoffice/sucursales/${sucursal.id}`);
-      update(sucursalRef, sucursal)
+    updateBranch({ commit }, branch) {
+      const branchRef = ref(db, `/projects/superkomprasBackoffice/stores/${branch.id}`);
+      update(branchRef, branch)
         .then(() => {
-          commit('updateSucursal', sucursal);
-          alert('Sucursal actualizada correctamente');
+          commit('updateBranch', branch);
+          Swal.fire('Success', 'Branch updated successfully', 'success');
         })
         .catch((error) => {
-          console.error("Error al actualizar la sucursal:", error);
-          alert('Hubo un error al actualizar la sucursal.');
+          console.error("Error updating branch:", error);
+          Swal.fire('Error', 'There was an error updating the branch', 'error');
         });
     },
-    deleteSucursal({ commit }, sucursalId) {
-      const sucursalRef = ref(db, `/projects/superkomprasBackoffice/sucursales/${sucursalId}`);
-      remove(sucursalRef)
+    deleteBranch({ commit }, branchId) {
+      const branchRef = ref(db, `/projects/superkomprasBackoffice/stores/${branchId}`);
+      remove(branchRef)
         .then(() => {
-          commit('removeSucursal', sucursalId);
-          alert('Sucursal eliminada correctamente');
+          commit('removeBranch', branchId);
+          Swal.fire('Success', 'Branch deleted successfully', 'success');
         })
         .catch((error) => {
-          console.error("Error al eliminar la sucursal:", error);
-          alert('Hubo un error al eliminar la sucursal.');
+          console.error("Error deleting branch:", error);
+          Swal.fire('Error', 'There was an error deleting the branch', 'error');
         });
     }
   },
   getters: {
-    getSucursalById: (state) => (id) => {
-      return state.sucursales.find(s => s.id === id);
+    getBranchById: (state) => (id) => {
+      return state.branches.find(b => b.id === id);
     }
   }
 });

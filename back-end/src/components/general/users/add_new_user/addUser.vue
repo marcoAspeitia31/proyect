@@ -101,6 +101,11 @@ export default {
         email: "",
         password: "",
         confirmPassword: ""
+      },
+      rolesPermissions: {
+        Administrador: ["crear", "actualizar", "suspender", "listar"],
+        Sistemas: ["crear", "actualizar", "suspender", "listar"],
+        Sucursal: ["listar"]
       }
     };
   },
@@ -162,7 +167,8 @@ export default {
           defaultStore,
           status: "Activo",
           email,
-          hashedPassword
+          hashedPassword,
+          permissions: this.rolesPermissions[rol] // Asignar permisos según el rol
         });
 
         // Mostrar mensaje de éxito con temporizador

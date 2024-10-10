@@ -23,31 +23,47 @@
         {
           "name": "Ver Usuarios",
           "path": "/all_users",
-          "type": "link"
+          "type": "link",
+          "rol": ["Administrador", "Sistemas"]
         },
         {
           "name": "Añadir Usuarios",
           "path": "/add_new_user",
-          "type": "link"
+          "type": "link",
+          "rol": ["Administrador", "Sistemas"]
         },
         {
           "name": "Lista de usuarios",
           "path": "/user_List",
-          "type": "link"
-          
+          "type": "link",
+          "rol": ["Administrador", "Sistemas", "Sucursal"]
         },
         {
           "name": "Gestion de Roles",
           "path": "/rols_crud",
-          "type": "link"
+          "type": "link",
+          "rol": ["Administrador", "Sistemas"]
         }
       ]
     },
     {
       "name": "Gestion Sucursales",
-      "path": "/gestion-sucursales",
-      "type": "link",
-      "icon": "home"
+      "active": false,
+      "icon": "home",
+      "children": [
+        {
+          "name": "Crear Sucursal",
+          "path": "/gestion-sucursales",
+          "type": "link",
+          "rol": ["Administrador", "Sistemas"]
+        },
+        {
+          "name": "Ver Sucursales",
+          "path": "/all_sucursal",
+          "type": "link",
+          "rol": ["Administrador", "Sistemas"]
+        }
+      ]
     },
     {
       "name": "Recuperar Contraseña",

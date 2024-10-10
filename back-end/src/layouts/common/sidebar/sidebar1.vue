@@ -43,7 +43,7 @@
           <ul class="sidebar-links" id="simple-bar">
             <li class="back-btn"></li>
             <li
-              v-for="(item, index) in sidebarLinks"
+              v-for="(item, index) in filteredSidebarLinks"
               :key="index"
               :class="item.application ? item.mainClasses : 'sidebar-list'"
             >
@@ -53,10 +53,7 @@
               </div>
               <a
                 v-else-if="item.children"
-                :class="[
-                  item.class ? item.class : 'sidebar-link sidebar-title',
-                  item.active ? 'active' : '',
-                ]"
+                :class="[item.class ? item.class : 'sidebar-link sidebar-title', item.active ? 'active' : '']"
                 href="javascript:void(0)"
                 @click.prevent="toggleSubmenu(item.name)"
               >
@@ -69,20 +66,13 @@
               </a>
               <router-link
                 v-else
-                :class="[
-                  item.class
-                    ? item.class
-                    : 'sidebar-link sidebar-title link-nav',
-                  item.active ? 'active' : '',
-                ]"
-                href="javascript:void(0)"
+                :class="[item.class ? item.class : 'sidebar-link sidebar-title link-nav', item.active ? 'active' : '']"
                 :to="item.path"
                 @click="currentActiveMenu = item.name"
               >
                 <vueFeather :type="item.icon" v-if="item.icon"></vueFeather>
                 <span>{{ item.name }}</span>
               </router-link>
-
               <ul
                 class="sidebar-submenu"
                 v-if="item.children"
@@ -91,9 +81,9 @@
                 <li v-for="(link, index) in item.children" :key="'a' + index">
                   <router-link
                     :to="link.path"
+                    v-if="canAccess(link)"
                     :class="[{ active: item.active }]"
-                    >{{ link.name }}</router-link
-                  >
+                  >{{ link.name }}</router-link>
                 </li>
               </ul>
             </li>
@@ -107,9 +97,11 @@
   </div>
 </template>
 
+
 <script>
 import Menu from "@/data/sidebar.json";
 import { mapState } from "vuex";
+
 export default {
   data() {
     return {
@@ -120,7 +112,15 @@ export default {
   computed: {
     ...mapState({
       isSidebarOpen: (state) => state.clickEvents.toggleEvents.isSidebarOpen,
+      user: (state) => state.functionalities.user,
     }),
+    filteredSidebarLinks() {
+      // Filtra los enlaces del sidebar según el rol del usuario
+      return this.sidebarLinks.filter((item) => {
+        if (!item.rol) return true; // Si no tiene restricción de rol, se incluye
+        return item.rol.includes(this.user?.rol); // Si el usuario tiene el rol, se incluye
+      });
+    },
   },
   methods: {
     closeOverlay() {
@@ -139,6 +139,11 @@ export default {
           return false;
         } else return true;
       });
+    },
+    canAccess(link) {
+      // Verifica si el usuario tiene permiso para acceder a un enlace del submenu
+      if (!link.rol) return true; // Si no hay restricciones de rol, se permite el acceso
+      return link.rol.includes(this.user?.rol); // Si el usuario tiene el rol necesario, se permite el acceso
     },
   },
 };

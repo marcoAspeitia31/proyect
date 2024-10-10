@@ -28,7 +28,7 @@
             <td class="action-cell">
               <!-- Botón de Editar con icono -->
               <button @click="editUser(user)" class="edit-button">
-                ✏️
+              Editar
               </button>
             </td>
           </tr>

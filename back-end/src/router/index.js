@@ -1,3 +1,4 @@
+
 import { createRouter, createWebHistory } from "vue-router";
 import layout1 from "../layouts/layout/layout1.vue";
 
@@ -29,7 +30,9 @@ import forgot_password from "../pages/application/forgot_password.vue";
 import register from "../pages/application/register.vue";
 import userList from '@/components/general/users/allUsers/userList.vue';
 import RolsCrud from "@/components/general/users/rolsCrud.vue";
-import SucursalesCrud from '@/pages/application/store/SucursalesCrud.vue'; 
+import SucursalesCrud from '@/pages/application/store/SucursalesCrud.vue';
+import allSucursal from "@/components/allSucursal.vue";
+
 
 // Declaración de las rutas
 const routes = [
@@ -46,6 +49,7 @@ const routes = [
     meta: {
       layout: layout1,
       breadcrumb: { type: 1, title: "Total de usuarios", buttonPath: "/add_new_user" },
+      roles: ["Administrador", "Sistemas"]
     },
   },
   {
@@ -55,6 +59,7 @@ const routes = [
     meta: {
       layout: layout1,
       breadcrumb: { type: 2, title: "Añadir usuario" },
+      roles: ["Administrador", "Sistemas"]
     },
   },
   {
@@ -206,23 +211,36 @@ const routes = [
     component: register,
   },
   {
-    path: '/user_list',
-    name: 'userList',
+    path: "/user_list",
+    name: "userList",
     component: userList, 
-    meta: { layout: layout1, breadcrumb: { type: 2, title: "Lista de Usuarios" } },
+    meta: {
+      layout: layout1,
+      breadcrumb: { type: 2, title: "Lista de Usuarios" },
+      roles: ["Administrador", "Sistemas", "Sucursal"]
+    },
   },
   {
     path: "/rols_Crud",
     name: "rolsCrud",
     component: RolsCrud,
-    meta: { layout: layout1, breadcrumb: { type: 2, title: "Gestionar Roles" } },
+    meta: { layout: layout1, breadcrumb: { type: 2, title: "Gestionar Roles" }, roles: ["Administrador", "Sistemas"] },
   },
   {
     path: '/gestion-sucursales',
     name: 'SucursalesCrud',
     component: SucursalesCrud,
     meta: { layout: layout1, breadcrumb: { type: 2, title: "Gestion Sucurales" } },
+  },
+  {
+    path: "/all_sucursal",
+    name: "allSucursal",
+    component: allSucursal,
+    meta: {
+      layout: layout1, breadcrumb: { type: 1, title: "Total Sucursales" }, roles: ["Administrador", "Sistemas"]
+    }
   }
+
 ];
 
 // Configuración del router
@@ -231,15 +249,25 @@ const router = createRouter({
   routes,
 });
 
-// **Guardia de navegación global para redirección**
 router.beforeEach((to, from, next) => {
   const isAuthenticated = localStorage.getItem("user"); // Verifica si el usuario está autenticado
+  let user = null;
 
-  // Si la ruta no es login o forgot_password, pero no está autenticado, redirige a login
-  if (to.name !== "log_in" && to.name !== "forgot_password" && !isAuthenticated) {
-    next({ name: "log_in" }); // Redirige a la página de inicio de sesión
+  try {
+    user = isAuthenticated ? JSON.parse(isAuthenticated) : null;
+  } catch (e) {
+    console.error("Error al parsear el usuario desde localStorage:", e);
+  }
+
+  // Si no está autenticado y la ruta no es login o forgot_password, redirige a login
+  if (!isAuthenticated && to.name !== "log_in" && to.name !== "forgot_password") {
+    next({ name: "log_in" });
+  } else if (to.meta.roles && user && !to.meta.roles.includes(user.rol)) {
+    // Si el rol del usuario no tiene acceso a la ruta solicitada, redirige al dashboard
+    next({ name: "dashboard" });
   } else {
-    next(); // Deja continuar la navegación
+    // Permite la navegación
+    next();
   }
 });
 

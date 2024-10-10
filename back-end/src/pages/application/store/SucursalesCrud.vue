@@ -1,171 +1,238 @@
 <template>
   <div class="card">
     <div class="card-body">
-      <h3>Gestión de Sucursales</h3>
+      <h4 class="form-title">Crea una Sucursal</h4>
+      <form @submit.prevent="createNewBranch" class="branch-form">
+        <div class="form-group">
+          <label>Nombre de la Sucursal:</label>
+          <input v-model="newBranch.name" type="text" required class="form-control" />
+        </div>
+        <div class="form-group">
+          <label>Division:</label>
+          <input v-model="newBranch.division" type="text" required class="form-control" />
+        </div>
+        <div class="form-group">
+          <label>Direccion:</label>
+          <input v-model="newBranch.address" type="text" required class="form-control" />
+        </div>
+        <div class="form-group latitude-longitude">
+          <div class="latitude">
+            <label>Latitud:</label>
+            <input v-model="newBranch.latitude" type="text" required class="form-control" />
+          </div>
+          <div class="longitude">
+            <label>Longitud:</label>
+            <input v-model="newBranch.longitude" type="text" required class="form-control" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Telefono:</label>
+          <input v-model="newBranch.phone" type="text" required class="form-control" />
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">Crear Sucursal</button>
+          <button type="button" @click="cancelCreate" class="btn btn-primary">Cancelar</button>
+        </div>
+      </form>
 
-      <button @click="createSucursal" class="create-button">
-        <vue-feather icon="plus-circle" /> Crear Sucursal
-      </button>
-
-      <table>
-        <thead>
-          <tr>
-            <th>Nombre</th>
-            <th>Dirección</th>
-            <th>Teléfono</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- Verificar si hay sucursales disponibles -->
-          <tr v-if="!sucursales || sucursales.length === 0">
-            <td colspan="4">No hay sucursales disponibles.</td>
-          </tr>
-          <tr v-for="(sucursal, index) in sucursales" :key="sucursal.id">
-            <td>{{ sucursal.nombre }}</td>
-            <td>{{ sucursal.direccion }}</td>
-            <td>{{ sucursal.telefono }}</td>
-            <td class="action-cell">
-              <!-- Botones de acciones -->
-              <button @click="editSucursal(sucursal)" class="edit-button">
-                <vue-feather icon="edit-2" /> Editar
-              </button>
-              <button @click="deleteSucursal(sucursal.id)" class="delete-button">
-                <vue-feather icon="trash" /> Eliminar
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-
-      <!-- Formulario de edición de sucursal -->
-      <div v-if="selectedSucursal" class="edit-form">
-        <h4>Editar Sucursal</h4>
-        <form @submit.prevent="updateSucursal">
-          <div class="form-group">
-            <label>Nombre:</label>
-            <input v-model="selectedSucursal.nombre" type="text" required />
-          </div>
-          <div class="form-group">
-            <label>Dirección:</label>
-            <input v-model="selectedSucursal.direccion" type="text" required />
-          </div>
-          <div class="form-group">
-            <label>Teléfono:</label>
-            <input v-model="selectedSucursal.telefono" type="text" required />
-          </div>
-          <button type="submit" class="save-button">Guardar</button>
-          <button type="button" @click="cancelEdit" class="cancel-button">Cancelar</button>
-        </form>
-      </div>
-
-      <!-- Formulario para crear una nueva sucursal -->
-      <div v-if="isCreating" class="create-form">
-        <h4>Crear Nueva Sucursal</h4>
-        <form @submit.prevent="createNewSucursal">
-          <div class="form-group">
-            <label>Nombre:</label>
-            <input v-model="newSucursal.nombre" type="text" required />
-          </div>
-          <div class="form-group">
-            <label>Dirección:</label>
-            <input v-model="newSucursal.direccion" type="text" required />
-          </div>
-          <div class="form-group">
-            <label>Teléfono:</label>
-            <input v-model="newSucursal.telefono" type="text" required />
-          </div>
-          <button type="submit" class="save-button">Crear</button>
-          <button type="button" @click="cancelCreate" class="cancel-button">Cancelar</button>
-        </form>
-      </div>
+      <!-- Branches List Component -->
+      <list-stores :branches="branches" @edit-branch="editBranch" @delete-branch="handleDeleteBranch" />
     </div>
   </div>
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex';
-import VueFeather from 'vue-feather';
+import { ref, push, update, remove, onValue } from 'firebase/database';
+import { db } from '@/firebase';
 
 export default {
-  name: 'SucursalesCrud',
-  components: {
-    VueFeather // Registrar el componente localmente
-  },
+  name: 'BranchForm',
   data() {
     return {
-      selectedSucursal: null, // Sucursal seleccionada para editar
-      isCreating: false, // Estado para mostrar el formulario de creación
-      newSucursal: { // Datos para la nueva sucursal
-        nombre: '',
-        direccion: '',
-        telefono: ''
-      }
+      branches: [],
+      newBranch: {
+        id: '',
+        name: '',
+        division: '',
+        address: '',
+        latitude: '',
+        longitude: '',
+        phone: ''
+      },
+      isEditing: false,
+      editingIndex: null
     };
   },
-  computed: {
-    ...mapGetters(['sucursales'])
-  },
   created() {
-    this.fetchSucursales(); // Cargar sucursales al montar el componente
-    this.$store.dispatch('fetchCurrentUser'); // Asegurarse de que el usuario actual está cargado
+    this.fetchBranches();
   },
   methods: {
-    ...mapActions(['fetchSucursales', 'createSucursal', 'updateSucursal', 'deleteSucursal']),
-    
-    // Seleccionar una sucursal para editar
-    editSucursal(sucursal) {
-      this.selectedSucursal = { ...sucursal }; // Clonar la sucursal seleccionada
+    fetchBranches() {
+      const branchesRef = ref(db, '/projects/superkomprasBackoffice/stores');
+      onValue(branchesRef, (snapshot) => {
+        const data = snapshot.val();
+        const branches = [];
+        if (data) {
+          for (let id in data) {
+            branches.push({ ...data[id], id });
+          }
+        }
+        this.branches = branches;
+      }, (error) => {
+        console.error("Error fetching branches:", error);
+      });
     },
-    
-    // Cancelar la edición
-    cancelEdit() {
-      this.selectedSucursal = null; // Limpiar la sucursal seleccionada
-    },
-    
-    // Actualizar la sucursal
-    updateSucursal() {
-      if (!this.selectedSucursal.nombre || !this.selectedSucursal.direccion || !this.selectedSucursal.telefono) {
-        alert('Por favor, completa todos los campos.');
-        return;
+    createNewBranch() {
+      if (this.isEditing) {
+        // Update existing branch in Firebase
+        const branchRef = ref(db, `/projects/superkomprasBackoffice/stores/${this.newBranch.id}`);
+        update(branchRef, this.newBranch)
+          .then(() => {
+            this.isEditing = false;
+            this.editingIndex = null;
+            this.resetForm();
+          })
+          .catch((error) => {
+            console.error("Error updating branch:", error);
+          });
+      } else {
+        // Create new branch in Firebase
+        const branchesRef = ref(db, '/projects/superkomprasBackoffice/stores');
+        push(branchesRef, this.newBranch)
+          .then((snapshot) => {
+            this.newBranch.id = snapshot.key;
+            this.branches.push({ ...this.newBranch });
+            this.resetForm();
+          })
+          .catch((error) => {
+            console.error("Error creating branch:", error);
+          });
       }
-      this.$store.dispatch('updateSucursal', this.selectedSucursal);
-      this.selectedSucursal = null; // Limpiar la sucursal seleccionada
     },
-    
-    // Eliminar una sucursal
-    deleteSucursal(sucursalId) {
-      if (confirm('¿Estás seguro de eliminar esta sucursal?')) {
-        this.$store.dispatch('deleteSucursal', sucursalId);
-      }
+    editBranch(branch) {
+      this.isEditing = true;
+      this.newBranch = { ...branch };
     },
-    
-    // Mostrar el formulario para crear una nueva sucursal
-    createSucursal() {
-      this.isCreating = true;
+    handleDeleteBranch(branchId) {
+      this.branches = this.branches.filter(branch => branch.id !== branchId);
     },
-    
-    // Cancelar la creación
     cancelCreate() {
-      this.isCreating = false;
-      this.newSucursal = { nombre: '', direccion: '', telefono: '' };
+      this.resetForm();
     },
-    
-    // Crear una nueva sucursal
-    createNewSucursal() {
-      if (!this.newSucursal.nombre || !this.newSucursal.direccion || !this.newSucursal.telefono) {
-        alert('Por favor, completa todos los campos.');
-        return;
-      }
-      this.$store.dispatch('createSucursal', this.newSucursal);
-      this.cancelCreate(); // Limpiar el formulario de creación
+    resetForm() {
+      this.newBranch = { id: '', name: '', division: '', address: '', latitude: '', longitude: '', phone: '' };
+      this.isEditing = false;
+      this.editingIndex = null;
     }
   }
 };
 </script>
 
 <style scoped>
-/* Estilos generales */
+.card {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  max-width: 800px;
+  margin: 20px auto;
+}
+
+.card-body {
+  padding: 20px;
+}
+
+.form-title {
+  font-size: 1.5em;
+  margin-bottom: 20px;
+}
+
+.branch-form, .branches-list {
+  margin-bottom: 30px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.form-control {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1em;
+}
+
+.latitude-longitude {
+  display: flex;
+  gap: 20px;
+}
+
+.latitude, .longitude {
+  flex: 1;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.btn {
+  padding: 10px 20px;
+  font-size: 1em;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background-color: #5a6268;
+}
+
+.btn-sm {
+  padding: 5px 10px;
+  font-size: 0.875em;
+}
+
+.btn-warning {
+  background-color: #ffc107;
+  color: white;
+}
+
+.btn-warning:hover {
+  background-color: #e0a800;
+}
+
+.btn-danger {
+  background-color: #dc3545;
+  color: white;
+}
+
+.btn-danger:hover {
+  background-color: #c82333;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
@@ -180,90 +247,5 @@ th, td {
 
 th {
   background-color: #f0f0f0;
-}
-
-td {
-  font-size: 14px;
-}
-
-.action-cell {
-  text-align: center;
-}
-
-/* Botones */
-.edit-button, .delete-button, .create-button {
-  display: inline-flex;
-  align-items: center;
-  color: white;
-  padding: 5px 10px;
-  border: none;
-  border-radius: 3px;
-  cursor: pointer;
-  margin-right: 5px;
-  font-size: 14px;
-  transition: background-color 0.3s ease;
-}
-
-.edit-button {
-  background-color: #007bff; /* Azul */
-}
-.edit-button:hover {
-  background-color: #0056b3; /* Azul más oscuro */
-}
-
-.delete-button {
-  background-color: #dc3545; /* Rojo */
-}
-.delete-button:hover {
-  background-color: #c82333; /* Rojo más oscuro */
-}
-
-.create-button {
-  background-color: #28a745; /* Verde */
-}
-.create-button:hover {
-  background-color: #218838; /* Verde más oscuro */
-}
-
-/* Formularios de edición y creación */
-.edit-form, .create-form {
-  margin-top: 20px;
-  padding: 20px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  background-color: #fafafa;
-}
-
-.form-group {
-  margin-bottom: 15px;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 5px;
-}
-
-.save-button, .cancel-button {
-  padding: 8px 12px;
-  margin-right: 10px;
-  border: none;
-  cursor: pointer;
-  border-radius: 3px;
-}
-
-.save-button {
-  background-color: #4caf50; /* Verde */
-  color: white;
-}
-.save-button:hover {
-  background-color: #45a049; /* Verde más oscuro */
-}
-
-.cancel-button {
-  background-color: #f44336; /* Rojo */
-  color: white;
-}
-.cancel-button:hover {
-  background-color: #d32f2f; /* Rojo más oscuro */
 }
 </style>

@@ -24,6 +24,7 @@
     "uuid": "^10.0.0",
     "vue-feather": "^2.0.0",
     "vue-router": "^4.0.3",
+    "vue2-google-maps": "^0.10.7",
     "vue3-apexcharts": "^1.4.1",
     "vuefire": "^3.2.0",
     "vuex": "^4.0.0"

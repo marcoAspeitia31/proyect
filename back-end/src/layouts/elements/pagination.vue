@@ -4,11 +4,10 @@
       <!-- Renderiza la paginación y el contenido de la página -->
       <ul>
         <li v-for="(item, index) in pages" :key="index">
-          <!-- Muestra el contenido de 'item' aquí -->
           {{ item }}
         </li>
       </ul>
-      
+
       <!-- Controles de paginación -->
       <div class="pagination-controls">
         <button @click="changePage(currentPage - 1)" :disabled="currentPage === 1">Anterior</button>
@@ -17,6 +16,7 @@
       </div>
     </div>
     <div v-else>
+      <p>No hay datos disponibles para mostrar.</p>
     </div>
   </div>
 </template>
@@ -28,8 +28,8 @@ export default {
     return {
       totalPages: 0, // Inicializar en 0 para evitar errores si no hay datos
       currentPage: 1,
-      contentToShow: 10,
-      pages: [],
+      contentToShow: 10, // Número de elementos por página
+      pages: [], // Datos paginados para mostrar en la vista
     };
   },
   methods: {
@@ -49,7 +49,7 @@ export default {
         // Enviar la solicitud para cambiar la página
         this.$store.dispatch("functionalities/changePage", toSend)
           .then((response) => {
-            this.pages = [...response];
+            this.pages = [...response]; // Actualizar los datos paginados
           })
           .catch((error) => {
             console.error("Error al cambiar de página:", error);
@@ -58,7 +58,7 @@ export default {
     },
   },
   mounted() {
-    // Verifica si 'allData' está definido y tiene longitud antes de calcular
+    // Verifica si 'allData' está definido y tiene longitud antes de calcular la paginación
     if (Array.isArray(this.allData) && this.allData.length > 0) {
       this.totalPages = Math.ceil(this.allData.length / this.contentToShow);
 

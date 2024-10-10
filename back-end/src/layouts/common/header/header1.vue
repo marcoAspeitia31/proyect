@@ -30,30 +30,31 @@
         action="javascript:void(0)"
         method="get"
       >
-        <div class="form-group w-100">
-          <div class="Typeahead Typeahead--twitterUsers">
-            <div class="u-posRelative">
-              <input
-                class="demo-input Typeahead-input form-control-plaintext w-100"
-                type="text"
-                placeholder="Buscar en SuperKompras.."
-                name="q"
-                title=""
-                autofocus
-              />
-              <vueFeather
-                type="x"
-                class="close-search"
-                @click.prevent="toggleSearchbar"
-              ></vueFeather>
+      <div class="form-group w-100">
+    <div class="Typeahead Typeahead--twitterUsers">
+      <div class="d-flex align-items-center" style="position: relative;">
+        <!-- Input del buscador -->
+        <input
+          class="demo-input Typeahead-input form-control-plaintext w-100"
+          type="text"
+          placeholder="Buscar en SuperKompras.."
+          name=""
+          title=""
+          autofocus
+        />
+        <vueFeather
+          type="x"
+          class="close-search"
+          @click.prevent="toggleSearchbar"
+          style="cursor: pointer; margin-left: 10px;"
+        ></vueFeather>
 
-              <div class="spinner-border Typeahead-spinner" role="status">
-                <span class="sr-only">Cargando...</span>
-              </div>
-            </div>
-            <div class="Typeahead-menu"></div>
-          </div>
+        <div class="spinner-border Typeahead-spinner" role="status" style="margin-left: 10px;">
+          <span class="sr-only">Cargando...</span>
         </div>
+      </div>
+    </div>
+  </div>
       </form>
       <div class="nav-right col-4 pull-right right-header p-0">
         <ul class="nav-menus">
@@ -107,10 +108,10 @@
                 src="@/assets/images/users/4.jpg"
                 alt=""
               />
-              <div class="user-name-hide media-body">
-                <span>Alexander Byron</span>
+              <div class="user-name-hide media-body" v-if="user && user.name && user.rol">
+                <span>{{ user.name }}</span>
                 <p class="mb-0 font-roboto">
-                  Admin<i class="middle fa fa-angle-down"></i>
+                  {{ user.rol }}<i class="middle fa fa-angle-down"></i>
                 </p>
               </div>
             </div>
@@ -132,6 +133,7 @@
                   data-bs-toggle="modal"
                   data-bs-target="#staticBackdrop"
                   href="javascript:void(0)"
+                  @click.prevent="logout"
                 >
                   <vueFeather type="log-out"></vueFeather>
                   <span>Cerrar Sesion</span>
@@ -147,6 +149,9 @@
 
 <script>
 import { mapState } from "vuex";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { db, ref, get } from '@/firebase';
+
 export default {
   data() {
     return {
@@ -173,11 +178,37 @@ export default {
         this.fullScreen = true;
       }
     },
+    async fetchUserData(uid) {
+      try {
+        const userRef = ref(db, `/projects/superkomprasBackoffice/users/${uid}`);
+        const userSnapshot = await get(userRef);
+        if (userSnapshot.exists()) {
+          const userData = userSnapshot.val();
+          this.$store.dispatch("functionalities/setUser", {
+            user: {
+              uid,
+              name: userData.name,
+              rol: userData.rol,
+            }
+          });
+        }
+      } catch (error) {
+        console.error("Error al obtener datos del usuario: ", error);
+      }
+    },
+    logout() {
+      const auth = getAuth();
+      auth.signOut().then(() => {
+        this.$store.dispatch("functionalities/setUser", { user: null });
+        this.$router.push("/login");
+      });
+    },
   },
   computed: {
     ...mapState({
       isSidebarOpen: (state) => state.clickEvents.toggleEvents.isSidebarOpen,
       openSearchbar: (state) => state.clickEvents.openSearchbar,
+      user: (state) => state.functionalities.user,
     }),
   },
   watch: {
@@ -193,8 +224,48 @@ export default {
   },
   mounted() {
     this.darkMode = localStorage.getItem("darkModeActive") || false;
+    const auth = getAuth();
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        this.fetchUserData(user.uid);
+      }
+    });
   },
 };
 </script>
 
-<style></style>
+<style>
+.form-inline.search-full {
+  position: relative;
+  width: 50%; /* Ajusta este porcentaje según el diseño deseado */
+}
+
+.search-full input {
+  width: 100%;
+  padding: 10px 15px;
+  border-radius: 25px;
+  border: 1px solid #ddd;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  font-size: 16px;
+  position: relative;
+}
+
+.Typeahead .lnr-magnifier {
+  position: absolute;
+  left: 15px;
+  top: 50%; /* Posiciona el ícono verticalmente en el centro */
+  transform: translateY(-50%); /* Ajusta para centrar el ícono */
+  font-size: 18px;
+  color: #6c757d;
+}
+
+.form-inline.search-full .Typeahead-input {
+  padding-left: 40px; /* Deja espacio para el ícono */
+}
+
+.form-inline.search-full .Typeahead-input::placeholder {
+  color: #b5b5b5;
+}
+
+
+</style>

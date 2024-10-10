@@ -6,8 +6,8 @@
         <div class="custome-1-bg b-r-4 card-body">
           <div class="media align-items-center static-top-widget">
             <div class="media-body p-0">
-              <span class="m-0">Ganancias Totales</span>
-              <h4 class="mb-0 counter">0
+              <span class="m-0">Total de Sucursales</span>
+              <h4 class="mb-0 counter">{{ totalBranches }}
                 <span class="badge badge-light-primary grow">
                   <vueFeather type="trending-down" />
                 </span>
@@ -133,7 +133,7 @@
 
 <script>
 import charts from "@/data/charts.js";
-import { getDatabase, ref, get } from "firebase/database"; 
+import { getDatabase, ref, get, onValue } from "firebase/database"; 
 import { firebaseApp } from "@/firebase"; // Asegúrate de tener la configuración correcta
 
 const db = getDatabase(firebaseApp);
@@ -146,6 +146,7 @@ export default {
       revenueChart: charts.revenueChart,
       visitorChart: charts.visitorChart,
       totalUsers: 0, // Inicializamos el total de usuarios
+      totalBranches: 0, // Inicializamos el total de sucursales
     };
   },
   methods: {
@@ -160,15 +161,32 @@ export default {
           this.totalUsers = Object.keys(usersData).length;
         } else {
           console.warn("No se encontraron usuarios en la base de datos.");
-          this.totalUsers = 0; // Asegurarse de manejar el caso donde no haya usuarios
+          this.totalUsers = 0;
         }
       } catch (error) {
         console.error("Error al obtener usuarios:", error);
       }
     },
+    fetchTotalBranches() {
+      // Obtener datos en tiempo real de la base de datos de sucursales
+      const branchesRef = ref(db, "/projects/superkomprasBackoffice/stores");
+      onValue(branchesRef, (snapshot) => {
+        if (snapshot.exists()) {
+          const branchesData = snapshot.val();
+          // Contar el número de sucursales
+          this.totalBranches = Object.keys(branchesData).length;
+        } else {
+          console.warn("No se encontraron sucursales en la base de datos.");
+          this.totalBranches = 0;
+        }
+      }, (error) => {
+        console.error("Error al obtener sucursales:", error);
+      });
+    }
   },
   created() {
-    this.fetchTotalUsers(); // Llamar la función al crear el componente
+    this.fetchTotalUsers();
+    this.fetchTotalBranches(); // Llamamos a la función para obtener las sucursales
   },
 };
 </script>
