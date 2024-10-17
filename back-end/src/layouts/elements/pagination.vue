@@ -16,7 +16,6 @@
       </div>
     </div>
     <div v-else>
-      <p>No hay datos disponibles para mostrar.</p>
     </div>
   </div>
 </template>

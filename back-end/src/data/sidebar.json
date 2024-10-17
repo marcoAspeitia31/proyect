@@ -24,19 +24,13 @@
           "name": "Ver Usuarios",
           "path": "/all_users",
           "type": "link",
-          "rol": ["Administrador", "Sistemas"]
+          "rol": ["Administrador", "Sistemas","Sucursal"]
         },
         {
           "name": "Añadir Usuarios",
           "path": "/add_new_user",
           "type": "link",
           "rol": ["Administrador", "Sistemas"]
-        },
-        {
-          "name": "Lista de usuarios",
-          "path": "/user_List",
-          "type": "link",
-          "rol": ["Administrador", "Sistemas", "Sucursal"]
         },
         {
           "name": "Gestion de Roles",

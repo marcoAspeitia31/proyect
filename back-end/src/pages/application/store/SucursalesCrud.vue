@@ -1,19 +1,19 @@
 <template>
   <div class="card">
     <div class="card-body">
-      <h4 class="form-title">Crea una Sucursal</h4>
       <form @submit.prevent="createNewBranch" class="branch-form">
         <div class="form-group">
-          <label>Nombre de la Sucursal:</label>
+          <label for="branchName">Nombre de la Sucursal:</label>
           <input v-model="newBranch.name" type="text" required class="form-control" />
         </div>
         <div class="form-group">
-          <label>Division:</label>
+          <label>División:</label>
           <input v-model="newBranch.division" type="text" required class="form-control" />
         </div>
         <div class="form-group">
-          <label>Direccion:</label>
-          <input v-model="newBranch.address" type="text" required class="form-control" />
+          <label>Dirección:</label>
+          <input id="branch-address" v-model="newBranch.address" type="text" required class="form-control" placeholder="Ingresa la dirección" />
+          <button type="button" @click="showMapModal" class="btn btn-primary">Seleccionar en el Mapa</button>
         </div>
         <div class="form-group latitude-longitude">
           <div class="latitude">
@@ -26,32 +26,38 @@
           </div>
         </div>
         <div class="form-group">
-          <label>Telefono:</label>
+          <label>Teléfono:</label>
           <input v-model="newBranch.phone" type="text" required class="form-control" />
         </div>
         <div class="form-actions">
           <button type="submit" class="btn btn-primary">Crear Sucursal</button>
-          <button type="button" @click="cancelCreate" class="btn btn-primary">Cancelar</button>
+          <button type="button" @click="cancelCreate" class="btn btn-secondary">Cancelar</button>
         </div>
       </form>
+    </div>
 
-      <!-- Branches List Component -->
-      <list-stores :branches="branches" @edit-branch="editBranch" @delete-branch="handleDeleteBranch" />
+    <!-- Modal del Mapa -->
+    <div v-if="isMapModalVisible" class="map-modal">
+      <div class="modal-content">
+        <span class="close" @click="hideMapModal">&times;</span>
+        <h4>Seleccionar Ubicación en el Mapa</h4>
+        <div id="map" class="map-container"></div>
+        <button @click="confirmLocation" class="btn btn-primary">Confirmar Ubicación</button>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
-import { ref, push, update, remove, onValue } from 'firebase/database';
+import { ref, push, set, onValue } from 'firebase/database';
 import { db } from '@/firebase';
+import Swal from 'sweetalert2';
 
 export default {
   name: 'BranchForm',
   data() {
     return {
-      branches: [],
       newBranch: {
-        id: '',
         name: '',
         division: '',
         address: '',
@@ -59,14 +65,140 @@ export default {
         longitude: '',
         phone: ''
       },
-      isEditing: false,
-      editingIndex: null
+      isMapModalVisible: false,
+      map: null,
+      marker: null,
+      geocoder: new google.maps.Geocoder(), // Inicializamos el Geocoder
+      autocomplete: null, // Para manejar Google Places Autocomplete
     };
   },
-  created() {
-    this.fetchBranches();
+  mounted() {
+    this.initializeAutocomplete(); // Inicializamos Autocomplete cuando se monta el componente
   },
   methods: {
+    initializeAutocomplete() {
+      const input = document.getElementById('branch-address');
+      if (input && !this.autocomplete) {
+        this.autocomplete = new google.maps.places.Autocomplete(input, {
+          types: ['geocode']
+        });
+        this.autocomplete.addListener('place_changed', this.handlePlaceSelect);
+      }
+    },
+    handlePlaceSelect() {
+      const place = this.autocomplete.getPlace();
+      if (place.geometry) {
+        const location = place.geometry.location;
+        this.newBranch.latitude = location.lat();
+        this.newBranch.longitude = location.lng();
+        this.newBranch.address = place.formatted_address;
+
+        if (this.map && this.marker) {
+          this.marker.setPosition(location);
+          this.map.setCenter(location);
+        }
+      }
+    },
+    showMapModal() {
+      this.isMapModalVisible = true;
+      this.$nextTick(() => {
+        this.initializeMap();
+      });
+    },
+    hideMapModal() {
+      this.isMapModalVisible = false;
+    },
+    initializeMap() {
+      const hasCoordinates = this.newBranch.latitude && this.newBranch.longitude;
+      const mapCenter = hasCoordinates
+        ? { lat: parseFloat(this.newBranch.latitude), lng: parseFloat(this.newBranch.longitude) }
+        : { lat: 19.432608, lng: -99.133209 }; // Ubicación predeterminada
+
+      if (!this.map) {
+        this.map = new google.maps.Map(document.getElementById('map'), {
+          center: mapCenter,
+          zoom: 15
+        });
+
+        this.marker = new google.maps.Marker({
+          position: mapCenter,
+          map: this.map,
+          draggable: true
+        });
+
+        google.maps.event.addListener(this.marker, 'dragend', this.handleMarkerPositionChange);
+        google.maps.event.addListener(this.map, 'click', (event) => {
+          this.marker.setPosition(event.latLng);
+          this.handleMarkerPositionChange();
+        });
+      } else {
+        this.map.setCenter(mapCenter);
+        this.marker.setPosition(mapCenter);
+      }
+
+      google.maps.event.trigger(this.map, 'resize');
+    },
+    handleMarkerPositionChange() {
+      const pos = this.marker.getPosition();
+      this.newBranch.latitude = pos.lat();
+      this.newBranch.longitude = pos.lng();
+      this.geocodePosition(pos);
+    },
+    geocodePosition(pos) {
+      this.geocoder.geocode({ location: pos }, (results, status) => {
+        if (status === 'OK') {
+          this.newBranch.address = results[0].formatted_address;
+        }
+      });
+    },
+    confirmLocation() {
+      this.isMapModalVisible = false;
+    },
+    createNewBranch() {
+      if (!this.newBranch.name || !this.newBranch.division || !this.newBranch.address || !this.newBranch.latitude || !this.newBranch.longitude || !this.newBranch.phone) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Por favor completa todos los campos antes de crear la sucursal.'
+        });
+        return;
+      }
+
+      const branchesRef = ref(db, '/projects/superkomprasBackoffice/stores');
+      const newBranchRef = push(branchesRef);
+
+      set(newBranchRef, {
+        name: this.newBranch.name,
+        division: this.newBranch.division,
+        address: this.newBranch.address,
+        latitude: this.newBranch.latitude,
+        longitude: this.newBranch.longitude,
+        phone: this.newBranch.phone
+      })
+      .then(() => {
+        Swal.fire({
+          icon: 'success',
+          title: 'Sucursal creada',
+          text: 'La sucursal ha sido creada exitosamente.'
+        });
+        this.resetForm();
+        this.fetchBranches();
+      })
+      .catch((error) => {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: `No se pudo crear la sucursal: ${error.message}`
+        });
+      });
+    },
+    cancelCreate() {
+      this.resetForm();
+    },
+    resetForm() {
+      this.newBranch = { name: '', division: '', address: '', latitude: '', longitude: '', phone: '' };
+      this.isMapModalVisible = false;
+    },
     fetchBranches() {
       const branchesRef = ref(db, '/projects/superkomprasBackoffice/stores');
       onValue(branchesRef, (snapshot) => {
@@ -78,57 +210,47 @@ export default {
           }
         }
         this.branches = branches;
-      }, (error) => {
-        console.error("Error fetching branches:", error);
       });
-    },
-    createNewBranch() {
-      if (this.isEditing) {
-        // Update existing branch in Firebase
-        const branchRef = ref(db, `/projects/superkomprasBackoffice/stores/${this.newBranch.id}`);
-        update(branchRef, this.newBranch)
-          .then(() => {
-            this.isEditing = false;
-            this.editingIndex = null;
-            this.resetForm();
-          })
-          .catch((error) => {
-            console.error("Error updating branch:", error);
-          });
-      } else {
-        // Create new branch in Firebase
-        const branchesRef = ref(db, '/projects/superkomprasBackoffice/stores');
-        push(branchesRef, this.newBranch)
-          .then((snapshot) => {
-            this.newBranch.id = snapshot.key;
-            this.branches.push({ ...this.newBranch });
-            this.resetForm();
-          })
-          .catch((error) => {
-            console.error("Error creating branch:", error);
-          });
-      }
-    },
-    editBranch(branch) {
-      this.isEditing = true;
-      this.newBranch = { ...branch };
-    },
-    handleDeleteBranch(branchId) {
-      this.branches = this.branches.filter(branch => branch.id !== branchId);
-    },
-    cancelCreate() {
-      this.resetForm();
-    },
-    resetForm() {
-      this.newBranch = { id: '', name: '', division: '', address: '', latitude: '', longitude: '', phone: '' };
-      this.isEditing = false;
-      this.editingIndex = null;
     }
   }
 };
 </script>
 
 <style scoped>
+.map-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 20px;
+  width: 80%;
+  max-width: 600px;
+  text-align: center;
+  position: relative;
+}
+
+.map-container {
+  height: 400px;
+  width: 100%;
+}
+
+.close {
+  position:absolute;
+  top: 10px;
+  right: 20px;
+  font-size: 24px;
+  cursor: pointer;
+}
+
 .card {
   background-color: #ffffff;
   border-radius: 8px;
@@ -156,7 +278,7 @@ export default {
 }
 
 .form-group label {
-  display: block;
+  display:block;
   margin-bottom: 5px;
   font-weight: bold;
 }
@@ -208,44 +330,5 @@ export default {
 
 .btn-secondary:hover {
   background-color: #5a6268;
-}
-
-.btn-sm {
-  padding: 5px 10px;
-  font-size: 0.875em;
-}
-
-.btn-warning {
-  background-color: #ffc107;
-  color: white;
-}
-
-.btn-warning:hover {
-  background-color: #e0a800;
-}
-
-.btn-danger {
-  background-color: #dc3545;
-  color: white;
-}
-
-.btn-danger:hover {
-  background-color: #c82333;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 20px;
-}
-
-th, td {
-  padding: 10px;
-  border: 1px solid #ccc;
-  text-align: left;
-}
-
-th {
-  background-color: #f0f0f0;
 }
 </style>

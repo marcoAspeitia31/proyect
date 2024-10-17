@@ -28,7 +28,6 @@ import list_page from "../pages/application/list_page.vue";
 import log_in from "../pages/application/log_in.vue";
 import forgot_password from "../pages/application/forgot_password.vue";
 import register from "../pages/application/register.vue";
-import userList from '@/components/general/users/allUsers/userList.vue';
 import RolsCrud from "@/components/general/users/rolsCrud.vue";
 import SucursalesCrud from '@/pages/application/store/SucursalesCrud.vue';
 import allSucursal from "@/components/allSucursal.vue";
@@ -49,7 +48,7 @@ const routes = [
     meta: {
       layout: layout1,
       breadcrumb: { type: 1, title: "Total de usuarios", buttonPath: "/add_new_user" },
-      roles: ["Administrador", "Sistemas"]
+      roles: ["Administrador", "Sistemas", "Sucursal"]
     },
   },
   {
@@ -210,16 +209,7 @@ const routes = [
     name: "register",
     component: register,
   },
-  {
-    path: "/user_list",
-    name: "userList",
-    component: userList, 
-    meta: {
-      layout: layout1,
-      breadcrumb: { type: 2, title: "Lista de Usuarios" },
-      roles: ["Administrador", "Sistemas", "Sucursal"]
-    },
-  },
+  
   {
     path: "/rols_Crud",
     name: "rolsCrud",
@@ -237,10 +227,9 @@ const routes = [
     name: "allSucursal",
     component: allSucursal,
     meta: {
-      layout: layout1, breadcrumb: { type: 1, title: "Total Sucursales" }, roles: ["Administrador", "Sistemas"]
+      layout: layout1, breadcrumb: { type: 2, title: "Total Sucursales" }, roles: ["Administrador", "Sistemas","Sucursal"]
     }
   }
-
 ];
 
 // Configuración del router

@@ -9,9 +9,10 @@
             <th>Nombre</th>
             <th>Email</th>
             <th>Rol</th>
-            <th>Sucursal</th> 
+            <th>Sucursal</th>
             <th>Estatus</th>
-            <th>Acciones</th>
+            <!-- Mostrar la columna de acciones solo si el rol es 'Administrador' o 'Sistemas' -->
+            <th v-if="loggedUserRole === 'Administrador' || loggedUserRole === 'Sistemas'">Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -25,16 +26,17 @@
             <td>{{ user.rol }}</td>
             <td>{{ getStoreName(user.defaultStore) }}</td>
             <td>{{ user.status }}</td>
-            <td class="action-cell">
+            <!-- Mostrar las acciones solo si el rol del usuario logueado es 'Administrador' o 'Sistemas' -->
+            <td v-if="loggedUserRole === 'Administrador' || loggedUserRole === 'Sistemas'" class="action-cell">
               <!-- Botón de Editar con icono -->
               <button @click="editUser(user)" class="edit-button">
-              Editar
+                Editar
               </button>
             </td>
           </tr>
         </tbody>
       </table>
-      
+
       <!-- Formulario de edición de usuario -->
       <div v-if="selectedUser" class="edit-form">
         <h4>Editar Usuario</h4>
@@ -114,11 +116,13 @@ export default {
         "7346": "SKM TENANGO",
         "7347": "SKM IXTLAHUACA",
       }, // Mapa de sucursales
-      selectedUser: null // Usuario seleccionado para editar
+      selectedUser: null, // Usuario seleccionado para editar
+      loggedUserRole: 'Sucursal' // Rol del usuario logueado
     };
   },
   created() {
     this.fetchUsers(); // Llama a fetchUsers al crear el componente
+    this.getLoggedUserRole(); // Obtener el rol del usuario logueado
   },
   methods: {
     // Obtener todos los usuarios de Firebase
@@ -167,6 +171,11 @@ export default {
         console.error("Error al actualizar el usuario:", error);
         alert('Hubo un error al actualizar el usuario.');
       });
+    },
+    // Obtener el rol del usuario logueado
+    getLoggedUserRole() {
+      // Aquí deberías implementar la lógica para obtener el rol del usuario logueado desde tu autenticación
+      this.loggedUserRole = 'Administrador'; // Puedes cambiar esto dinámicamente según el rol del usuario logueado
     }
   }
 };
