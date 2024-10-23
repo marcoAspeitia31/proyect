@@ -13,6 +13,7 @@ import CKEditor from "@ckeditor/ckeditor5-vue";
 import VueApexCharts from "vue3-apexcharts";
 import { VueFire, VueFireAuth } from 'vuefire'; // Importar VueFire y VueFireAuth
 import * as VueGoogleMaps from 'vue2-google-maps';
+
 // Crear la aplicación con Vue 3
 const app = createApp(App);
 

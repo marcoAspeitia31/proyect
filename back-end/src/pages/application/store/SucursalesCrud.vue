@@ -1,6 +1,17 @@
 <template>
   <div class="card">
     <div class="card-body">
+      <nav aria-label="breadcrumb" class="float-right">
+      <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+      <router-link to="/">Home</router-link>
+      </li>
+      <li class="breadcrumb-item">
+      <router-link to="#">Gestion de Sucursales</router-link>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">Total de sucursales</li>
+  </ol>
+</nav>
       <form @submit.prevent="createNewBranch" class="branch-form">
         <div class="form-group">
           <label for="branchName">Nombre de la Sucursal:</label>
@@ -13,8 +24,8 @@
         <div class="form-group">
           <label>Dirección:</label>
           <input id="branch-address" v-model="newBranch.address" type="text" required class="form-control" placeholder="Ingresa la dirección" />
-          <button type="button" @click="showMapModal" class="btn btn-primary">Seleccionar en el Mapa</button>
         </div>
+        <div id="map" class="map-container"></div>
         <div class="form-group latitude-longitude">
           <div class="latitude">
             <label>Latitud:</label>
@@ -35,18 +46,10 @@
         </div>
       </form>
     </div>
-
-    <!-- Modal del Mapa -->
-    <div v-if="isMapModalVisible" class="map-modal">
-      <div class="modal-content">
-        <span class="close" @click="hideMapModal">&times;</span>
-        <h4>Seleccionar Ubicación en el Mapa</h4>
-        <div id="map" class="map-container"></div>
-        <button @click="confirmLocation" class="btn btn-primary">Confirmar Ubicación</button>
-      </div>
-    </div>
   </div>
 </template>
+
+
 
 <script>
 import { ref, push, set, onValue } from 'firebase/database';
@@ -65,23 +68,21 @@ export default {
         longitude: '',
         phone: ''
       },
-      isMapModalVisible: false,
       map: null,
       marker: null,
-      geocoder: new google.maps.Geocoder(), // Inicializamos el Geocoder
-      autocomplete: null, // Para manejar Google Places Autocomplete
+      geocoder: new google.maps.Geocoder(),
+      autocomplete: null,
     };
   },
   mounted() {
-    this.initializeAutocomplete(); // Inicializamos Autocomplete cuando se monta el componente
+    this.initializeAutocomplete();
+    this.initializeMap();
   },
   methods: {
     initializeAutocomplete() {
       const input = document.getElementById('branch-address');
       if (input && !this.autocomplete) {
-        this.autocomplete = new google.maps.places.Autocomplete(input, {
-          types: ['geocode']
-        });
+        this.autocomplete = new google.maps.places.Autocomplete(input, {types: ['geocode']});
         this.autocomplete.addListener('place_changed', this.handlePlaceSelect);
       }
     },
@@ -92,51 +93,27 @@ export default {
         this.newBranch.latitude = location.lat();
         this.newBranch.longitude = location.lng();
         this.newBranch.address = place.formatted_address;
-
-        if (this.map && this.marker) {
-          this.marker.setPosition(location);
-          this.map.setCenter(location);
-        }
+        this.updateMap(location);
       }
     },
-    showMapModal() {
-      this.isMapModalVisible = true;
-      this.$nextTick(() => {
-        this.initializeMap();
-      });
-    },
-    hideMapModal() {
-      this.isMapModalVisible = false;
+    updateMap(location) {
+      if (this.marker) {
+        this.marker.setPosition(location);
+        this.map.setCenter(location);
+      }
     },
     initializeMap() {
-      const hasCoordinates = this.newBranch.latitude && this.newBranch.longitude;
-      const mapCenter = hasCoordinates
-        ? { lat: parseFloat(this.newBranch.latitude), lng: parseFloat(this.newBranch.longitude) }
-        : { lat: 19.432608, lng: -99.133209 }; // Ubicación predeterminada
-
-      if (!this.map) {
-        this.map = new google.maps.Map(document.getElementById('map'), {
-          center: mapCenter,
-          zoom: 15
-        });
-
-        this.marker = new google.maps.Marker({
-          position: mapCenter,
-          map: this.map,
-          draggable: true
-        });
-
-        google.maps.event.addListener(this.marker, 'dragend', this.handleMarkerPositionChange);
-        google.maps.event.addListener(this.map, 'click', (event) => {
-          this.marker.setPosition(event.latLng);
-          this.handleMarkerPositionChange();
-        });
-      } else {
-        this.map.setCenter(mapCenter);
-        this.marker.setPosition(mapCenter);
-      }
-
-      google.maps.event.trigger(this.map, 'resize');
+      const mapCenter = { lat: 19.432608, lng: -99.133209 }; // Default center
+      this.map = new google.maps.Map(document.getElementById('map'), {
+        center: mapCenter,
+        zoom: 15
+      });
+      this.marker = new google.maps.Marker({
+        position: mapCenter,
+        map: this.map,
+        draggable: true
+      });
+      google.maps.event.addListener(this.marker, 'dragend', this.handleMarkerPositionChange);
     },
     handleMarkerPositionChange() {
       const pos = this.marker.getPosition();
@@ -151,92 +128,70 @@ export default {
         }
       });
     },
-    confirmLocation() {
-      this.isMapModalVisible = false;
-    },
     createNewBranch() {
-      if (!this.newBranch.name || !this.newBranch.division || !this.newBranch.address || !this.newBranch.latitude || !this.newBranch.longitude || !this.newBranch.phone) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'Por favor completa todos los campos antes de crear la sucursal.'
-        });
-        return;
-      }
-
-      const branchesRef = ref(db, '/projects/superkomprasBackoffice/stores');
-      const newBranchRef = push(branchesRef);
-
-      set(newBranchRef, {
-        name: this.newBranch.name,
-        division: this.newBranch.division,
-        address: this.newBranch.address,
-        latitude: this.newBranch.latitude,
-        longitude: this.newBranch.longitude,
-        phone: this.newBranch.phone
-      })
+  if (this.newBranch.name && this.newBranch.division && this.newBranch.address && this.newBranch.latitude && this.newBranch.longitude && this.newBranch.phone) {
+    // Usa la ruta correcta para almacenar las sucursales
+    const branchRef = push(ref(db, '/projects/superkomprasBackoffice/stores'));  // Cambiar 'branches' por 'stores'
+    set(branchRef, this.newBranch)
       .then(() => {
-        Swal.fire({
-          icon: 'success',
-          title: 'Sucursal creada',
-          text: 'La sucursal ha sido creada exitosamente.'
-        });
-        this.resetForm();
-        this.fetchBranches();
+        Swal.fire('Sucursal creada', 'La sucursal ha sido creada exitosamente', 'success');
+        this.resetForm();  // Limpiar el formulario después de crear
       })
       .catch((error) => {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: `No se pudo crear la sucursal: ${error.message}`
-        });
+        Swal.fire('Error', 'Hubo un problema al crear la sucursal', 'error');
+        console.error('Error al crear sucursal: ', error);
       });
-    },
-    cancelCreate() {
-      this.resetForm();
-    },
-    resetForm() {
-      this.newBranch = { name: '', division: '', address: '', latitude: '', longitude: '', phone: '' };
-      this.isMapModalVisible = false;
-    },
-    fetchBranches() {
-      const branchesRef = ref(db, '/projects/superkomprasBackoffice/stores');
-      onValue(branchesRef, (snapshot) => {
-        const data = snapshot.val();
-        const branches = [];
-        if (data) {
-          for (let id in data) {
-            branches.push({ ...data[id], id });
-          }
-        }
-        this.branches = branches;
-      });
+  } else {
+    Swal.fire('Formulario incompleto', 'Por favor llena todos los campos', 'warning');
+  }
+},
+cancelCreate() {
+  Swal.fire({
+    title: '¿Estás seguro?',
+    text: "Los cambios no guardados se perderán",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Sí, cancelar',
+    cancelButtonText: 'No, continuar'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      this.resetForm();  // Limpia el formulario si se confirma
     }
+  });
+},
+resetForm() {
+  this.newBranch = {
+    name: '',
+    division: '',
+    address: '',
+    latitude: '',
+    longitude: '',
+    phone: ''
+  };
+  if (this.marker && this.map) {
+    const defaultPosition = { lat: 19.432608, lng: -99.133209 }; // Coordenadas predeterminadas
+    this.marker.setPosition(defaultPosition);
+    this.map.setCenter(defaultPosition);
+  }
+},
+fetchBranches() {
+  const branchesRef = ref(db, '/projects/superkomprasBackoffice/stores');  // Asegúrate de que la ruta es correcta
+  onValue(branchesRef, (snapshot) => {
+    const branches = [];
+    snapshot.forEach((childSnapshot) => {
+      const branch = childSnapshot.val();
+      branches.push({ id: childSnapshot.key, ...branch });
+    });
+    this.branches = branches;
+  }, (error) => {
+    console.error('Error al obtener sucursales: ', error);
+  });
+}
   }
 };
 </script>
 
 <style scoped>
-.map-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.modal-content {
-  background-color: white;
-  padding: 20px;
-  width: 80%;
-  max-width: 600px;
-  text-align: center;
-  position: relative;
-}
 
 .map-container {
   height: 400px;
@@ -280,7 +235,7 @@ export default {
 .form-group label {
   display:block;
   margin-bottom: 5px;
-  font-weight: bold;
+  font-weight:bold;
 }
 
 .form-control {
@@ -302,14 +257,14 @@ export default {
 
 .form-actions {
   display: flex;
-  justify-content: flex-end;
+  justify-content:flex-end;
   gap: 10px;
 }
 
 .btn {
   padding: 10px 20px;
   font-size: 1em;
-  border: none;
+  border:none;
   border-radius: 4px;
   cursor: pointer;
 }

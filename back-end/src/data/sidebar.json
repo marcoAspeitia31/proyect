@@ -21,22 +21,28 @@
       "icon": "users",
       "children": [
         {
-          "name": "Ver Usuarios",
-          "path": "/all_users",
+          "name": "Añadir Usuarios",
+          "path": "/user/add-new-user",
           "type": "link",
-          "rol": ["Administrador", "Sistemas","Sucursal"]
+          "rol": ["Administrador", "Sistemas"]
+        },
+        {
+          "name": "Total de Usuarios",
+          "path": "/user/all-users",
+          "type": "link",
+          "rol": ["Administrador", "Sistemas"]
+        },
+        {
+          "name": "Ver Usuarios ",
+          "path": "/user/view-user",
+          "type": "link",
+          "rol": ["Administrador", "Sistemas"]
         },
         {
           "name": "Añadir Usuarios",
-          "path": "/add_new_user",
+          "path": "/user_list",
           "type": "link",
-          "rol": ["Administrador", "Sistemas"]
-        },
-        {
-          "name": "Gestion de Roles",
-          "path": "/rols_crud",
-          "type": "link",
-          "rol": ["Administrador", "Sistemas"]
+          "rol": ["Sucursal"]
         }
       ]
     },
@@ -44,25 +50,38 @@
       "name": "Gestion Sucursales",
       "active": false,
       "icon": "home",
+      "rol": ["Administrador", "Sistemas"],
       "children": [
         {
           "name": "Crear Sucursal",
-          "path": "/gestion-sucursales",
+          "path": "/stores/create-store",
           "type": "link",
           "rol": ["Administrador", "Sistemas"]
         },
         {
-          "name": "Ver Sucursales",
-          "path": "/all_sucursal",
+          "name": "Total de Sucursales",
+          "path": "/stores/all-store",
           "type": "link",
           "rol": ["Administrador", "Sistemas"]
+        },
+        {
+          "name": "Direcctorio de Sucursales",
+          "path": "/stores/list-store",
+          "type": "link",
+          "rol": ["Administrador", "Sistemas","Sucursal"]
         }
       ]
     },
     {
+      "name": "Gestion de Roles",
+      "path": "/rols_crud",
+      "type": "link",
+      "rol": ["Administrador", "Sistemas"]
+    },
+    {
       "name": "Recuperar Contraseña",
       "icon": "key",
-      "path": "/forgot_password",
+      "path": "/forgot-password",
       "type": "link"
     }
   ]

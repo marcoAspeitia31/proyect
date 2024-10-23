@@ -1,6 +1,18 @@
 <template>
   <div class="card">
     <div class="card-body">
+      <nav aria-label="breadcrumb" class="float-right">
+      <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+      <router-link to="/">Home</router-link>
+      </li>
+      <li class="breadcrumb-item">
+      <router-link to="#">Usuario</router-link>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">Nuevo Usuario</li>
+  </ol>
+</nav>
+
       <!-- Campo para el nombre -->
       <div class="input">
         <label for="name">Nombre</label>
@@ -41,37 +53,8 @@
         <label for="defaultStore">Selecciona una sucursal</label>
         <select name="defaultStore" id="defaultStore" v-model="values.defaultStore" required>
           <option value="" disabled selected>Selecciona una sucursal</option>
-          <option value="7104">SK LAS MARINAS</option>
-          <option value="7105">SK LERMA</option>
-          <option value="7120">SK TOLLOCAN</option>
-          <option value="7121">SK PINO SUAREZ</option>
-          <option value="7122">SK TENANCINGO</option>
-          <option value="7125">SK SAN BUENA VENTURA</option>
-          <option value="7126">SK CENTRO</option>
-          <option value="7127">SK LA ASUNCION</option>
-          <option value="7128">SK SANTIAGO TIANGUISTENCO</option>
-          <option value="7129">SK ATLACOMULCO</option>
-          <option value="7130">SK ZITACUARO</option>
-          <option value="7150">SK IXTLAHUACA</option>
-          <option value="7305">SKM ZITACUARO</option>
-          <option value="7306">SKM VALLE DE BRAVO AV TOLUCA</option>
-          <option value="7308">SKM SAN PEDRO</option>
-          <option value="7309">SKM SAN MATEO</option>
-          <option value="7310">SKM LAS PARTIDAS</option>
-          <option value="7319">SKM LEANDRO VALLE</option>
-          <option value="7323">SKM FIDEL VELAZQUEZ</option>
-          <option value="7324">SKM VALLE DE BRAVO</option>
-          <option value="7331">SKM XONACATLAN</option>
-          <option value="7332">SKM ALAMEDA</option>
-          <option value="7333">SKM GALERIAS</option>
-          <option value="7334">SKM METEPEC</option>
-          <option value="7335">SKM LERDO</option>
-          <option value="7337">SKM XINANTECATL</option>
-          <option value="7338">SKM SEMINARIO</option>
-          <option value="7339">SKM ATLACOMULCO</option>
-          <option value="7344">SKM SANTIAGO MILTEPEC</option>
-          <option value="7346">SKM TENANGO</option>
-          <option value="7347">SKM IXTLAHUACA</option>
+          <!-- Lista de sucursales -->
+          <option v-for="store in stores" :key="store.id" :value="store.id">{{ store.name }}</option>
         </select>
       </div>
 
@@ -85,56 +68,80 @@
 </template>
 
 <script>
-import { db, ref, set } from '@/firebase'; // Verifica que esta ruta sea correcta
+import { db, ref, set } from '@/firebase';
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
-import bcrypt from 'bcryptjs'; // Importar bcryptjs para hashear contraseñas
-import Swal from 'sweetalert2'; // Importa SweetAlert2
+import bcrypt from 'bcryptjs';
+import Swal from 'sweetalert2';
 
 export default {
   data() {
     return {
       values: {
         name: "",
-        rol: "", // Usando 'rol'
+        rol: "",
         defaultStore: "",
         status: "activo",
         email: "",
         password: "",
         confirmPassword: ""
       },
-      rolesPermissions: {
-        Administrador: ["crear", "actualizar", "suspender", "listar"],
-        Sistemas: ["crear", "actualizar", "suspender", "listar"],
-        Sucursal: ["listar"]
-      }
+      stores: [
+        { id: "7104", name: "SK LAS MARINAS" },
+        { id: "7105", name: "SK LERMA" },
+        { id: "7120", name: "SK TOLLOCAN" },
+        { id: "7121", name: "SK PINO SUAREZ" },
+        { id: "7122", name: "SK TENANCINGO" },
+        { id: "7125", name: "SK SAN BUENA VENTURA" },
+        { id: "7126", name: "SK CENTRO" },
+        { id: "7127", name: "SK LA ASUNCION" },
+        { id: "7128", name: "SK SANTIAGO TIANGUISTENCO" },
+        { id: "7129", name: "SK ATLACOMULCO" },
+        { id: "7130", name: "SK ZITACUARO" },
+        { id: "7150", name: "SK IXTLAHUACA" },
+        { id: "7305", name: "SKM ZITACUARO" },
+        { id: "7306", name: "SKM VALLE DE BRAVO AV TOLUCA" },
+        { id: "7308", name: "SKM SAN PEDRO" },
+        { id: "7309", name: "SKM SAN MATEO" },
+        { id: "7310", name: "SKM LAS PARTIDAS" },
+        { id: "7319", name: "SKM LEANDRO VALLE" },
+        { id: "7323", name: "SKM FIDEL VELAZQUEZ" },
+        { id: "7324", name: "SKM VALLE DE BRAVO" },
+        { id: "7331", name: "SKM XONACATLAN" },
+        { id: "7332", name: "SKM ALAMEDA" },
+        { id: "7333", name: "SKM GALERIAS" },
+        { id: "7334", name: "SKM METEPEC" },
+        { id: "7335", name: "SKM LERDO" },
+        { id: "7337", name: "SKM XINANTECATL" },
+        { id: "7338", name: "SKM SEMINARIO" },
+        { id: "7339", name: "SKM ATLACOMULCO" },
+        { id: "7344", name: "SKM SANTIAGO MILTEPEC" },
+        { id: "7346", name: "SKM TENANGO" },
+        { id: "7347", name: "SKM IXTLAHUACA" }
+      ]
     };
   },
-  methods: {
-    // Confirmar registro antes de proceder
-    async confirmRegister() {
+  computed: {
+    isFormValid() {
       const { name, email, password, confirmPassword, rol, defaultStore } = this.values;
-
-      if (!name || !email || !password || !confirmPassword || !rol || !defaultStore) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Campos incompletos',
-          text: 'Por favor, completa todos los campos antes de registrar.'
-        });
+      return name && email && password && confirmPassword && rol && defaultStore;
+    },
+    arePasswordsMatching() {
+      return this.values.password === this.values.confirmPassword;
+    }
+  },
+  methods: {
+    async confirmRegister() {
+      if (!this.isFormValid) {
+        this.showAlert('error', 'Campos incompletos', 'Por favor, completa todos los campos antes de registrar.');
         return;
       }
 
-      // Verificar si las contraseñas coinciden
-      if (password !== confirmPassword) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'Las contraseñas no coinciden.'
-        });
+      if (!this.arePasswordsMatching) {
+        this.showAlert('error', 'Error', 'Las contraseñas no coinciden.');
         return;
       }
 
-      // Confirmación personalizada
-      const { value: confirmation } = await Swal.fire({
+      const confirmation = await Swal.fire({
         title: '¿Estás seguro?',
         text: "¿Quieres registrar este usuario?",
         icon: 'warning',
@@ -143,44 +150,35 @@ export default {
         cancelButtonText: 'No, cancelar',
       });
 
-      if (confirmation) {
-        this.registerUser(); // Proceder al registro
+      if (confirmation.isConfirmed) {
+        this.registerUser();
       }
     },
 
-    // Método para registrar usuarios
     async registerUser() {
-      const { email, password, rol, name, defaultStore } = this.values;
-
       try {
+        const { email, password } = this.values;
         const hashedPassword = await bcrypt.hash(password, 10);
-
-        // Crear usuario en Firebase Authentication
         const auth = getAuth();
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
-        // Guardar datos del usuario en Realtime Database
         await set(ref(db, `/projects/superkomprasBackoffice/users/${user.uid}`), {
-          name,
-          rol,
-          defaultStore,
-          status: "Activo",
+          name: this.values.name,
+          rol: this.values.rol,
+          defaultStore: this.values.defaultStore,
+          status: "activo",
           email,
-          hashedPassword,
-          permissions: this.rolesPermissions[rol] // Asignar permisos según el rol
+          hashedPassword
         });
 
-        // Mostrar mensaje de éxito con temporizador
         Swal.fire({
           icon: 'success',
           title: '¡Registro exitoso!',
-          text: 'El usuario ha sido registrado correctamente.',
-          timer: 1500,
-          showConfirmButton: false
+          showConfirmButton: false,
+          timer: 1500
         });
 
-        // Restablecer campos
         this.resetFields();
       } catch (error) {
         Swal.fire({
@@ -191,28 +189,25 @@ export default {
       }
     },
 
-    // Restablecer los campos del formulario
     resetFields() {
-      this.values.name = "";
-      this.values.rol = "";
-      this.values.defaultStore = "";
-      this.values.password = "";
-      this.values.confirmPassword = "";
+      this.values = {
+        name: "",
+        rol: "",
+        defaultStore: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+        status: "activo"
+      };
     },
 
-    // Obtener mensaje de error
     getErrorMessage(errorCode) {
       switch (errorCode) {
-        case 'auth/email-already-in-use':
-          return 'Este correo electrónico ya está en uso.';
-        case 'auth/invalid-email':
-          return 'El formato del correo electrónico es inválido.';
-        case 'auth/operation-not-allowed':
-          return 'La operación no está permitida.';
-        case 'auth/weak-password':
-          return 'La contraseña es demasiado débil.';
-        default:
-          return 'Error al registrar usuario. Por favor, intenta de nuevo.';
+        case 'auth/email-already-in-use': return 'Este correo electrónico ya está en uso.';
+        case 'auth/invalid-email': return 'El formato del correo electrónico es inválido.';
+        case 'auth/operation-not-allowed': return 'La operación no está permitida.';
+        case 'auth/weak-password': return 'La contraseña es demasiado débil.';
+        default: return 'Error al registrar usuario. Por favor, intenta de nuevo.';
       }
     }
   }
@@ -225,8 +220,7 @@ export default {
   position: relative;
 }
 
-select,
-input {
+select, input {
   width: 100%;
   padding: 10px;
   border: 1px solid #ccc;

@@ -1,7 +1,19 @@
 <template>
   <div class="card">
     <div class="card-body">
-      <h3>Lista de Usuarios</h3>
+      <!-- Breadcrumb -->
+      <nav aria-label="breadcrumb" class="float-right">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item">
+            <router-link to="/">Home</router-link>
+          </li>
+          <li class="breadcrumb-item">
+            <router-link to="#">Usuario</router-link>
+          </li>
+          <li class="breadcrumb-item active" aria-current="page">Total de Usuarios</li>
+        </ol>
+      </nav>
+
       <!-- Tabla para listar usuarios -->
       <table>
         <thead>
@@ -11,8 +23,7 @@
             <th>Rol</th>
             <th>Sucursal</th>
             <th>Estatus</th>
-            <!-- Mostrar la columna de acciones solo si el rol es 'Administrador' o 'Sistemas' -->
-            <th v-if="loggedUserRole === 'Administrador' || loggedUserRole === 'Sistemas'">Acciones</th>
+            <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -26,11 +37,10 @@
             <td>{{ user.rol }}</td>
             <td>{{ getStoreName(user.defaultStore) }}</td>
             <td>{{ user.status }}</td>
-            <!-- Mostrar las acciones solo si el rol del usuario logueado es 'Administrador' o 'Sistemas' -->
-            <td v-if="loggedUserRole === 'Administrador' || loggedUserRole === 'Sistemas'" class="action-cell">
-              <!-- Botón de Editar con icono -->
-              <button @click="editUser(user)" class="edit-button">
-                Editar
+            <td class="action-cell">
+              <!-- Botón de Editar con confirmación SweetAlert -->
+              <button @click="confirmEditUser(user)" class="edit-button">
+                <i class="fas fa-edit"></i>
               </button>
             </td>
           </tr>
@@ -40,7 +50,7 @@
       <!-- Formulario de edición de usuario -->
       <div v-if="selectedUser" class="edit-form">
         <h4>Editar Usuario</h4>
-        <form @submit.prevent="updateUser">
+        <form @submit.prevent="confirmUpdateUser">
           <div class="form-group">
             <label>Nombre:</label>
             <input v-model="selectedUser.name" type="text" />
@@ -68,16 +78,22 @@
               <option value="inactivo">Inactivo</option>
             </select>
           </div>
-          <button type="submit" class="save-button">Guardar</button>
-          <button type="button" @click="cancelEdit" class="cancel-button">Cancelar</button>
+          <button type="submit" class="save-button">
+            <i class="fas fa-save"></i>
+          </button>
+          <button type="button" @click="cancelEdit" class="cancel-button">
+            <i class="fas fa-times"></i>
+          </button>
         </form>
       </div>
     </div>
   </div>
 </template>
 
+
 <script>
 import { db, ref, onValue, update } from '@/firebase';
+import Swal from 'sweetalert2';
 
 export default {
   data() {
@@ -86,43 +102,13 @@ export default {
       stores: {
         "7104": "SK LAS MARINAS",
         "7105": "SK LERMA",
-        "7120": "SK TOLLOCAN",
-        "7121": "SK PINO SUAREZ",
-        "7122": "SK TENANCINGO",
-        "7125": "SK SAN BUENA VENTURA",
-        "7126": "SK CENTRO",
-        "7127": "SK LA ASUNCION",
-        "7128": "SK SANTIAGO TIANGUISTENCO",
-        "7129": "SK ATLACOMULCO",
-        "7130": "SK ZITACUARO",
-        "7150": "SK IXTLAHUACA",
-        "7305": "SKM ZITACUARO",
-        "7306": "SKM VALLE DE BRAVO AV TOLUCA",
-        "7308": "SKM SAN PEDRO",
-        "7309": "SKM SAN MATEO",
-        "7310": "SKM LAS PARTIDAS",
-        "7319": "SKM LEANDRO VALLE",
-        "7323": "SKM FIDEL VELAZQUEZ",
-        "7324": "SKM VALLE DE BRAVO",
-        "7331": "SKM XONACATLAN",
-        "7332": "SKM ALAMEDA",
-        "7333": "SKM GALERIAS",
-        "7334": "SKM METEPEC",
-        "7335": "SKM LERDO",
-        "7337": "SKM XINANTECATL",
-        "7338": "SKM SEMINARIO",
-        "7339": "SKM ATLACOMULCO",
-        "7344": "SKM SANTIAGO MILTEPEC",
-        "7346": "SKM TENANGO",
-        "7347": "SKM IXTLAHUACA",
-      }, // Mapa de sucursales
-      selectedUser: null, // Usuario seleccionado para editar
-      loggedUserRole: 'Sucursal' // Rol del usuario logueado
+        // Añade el resto de las sucursales aquí...
+      },
+      selectedUser: null // Usuario seleccionado para editar
     };
   },
   created() {
     this.fetchUsers(); // Llama a fetchUsers al crear el componente
-    this.getLoggedUserRole(); // Obtener el rol del usuario logueado
   },
   methods: {
     // Obtener todos los usuarios de Firebase
@@ -139,12 +125,31 @@ export default {
         }
       }, (error) => {
         console.error("Error al obtener los datos de Firebase:", error);
-        alert('Hubo un error al cargar los usuarios.');
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Hubo un error al cargar los usuarios.'
+        });
       });
     },
     // Obtener el nombre de la sucursal
     getStoreName(code) {
       return this.stores[code] || code;
+    },
+    // Confirmar antes de seleccionar un usuario para editar
+    confirmEditUser(user) {
+      Swal.fire({
+        title: '¿Editar Usuario?',
+        text: "¿Estás seguro de que deseas editar este usuario?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, editar',
+        cancelButtonText: 'Cancelar',
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.editUser(user);
+        }
+      });
     },
     // Seleccionar un usuario para editar
     editUser(user) {
@@ -153,6 +158,21 @@ export default {
     // Cancelar la edición
     cancelEdit() {
       this.selectedUser = null; // Limpia el usuario seleccionado
+    },
+    // Confirmar antes de actualizar los datos del usuario
+    confirmUpdateUser() {
+      Swal.fire({
+        title: '¿Guardar cambios?',
+        text: "¿Estás seguro de que deseas guardar los cambios?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, guardar',
+        cancelButtonText: 'Cancelar',
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.updateUser();
+        }
+      });
     },
     // Actualizar los datos del usuario
     updateUser() {
@@ -164,79 +184,69 @@ export default {
         defaultStore: this.selectedUser.defaultStore,
         status: this.selectedUser.status
       }).then(() => {
-        alert('Usuario actualizado correctamente');
+        Swal.fire({
+          icon: 'success',
+          title: 'Éxito',
+          text: 'Usuario actualizado correctamente'
+        });
         this.selectedUser = null; // Limpia el usuario seleccionado
         this.fetchUsers(); // Vuelve a cargar los usuarios
       }).catch((error) => {
         console.error("Error al actualizar el usuario:", error);
-        alert('Hubo un error al actualizar el usuario.');
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Hubo un error al actualizar el usuario.'
+        });
       });
-    },
-    // Obtener el rol del usuario logueado
-    getLoggedUserRole() {
-      // Aquí deberías implementar la lógica para obtener el rol del usuario logueado desde tu autenticación
-      this.loggedUserRole = 'Administrador'; // Puedes cambiar esto dinámicamente según el rol del usuario logueado
     }
   }
 };
 </script>
 
-<style>
-/* Estilos generales */
-table {
-  width: 100%;
-  border-collapse: collapse;
+<style scoped>
+.edit-form {
+  background: white;
+  padding: 20px;
   margin-top: 20px;
+  border-radius: 8px;
 }
-th, td {
-  padding: 10px;
-  border: 1px solid #ccc;
-  text-align: left;
+.map-container {
+  height: 400px;
+  width: 100%;
 }
-th {
-  background-color: #f0f0f0;
-}
-td {
+.btn, .btn-sm, .btn-edit, .btn-save {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 14px;
-}
-.action-cell {
-  text-align: center;
-}
-.edit-button {
-  background-color: transparent;
+  border-radius: 6px;
   border: none;
   cursor: pointer;
-  font-size: 16px;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-right: 10px;
+}
+.btn-edit, .btn-save, .btn-close {
+  color: white;
+}
+.btn-edit {
+  background-color: #007bff;
+}
+.btn-edit:hover {
+  background-color: #0056b3;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transform: scale(1.05);
+}
+.btn-save {
+  background-color: #28a745;
+}
+.btn-save:hover {
+  background-color: #218838;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transform: scale(1.05);
 }
 
-/* Estilos del formulario de edición */
-.edit-form {
-  margin-top: 20px;
-  padding: 20px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  background-color: #fafafa;
-}
-.form-group {
-  margin-bottom: 15px;
-}
-.form-group label {
-  display: block;
-  margin-bottom: 5px;
-}
-.save-button, .cancel-button {
-  padding: 8px 12px;
-  margin-right: 10px;
-  border: none;
-  cursor: pointer;
-  border-radius: 3px;
-}
-.save-button {
-  background-color: #4caf50;
-  color: white;
-}
-.cancel-button {
-  background-color: #f44336;
-  color: white;
-}
 </style>

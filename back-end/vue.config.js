@@ -2,7 +2,7 @@ const path = require('path');
 
 module.exports = {
   transpileDependencies: [],
-  publicPath: "/SK-backend/",
+  publicPath: "/sk-back-end/",
   configureWebpack: {
     resolve: {
       alias: {
