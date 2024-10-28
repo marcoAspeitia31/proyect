@@ -7,7 +7,8 @@
       "title": true,
       "application": true,
       "mainClasses": "sidebar-main-title sidebar-main-title-3",
-      "class": "sidebar-link sidebar-title link-nav"
+      "class": "sidebar-link sidebar-title link-nav",
+      "icon": "grid"
     },
     {
       "name": "Dashboard",
@@ -24,24 +25,28 @@
           "name": "Añadir Usuarios",
           "path": "/user/add-new-user",
           "type": "link",
+          "icon": "user-plus",
           "rol": ["Administrador", "Sistemas"]
         },
         {
           "name": "Total de Usuarios",
           "path": "/user/all-users",
           "type": "link",
+          "icon": "users",
           "rol": ["Administrador", "Sistemas"]
         },
         {
-          "name": "Ver Usuarios ",
+          "name": "Ver Usuarios",
           "path": "/user/view-user",
           "type": "link",
+          "icon": "eye",
           "rol": ["Administrador", "Sistemas"]
         },
         {
           "name": "Añadir Usuarios",
           "path": "/user_list",
           "type": "link",
+          "icon": "user-plus",
           "rol": ["Sucursal"]
         }
       ]
@@ -49,38 +54,49 @@
     {
       "name": "Gestion Sucursales",
       "active": false,
-      "icon": "home",
+      "icon": "briefcase",
       "rol": ["Administrador", "Sistemas"],
       "children": [
         {
           "name": "Crear Sucursal",
           "path": "/stores/create-store",
           "type": "link",
+          "icon": "plus-circle",
           "rol": ["Administrador", "Sistemas"]
         },
         {
           "name": "Total de Sucursales",
           "path": "/stores/all-store",
           "type": "link",
+          "icon": "list",
           "rol": ["Administrador", "Sistemas"]
         },
         {
-          "name": "Direcctorio de Sucursales",
+          "name": "Directorio de Sucursales",
           "path": "/stores/list-store",
           "type": "link",
-          "rol": ["Administrador", "Sistemas","Sucursal"]
+          "icon": "map",
+          "rol": ["Administrador", "Sistemas", "Sucursal"]
         }
       ]
+    },
+    {
+      "name": "Poligonos",
+      "path": "/polygons",
+      "type": "link",
+      "icon": "map-pin",
+      "rol": ["Administrador", "Sistemas"]
     },
     {
       "name": "Gestion de Roles",
       "path": "/rols_crud",
       "type": "link",
+      "icon": "tool",
       "rol": ["Administrador", "Sistemas"]
     },
     {
       "name": "Recuperar Contraseña",
-      "icon": "key",
+      "icon": "unlock",
       "path": "/forgot-password",
       "type": "link"
     }

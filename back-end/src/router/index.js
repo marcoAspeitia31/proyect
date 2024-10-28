@@ -34,6 +34,7 @@ import allSucursal from "@/components/allSucursal.vue";
 import listUser from "@/components/general/users/allUsers/listUser.vue";
 import viewUser from "@/pages/general/users/viewUser.vue";
 import ListSucursal from "@/components/listSucursal.vue";
+import PolygonCrud from "@/pages/poligonos/polygonCrud.vue";
 
 
 
@@ -257,6 +258,14 @@ const routes = [
     component: ListSucursal,
     meta: {
       layout: layout1, breadcrumb: { type: 2, title: "Directorio De Sucursales" }, roles: ["Administrador", "Sistemas","Sucursal"]
+    }
+  },
+  {
+    path: "/polygons",
+    name: "polygonCrud",
+    component: PolygonCrud,
+    meta: {
+      layout: layout1, breadcrumb: { type: 2, title: "Poligonos" }, roles: ["Administrador", "Sistemas","Sucursal"]
     }
   }
 ];
