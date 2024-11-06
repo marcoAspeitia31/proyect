@@ -10,7 +10,9 @@
           <li class="breadcrumb-item">
             <router-link to="#">Usuario</router-link>
           </li>
-          <li class="breadcrumb-item active" aria-current="page">Total de Usuarios</li>
+          <li class="breadcrumb-item active" aria-current="page">
+            Total de Usuarios
+          </li>
         </ol>
       </nav>
 
@@ -66,7 +68,11 @@
           <div class="form-group">
             <label>Sucursal:</label>
             <select v-model="selectedUser.defaultStore">
-              <option v-for="(storeName, storeCode) in stores" :key="storeCode" :value="storeCode">
+              <option
+                v-for="(storeName, storeCode) in stores"
+                :key="storeCode"
+                :value="storeCode"
+              >
                 {{ storeName }}
               </option>
             </select>
@@ -90,21 +96,49 @@
   </div>
 </template>
 
-
 <script>
-import { db, ref, onValue, update } from '@/firebase';
-import Swal from 'sweetalert2';
+import { db, ref, onValue, update } from "@/firebase";
+import Swal from "sweetalert2";
 
 export default {
   data() {
     return {
       users: [], // Lista de usuarios
       stores: {
-        "7104": "SK LAS MARINAS",
-        "7105": "SK LERMA",
+        7104: "SK LAS MARINAS",
+        7105: "SK LERMA",
+        "7120": "SK TOLLOCAN",
+          "7121": "SK PINO SUAREZ",
+          "7122": "SK TENANCINGO",
+          "7125": "SK SAN BUENA VENTURA",
+          "7126": "SK CENTRO",
+          "7127": "SK LA ASUNCION",
+          "7128": "SK SANTIAGO TIANGUISTENCO",
+          "7129": "SK ATLACOMULCO",
+          "7130": "SK ZITACUARO",
+          "7150": "SK IXTLAHUACA",
+          "7305": "SKM ZITACUARO",
+          "7306": "SKM VALLE DE BRAVO AV TOLUCA",
+          "7308": "SKM SAN PEDRO",
+          "7309": "SKM SAN MATEO",
+          "7310": "SKM LAS PARTIDAS",
+          "7319": "SKM LEANDRO VALLE",
+          "7323": "SKM FIDEL VELAZQUEZ",
+          "7324": "SKM VALLE DE BRAVO",
+          "7331": "SKM XONACATLAN",
+          "7332": "SKM ALAMEDA",
+          "7333": "SKM GALERIAS",
+          "7334": "SKM METEPEC",
+          "7335": "SKM LERDO",
+          "7337": "SKM XINANTECATL",
+          "7338": "SKM SEMINARIO",
+          "7339": "SKM ATLACOMULCO",
+          "7344": "SKM SANTIAGO MILTEPEC",
+          "7346": "SKM TENANGO",
+          "7347": "SKM IXTLAHUACA",
         // Añade el resto de las sucursales aquí...
       },
-      selectedUser: null // Usuario seleccionado para editar
+      selectedUser: null, // Usuario seleccionado para editar
     };
   },
   created() {
@@ -113,24 +147,28 @@ export default {
   methods: {
     // Obtener todos los usuarios de Firebase
     fetchUsers() {
-      const usersRef = ref(db, '/projects/superkomprasBackoffice/users');
-      onValue(usersRef, (snapshot) => {
-        const data = snapshot.val();
-        this.users = [];
+      const usersRef = ref(db, "/projects/superkomprasBackoffice/users");
+      onValue(
+        usersRef,
+        (snapshot) => {
+          const data = snapshot.val();
+          this.users = [];
 
-        if (data) {
-          for (let id in data) {
-            this.users.push({ ...data[id], id });
+          if (data) {
+            for (let id in data) {
+              this.users.push({ ...data[id], id });
+            }
           }
+        },
+        (error) => {
+          console.error("Error al obtener los datos de Firebase:", error);
+          Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: "Hubo un error al cargar los usuarios.",
+          });
         }
-      }, (error) => {
-        console.error("Error al obtener los datos de Firebase:", error);
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'Hubo un error al cargar los usuarios.'
-        });
-      });
+      );
     },
     // Obtener el nombre de la sucursal
     getStoreName(code) {
@@ -139,12 +177,12 @@ export default {
     // Confirmar antes de seleccionar un usuario para editar
     confirmEditUser(user) {
       Swal.fire({
-        title: '¿Editar Usuario?',
+        title: "¿Editar Usuario?",
         text: "¿Estás seguro de que deseas editar este usuario?",
-        icon: 'warning',
+        icon: "warning",
         showCancelButton: true,
-        confirmButtonText: 'Sí, editar',
-        cancelButtonText: 'Cancelar',
+        confirmButtonText: "Sí, editar",
+        cancelButtonText: "Cancelar",
       }).then((result) => {
         if (result.isConfirmed) {
           this.editUser(user);
@@ -162,12 +200,12 @@ export default {
     // Confirmar antes de actualizar los datos del usuario
     confirmUpdateUser() {
       Swal.fire({
-        title: '¿Guardar cambios?',
+        title: "¿Guardar cambios?",
         text: "¿Estás seguro de que deseas guardar los cambios?",
-        icon: 'warning',
+        icon: "warning",
         showCancelButton: true,
-        confirmButtonText: 'Sí, guardar',
-        cancelButtonText: 'Cancelar',
+        confirmButtonText: "Sí, guardar",
+        cancelButtonText: "Cancelar",
       }).then((result) => {
         if (result.isConfirmed) {
           this.updateUser();
@@ -176,31 +214,37 @@ export default {
     },
     // Actualizar los datos del usuario
     updateUser() {
-      const userRef = ref(db, `/projects/superkomprasBackoffice/users/${this.selectedUser.id}`);
+      const userRef = ref(
+        db,
+        `/projects/superkomprasBackoffice/users/${this.selectedUser.id}`
+      );
+
       update(userRef, {
         name: this.selectedUser.name,
         email: this.selectedUser.email,
         rol: this.selectedUser.rol,
         defaultStore: this.selectedUser.defaultStore,
-        status: this.selectedUser.status
-      }).then(() => {
-        Swal.fire({
-          icon: 'success',
-          title: 'Éxito',
-          text: 'Usuario actualizado correctamente'
+        status: this.selectedUser.status,
+      })
+        .then(() => {
+          Swal.fire({
+            icon: "success",
+            title: "Éxito",
+            text: "Usuario actualizado correctamente",
+          });
+          this.selectedUser = null; // Limpia el usuario seleccionado
+          this.fetchUsers(); // Vuelve a cargar los usuarios
+        })
+        .catch((error) => {
+          console.error("Error al actualizar el usuario:", error);
+          Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: "Hubo un error al actualizar el usuario.",
+          });
         });
-        this.selectedUser = null; // Limpia el usuario seleccionado
-        this.fetchUsers(); // Vuelve a cargar los usuarios
-      }).catch((error) => {
-        console.error("Error al actualizar el usuario:", error);
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'Hubo un error al actualizar el usuario.'
-        });
-      });
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -215,7 +259,10 @@ export default {
   height: 400px;
   width: 100%;
 }
-.btn, .btn-sm, .btn-edit, .btn-save {
+.btn,
+.btn-sm,
+.btn-edit,
+.btn-save {
   width: 40px;
   height: 40px;
   display: flex;
@@ -225,11 +272,14 @@ export default {
   border-radius: 6px;
   border: none;
   cursor: pointer;
-  transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease,
+    transform 0.2s ease;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   margin-right: 10px;
 }
-.btn-edit, .btn-save, .btn-close {
+.btn-edit,
+.btn-save,
+.btn-close {
   color: white;
 }
 .btn-edit {
@@ -248,5 +298,4 @@ export default {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   transform: scale(1.05);
 }
-
 </style>

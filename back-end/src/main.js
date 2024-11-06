@@ -11,8 +11,10 @@ import "@/assets/css/vendors/font-awesome.css";
 import vueFeather from "vue-feather";
 import CKEditor from "@ckeditor/ckeditor5-vue";
 import VueApexCharts from "vue3-apexcharts";
-import { VueFire, VueFireAuth } from 'vuefire'; // Importar VueFire y VueFireAuth
-import * as VueGoogleMaps from 'vue2-google-maps';
+import { VueFire, VueFireAuth } from 'vuefire'; 
+
+
+
 
 // Crear la aplicación con Vue 3
 const app = createApp(App);

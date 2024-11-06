@@ -1,4 +1,3 @@
-
 import { createRouter, createWebHistory } from "vue-router";
 import layout1 from "../layouts/layout/layout1.vue";
 
@@ -29,13 +28,14 @@ import log_in from "../pages/application/log_in.vue";
 import forgot_password from "../pages/application/forgot_password.vue";
 import register from "../pages/application/register.vue";
 import RolsCrud from "@/components/general/users/rolsCrud.vue";
-import SucursalesCrud from '@/pages/application/store/SucursalesCrud.vue';
+import SucursalesCrud from "@/pages/application/store/SucursalesCrud.vue";
 import allSucursal from "@/components/allSucursal.vue";
 import listUser from "@/components/general/users/allUsers/listUser.vue";
 import viewUser from "@/pages/general/users/viewUser.vue";
 import ListSucursal from "@/components/listSucursal.vue";
-import PolygonCrud from "@/pages/poligonos/polygonCrud.vue";
-
+import editPolygon from "@/pages/poligonos/editPolygon.vue";
+import createPolygon from "@/pages/poligonos/createPolygon.vue";
+import viewPolygon from '@/pages/poligonos/viewPolygon.vue';
 
 
 // Declaración de las rutas
@@ -52,8 +52,12 @@ const routes = [
     component: allUsers,
     meta: {
       layout: layout1,
-      breadcrumb: { type: 1, title: "Total de usuarios", buttonPath: "/user/add-new-user" },
-      roles: ["Administrador", "Sistemas", "Sucursal"]
+      breadcrumb: {
+        type: 1,
+        title: "Total de usuarios",
+        buttonPath: "/user/add-new-user",
+      },
+      roles: ["Administrador", "Sistemas", "Sucursal"],
     },
   },
   {
@@ -63,7 +67,7 @@ const routes = [
     meta: {
       layout: layout1,
       breadcrumb: { type: 2, title: "Añadir usuario" },
-      roles: ["Administrador", "Sistemas"]
+      roles: ["Administrador", "Sistemas"],
     },
   },
   {
@@ -71,17 +75,19 @@ const routes = [
     name: "viewUser",
     component: viewUser,
     meta: {
-      layout: layout1, breadcrumb: { type: 2, title: "Detalles de usuario" }, roles: ["Administrador", "Sistemas","Sucursal"]
-    }
+      layout: layout1,
+      breadcrumb: { type: 2, title: "Detalles de usuario" },
+      roles: ["Administrador", "Sistemas", "Sucursal"],
+    },
   },
   {
-    path: "/order_list",
+    path: "/orders/order-list",
     name: "order_list",
     component: order_list,
     meta: { layout: layout1, breadcrumb: { type: 2, title: "Order List" } },
   },
   {
-    path: "/order_detail",
+    path: "/orders/order-detail",
     name: "order_detail",
     component: order_detail,
     meta: {
@@ -94,7 +100,7 @@ const routes = [
     },
   },
   {
-    path: "/order_tracking",
+    path: "/orders/order-tracking",
     name: "order_tracking",
     component: order_tracking,
     meta: { layout: layout1, breadcrumb: { type: 2, title: "Order Tracking" } },
@@ -228,19 +234,27 @@ const routes = [
     component: listUser,
     meta: {
       layout: layout1,
-      breadcrumb: { type: 2, title: "Total de usuarios", buttonPath: "/user_list" },
-      roles: ["Administrador", "Sistemas", "Sucursal"]
+      breadcrumb: {
+        type: 2,
+        title: "Total de usuarios",
+        buttonPath: "/user_list",
+      },
+      roles: ["Administrador", "Sistemas", "Sucursal"],
     },
-  },  
+  },
   {
     path: "/rols_Crud",
     name: "rolsCrud",
     component: RolsCrud,
-    meta: { layout: layout1, breadcrumb: { type: 2, title: "Gestionar Roles" }, roles: ["Administrador", "Sistemas"] },
+    meta: {
+      layout: layout1,
+      breadcrumb: { type: 2, title: "Gestionar Roles" },
+      roles: ["Administrador", "Sistemas"],
+    },
   },
   {
-    path: '/stores/create-store',
-    name: 'SucursalesCrud',
+    path: "/stores/create-store",
+    name: "SucursalesCrud",
     component: SucursalesCrud,
     meta: { layout: layout1, breadcrumb: { type: 2, title: "Crear Sucursal" } },
   },
@@ -249,25 +263,53 @@ const routes = [
     name: "allSucursal",
     component: allSucursal,
     meta: {
-      layout: layout1, breadcrumb: { type: 2, title: "Total Sucursales" }, roles: ["Administrador", "Sistemas",]
-    }
+      layout: layout1,
+      breadcrumb: { type: 2, title: "Total Sucursales" },
+      roles: ["Administrador", "Sistemas"],
+    },
   },
   {
     path: "/stores/list-store",
     name: "listSucursal",
     component: ListSucursal,
     meta: {
-      layout: layout1, breadcrumb: { type: 2, title: "Directorio De Sucursales" }, roles: ["Administrador", "Sistemas","Sucursal"]
-    }
+      layout: layout1,
+      breadcrumb: { type: 2, title: "Directorio De Sucursales" },
+      roles: ["Administrador", "Sistemas", "Sucursal"],
+    },
   },
   {
-    path: "/polygons",
-    name: "polygonCrud",
-    component: PolygonCrud,
+    path: "/polygons/edit-polygon/:polygonId",
+    name: "editPolygon",
+    component: editPolygon,
+    props: true,
     meta: {
-      layout: layout1, breadcrumb: { type: 2, title: "Poligonos" }, roles: ["Administrador", "Sistemas","Sucursal"]
-    }
-  }
+      layout: layout1,
+      breadcrumb: { type: 2, title: "Editar Poligonos" },
+      roles: ["Administrador", "Sistemas", "Sucursal"],
+    },
+  },
+  
+  {
+    path: "/polygons/create-polygon/:branchId",
+    name: "createPolygon",
+    component: createPolygon,
+    meta: {
+        layout: layout1,
+        breadcrumb: { type: 2, title: "Crear Poligono" },
+        roles: ["Administrador", "Sistemas", "Sucursal"],
+    },
+},
+  {
+    path: "/polygons/view-polygon/",
+    name: "viewPolygon",
+    component: viewPolygon,
+    meta: {
+      layout: layout1,
+      breadcrumb: { type: 2, title: "Ver Poligono" },
+      roles: ["Administrador", "Sistemas", "Sucursal"],
+    },
+  },
 ];
 
 const router = createRouter({
@@ -283,17 +325,25 @@ router.beforeEach((to, from, next) => {
     user = isAuthenticated ? JSON.parse(isAuthenticated) : null;
   } catch (e) {
     console.error("Error al parsear el usuario desde localStorage:", e);
-    user = null;  // Establece user en null si hay un error de parseo
+    user = null; 
   }
 
-  if (!isAuthenticated && to.name !== "log_in" && to.name !== "forgot_password" && to.name !== "dashboard") {
+
+  
+  if (
+    !isAuthenticated &&
+    to.name !== "log_in" &&
+    to.name !== "forgot_password" &&
+    to.name !== "dashboard"
+  ) {
     next({ name: "log_in" });
   } else if (to.meta.roles && user && !to.meta.roles.includes(user.rol)) {
-    next({ name: "dashboard" });  // Redirige al dashboard si el rol no tiene acceso
+    next({ name: "dashboard" });
   } else {
-    next();  // Permite la navegación si todo está en orden
+    next();
   }
 });
+
 
 
 export default router;

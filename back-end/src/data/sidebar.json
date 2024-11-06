@@ -82,10 +82,61 @@
     },
     {
       "name": "Poligonos",
-      "path": "/polygons",
-      "type": "link",
+      "active": false,
       "icon": "map-pin",
-      "rol": ["Administrador", "Sistemas"]
+      "rol": ["Administrador", "Sistemas"],
+      "children": [
+        {
+          "name": "Crear Poligonos ",
+          "path": "/polygons/create-polygon/:branchId",
+          "type": "link",
+          "icon": "plus-circle",
+          "rol": ["Administrador", "Sistemas"]
+        },
+        {
+          "name": "Detalle de Poligonos ",
+          "path": "/polygons/view-polygon/",
+          "type": "link",
+          "icon": "plus-circle",
+          "rol": ["Administrador", "Sistemas"]
+        },
+        {
+          "name": "Editar Poligonos ",
+          "path": "/polygons/edit-polygon/:polygonId",
+          "type": "link",
+          "icon": "plus-circle",
+          "rol": ["Administrador", "Sistemas"]
+        }
+      ]
+    },
+    {
+      "name": "Pedidos",
+      "active": false,
+      "icon": "shopping-cart",
+      "rol": ["Administrador", "Sistemas", "Sucursal"],
+      "children": [
+        {
+          "name": "Lista de Pedidos",
+          "path": "/orders/order-list",
+          "type": "link",
+          "icon": "list",
+          "rol": ["Administrador", "Sistemas", "Sucursal"]
+        },
+        {
+          "name": "Detalles del Pedido",
+          "path": "/orders/order-detail",
+          "type": "link",
+          "icon": "file-text",
+          "rol": ["Administrador", "Sistemas", "Sucursal"]
+        },
+        {
+          "name": "Seguimiento del Pedido",
+          "path": "/orders/order-tracking",
+          "type": "link",
+          "icon": "truck",
+          "rol": ["Administrador", "Sistemas", "Sucursal"]
+        }
+      ]
     },
     {
       "name": "Gestion de Roles",
