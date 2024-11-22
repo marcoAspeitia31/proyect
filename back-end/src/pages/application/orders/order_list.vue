@@ -15,16 +15,17 @@
 </template>
 
 <script>
-import Orders from "@/data/orders.json";
+import ordersData from '@/data/Pedidos.json';
 import { mapState } from "vuex";
 import order_list_table from "@/components/application/orders/order_list/order_list_table.vue";
 import pagination from "@/layouts/elements/pagination.vue";
+
 export default {
   components: { order_list_table, pagination },
-  title: "Voxo-Order List",
+  title: "SK-Pedidos",
   data() {
     return {
-      orders: Orders.data,
+      orders: ordersData, 
     };
   },
   computed: {

@@ -1,13 +1,6 @@
 <template>
   <div class="edit-polygon-container">
     <div class="polygon-search">
-      <input
-        type="text"
-        v-model="searchQuery"
-        placeholder="Buscar polígono..."
-        @input="filterPolygons"
-        class="input-field"
-      />
       <select
         v-model="selectedPolygonId"
         @change="loadPolygonData"
@@ -26,14 +19,32 @@
 
     <!-- Información del polígono -->
     <div class="polygon-info">
-      <label for="polygonId">ID del Polígono:</label>
-      <input id="polygonId" v-model="polygon.uid" type="text" readonly />
+      <label for="polygonId">Nombre del Polígono:</label>
+      <input
+        id="polygonId"
+        v-model="polygon.uid"
+        type="text"
+        placeholder="Nombre del polígono"
+        readonly
+      />
 
-      <label for="polygonName">Nombre de Polígono:</label>
-      <input id="polygonName" v-model="polygon.name" type="text" readonly />
+      <label for="polygonName">Nombre de Sucursal</label>
+      <input
+        id="polygonName"
+        v-model="polygon.name"
+        type="text"
+        placeholder="Nombre del Sucursal "
+        readonly
+      />
 
-      <label for="branchName">Nombre de Sucursal:</label>
-      <input id="branchName" v-model="polygon.tienda" type="text" readonly />
+      <label for="branchName">Division</label>
+      <input
+        id="branchName"
+        v-model="polygon.tienda"
+        type="text"
+        placeholder="Division"
+        readonly
+      />
     </div>
 
     <!-- Contenedor para el mapa -->
@@ -41,8 +52,12 @@
 
     <!-- Botones de acciones -->
     <div class="action-buttons">
-      <button @click="resetPolygon" class="reset-button">Reiniciar Polígono</button>
-      <button @click="savePolygonChanges" class="save-button">Guardar Cambios</button>
+      <button @click="resetPolygon" class="reset-button">
+        Reiniciar Polígono
+      </button>
+      <button @click="savePolygonChanges" class="save-button">
+        Guardar Cambios
+      </button>
     </div>
   </div>
 </template>
@@ -160,7 +175,9 @@ export default {
         });
 
         const bounds = new google.maps.LatLngBounds();
-        this.currentPolygon.getPath().forEach((latLng) => bounds.extend(latLng));
+        this.currentPolygon
+          .getPath()
+          .forEach((latLng) => bounds.extend(latLng));
         this.map.fitBounds(bounds);
       }
     },
@@ -209,14 +226,26 @@ export default {
 
         update(polygonRef, { paths: this.newPath })
           .then(() => {
-            Swal.fire("Guardado", "Cambios guardados correctamente.", "success");
+            Swal.fire(
+              "Guardado",
+              "Cambios guardados correctamente.",
+              "success"
+            );
           })
           .catch((error) => {
             console.error("Error al guardar cambios:", error);
-            Swal.fire("Error", "Hubo un problema al guardar los cambios.", "error");
+            Swal.fire(
+              "Error",
+              "Hubo un problema al guardar los cambios.",
+              "error"
+            );
           });
       } else {
-        Swal.fire("Sin cambios", "No se han definido puntos para el polígono.", "info");
+        Swal.fire(
+          "Sin cambios",
+          "No se han definido puntos para el polígono.",
+          "info"
+        );
       }
     },
     clearPolygon() {
@@ -269,8 +298,8 @@ export default {
 }
 .map-container {
   height: 400px;
-  width: 100%;
-  margin-top: 20px;
+  width: 80%;
+  margin-top: 10px;
 }
 .action-buttons {
   display: flex;
@@ -280,7 +309,7 @@ export default {
 .reset-button,
 .save-button {
   padding: 10px 20px;
-  background-color: #4CAF50;
+  background-color: #4caf50;
   color: white;
   border: none;
   border-radius: 4px;

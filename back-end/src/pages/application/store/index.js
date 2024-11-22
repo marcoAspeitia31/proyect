@@ -5,6 +5,7 @@ import { ref, onValue, push, update, remove } from 'firebase/database';
 import Swal from 'sweetalert2';
 
 export default createStore({
+  title: "SK-Sucursales",
   state: {
     currentUser: {
       name: '',

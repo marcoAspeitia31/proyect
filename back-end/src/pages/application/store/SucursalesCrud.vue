@@ -56,6 +56,7 @@ import { ref, push, set, onValue } from 'firebase/database';
 import { db } from '@/firebase';
 import Swal from 'sweetalert2';
 
+
 export default {
   name: 'BranchForm',
   data() {

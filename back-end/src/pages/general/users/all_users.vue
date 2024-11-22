@@ -14,6 +14,7 @@ import usersTable from "@/components/general/users/allUsers/usersTable.vue";
 import pagination from "@/layouts/elements/pagination.vue";
 export default {
   components: { usersTable, pagination },
+  title: "Sk-Usuarios",
   data() {
     return {
       users: Users.data,

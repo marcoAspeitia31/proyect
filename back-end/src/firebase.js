@@ -4,15 +4,16 @@ import { getDatabase, ref, set, get, onValue, update } from "firebase/database";
 
 // Configuración de Firebase
 const firebaseConfig = {
-  apiKey: "AIzaSyARsgZH-lJgpJ9FITMqjAQY6L0oVy90pSI",
-  authDomain: "appmovil-fef11.firebaseapp.com",
-  databaseURL: "https://appmovil-fef11-default-rtdb.firebaseio.com",
-  projectId: "appmovil-fef11",
-  storageBucket: "appmovil-fef11.appspot.com",
-  messagingSenderId: "478162271316",
-  appId: "1:478162271316:web:51a1eea7d14d1ee05f81c1",
-  measurementId: "G-7DX7NPT5D4"
+  apiKey: "AIzaSyCQaNQ9r1XYhZjx9J3ZsLQqJ8yDK2T6gPo",
+  authDomain: "super-kompras.firebaseapp.com",
+  databaseURL: "https://super-kompras.firebaseio.com",
+  projectId: "super-kompras",
+  storageBucket: "super-kompras.appspot.com",
+  messagingSenderId: "401245304429",
+  appId: "1:401245304429:web:4ac8ba27934b393b53f164",
+  measurementId: "G-NKJJ595SXR"
 };
+
 
 // Inicializa Firebase
 const app = initializeApp(firebaseConfig);

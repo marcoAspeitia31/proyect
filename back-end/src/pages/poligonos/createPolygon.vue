@@ -11,7 +11,6 @@
         </li>
       </ol>
     </nav>
-    <h3>Crear Polígono para la Sucursal</h3>
     <div class="controls">
       <select
         v-model="selectedBranchId"
@@ -212,8 +211,8 @@ export default {
 }
 
 .map-container {
-  height: 400px;
-  width: 100%;
+  height: 500px;
+  width: 70%;
   border: 1px solid #ccc;
   border-radius: 4px;
 }

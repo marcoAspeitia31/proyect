@@ -26,21 +26,21 @@
           "path": "/user/add-new-user",
           "type": "link",
           "icon": "user-plus",
-          "rol": ["Administrador", "Sistemas"]
+          "rol": ["Administrador", "Sistemas","Sucursal"]
         },
         {
           "name": "Total de Usuarios",
           "path": "/user/all-users",
           "type": "link",
           "icon": "users",
-          "rol": ["Administrador", "Sistemas"]
+          "rol": ["Administrador", "Sistemas","Sucursal"]
         },
         {
           "name": "Ver Usuarios",
           "path": "/user/view-user",
           "type": "link",
           "icon": "eye",
-          "rol": ["Administrador", "Sistemas"]
+          "rol": ["Administrador", "Sistemas","Sucursal"]
         },
         {
           "name": "Añadir Usuarios",
@@ -124,16 +124,16 @@
         },
         {
           "name": "Detalles del Pedido",
-          "path": "/orders/order-detail",
+          "path": "/orders/order-detail/:orderUid",
           "type": "link",
           "icon": "file-text",
           "rol": ["Administrador", "Sistemas", "Sucursal"]
         },
         {
-          "name": "Seguimiento del Pedido",
-          "path": "/orders/order-tracking",
+          "name": "Trayecto del Pedido",
+          "path": "/orders/order-tracking/:orderUid",
           "type": "link",
-          "icon": "truck",
+          "icon": "file-text",
           "rol": ["Administrador", "Sistemas", "Sucursal"]
         }
       ]

@@ -2,48 +2,53 @@
   <div class="branches-list">
     <nav aria-label="breadcrumb" class="float-right">
       <ol class="breadcrumb">
-      <li class="breadcrumb-item">
-      <router-link to="/">Home</router-link>
-      </li>
-      <li class="breadcrumb-item">
-      <router-link to="#">Gestion de Sucursales</router-link>
-      </li>
-      <li class="breadcrumb-item active" aria-current="page">Total de sucursales</li>
-  </ol>
-</nav>
-    <!-- Tabla de sucursales -->
-    <table>
-      <thead>
-        <tr>
-          <th>Sucursal</th>
-          <th>División</th>
-          <th>Dirección</th>
-          <th>Teléfono</th>
-          <th>Estado</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-if="!branches || branches.length === 0">
-          <td colspan="6">No hay sucursales disponibles.</td>
-        </tr>
-        <tr v-else v-for="(branch, index) in branches" :key="branch.id || index">
-          <td>{{ branch.name }}</td>
-          <td>{{ branch.division }}</td>
-          <td>{{ branch.address }}</td>
-          <td>{{ branch.phone }}</td>
-          <td>
-            <label class="switch">
-              <input type="checkbox" :checked="branch.status === 'activo'" @change="toggleStatus(branch)">
-              <span class="slider round"></span>
-            </label>
-          </td>
-          <td>
-            <button @click="editBranch(branch)" class="btn btn-sm btn-edit"><i class="fas fa-edit"></i></button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+        <li class="breadcrumb-item">
+          <router-link to="/">Home</router-link>
+        </li>
+        <li class="breadcrumb-item">
+          <router-link to="#">Gestion de Sucursales</router-link>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">Total de sucursales</li>
+      </ol>
+    </nav>
+
+    <!-- Contenedor para la tabla de sucursales -->
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Sucursal</th>
+            <th>División</th>
+            <th>Dirección</th>
+            <th>Teléfono</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-if="!branches || branches.length === 0">
+            <td colspan="6">No hay sucursales disponibles.</td>
+          </tr>
+          <tr v-else v-for="(branch, index) in branches" :key="branch.id || index">
+            <td>{{ branch.name }}</td>
+            <td>{{ branch.division }}</td>
+            <td>{{ branch.address }}</td>
+            <td>{{ branch.phone }}</td>
+            <td>
+              <label class="switch">
+                <input type="checkbox" :checked="branch.status === 'activo'" @change="toggleStatus(branch)">
+                <span class="slider round"></span>
+              </label>
+            </td>
+            <td>
+              <button @click="editBranch(branch)" class="btn btn-sm btn-edit">
+                <i class="fas fa-edit"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
     <!-- Formulario de edición visible en la página principal -->
     <div v-if="selectedBranch" class="edit-form">
@@ -71,6 +76,7 @@
     </div>
   </div>
 </template>
+
 
 <script>
 import { ref, onValue, update } from 'firebase/database';
@@ -222,26 +228,144 @@ export default {
 </script>
 
 <style scoped>
-/* Estilo general para la tabla */
+/* ============================= */
+/*      Estilos Generales        */
+/* ============================= */
+
+.user-registration-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.breadcrumb {
+  font-size: 14px;
+  color: #ff6b6b;
+}
+
+/* ============================= */
+/*      Estilo del Formulario    */
+/* ============================= */
+
+.form-box {
+  background-color: #fff;
+  border-radius: 10px;
+  padding: 30px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 600;
+  color: #333;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+select {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+select:focus {
+  border-color: #ff6b6b;
+  outline: none;
+  box-shadow: 0 0 4px rgba(255, 107, 107, 0.2);
+}
+
+/* ============================= */
+/*      Botones del Formulario   */
+/* ============================= */
+
+.btn-register {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #fff;
+  background-color: #ff6b6b;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.btn-register:hover {
+  background-color: #e25555;
+}
+
+.btn-save {
+  width: 70px;
+  height: 40px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: bold;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+}
+
+.btn-save:hover {
+  background-color: #218838;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transform: scale(1.05);
+}
+
+.btn-save:active {
+  background-color: #1e7e34;
+  transform: scale(1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* ============================= */
+/*      Estilo de la Tabla       */
+/* ============================= */
+
 table {
   width: 100%;
-  border-collapse: collapse; /* Elimina el espacio entre las celdas */
+  border-collapse: collapse;
 }
 
 th, td {
-  text-align: center; /* Alineación central de texto y elementos */
-  vertical-align: middle; /* Alinea verticalmente el contenido */
-  padding: 10px; /* Espaciado entre contenido y borde de celda */
+  text-align: center;
+  vertical-align: middle;
+  padding: 10px;
 }
 
-/* Estilo para el encabezado */
 th {
   background-color: #f2f2f2;
   font-weight: bold;
   font-size: 16px;
 }
 
-/* Ajustar el tamaño del botón de edición */
+tbody tr {
+  height: 60px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+/* ============================= */
+/*      Botón de Edición         */
+/* ============================= */
+
 .btn-edit {
   width: 40px;
   height: 40px;
@@ -256,7 +380,7 @@ th {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   background-color: #007bff;
   color: white;
-  margin: 0 auto; /* Centra el botón dentro de la celda */
+  margin: 0 auto;
 }
 
 .btn-edit:hover {
@@ -265,13 +389,16 @@ th {
   transform: scale(1.05);
 }
 
-/* Mantener el tamaño del switch consistente */
+/* ============================= */
+/*      Estilo del Switch        */
+/* ============================= */
+
 .switch {
   position: relative;
   display: inline-block;
   width: 60px;
   height: 34px;
-  margin: 0 auto; /* Centra el switch dentro de la celda */
+  margin: 0 auto;
 }
 
 .switch input {
@@ -288,7 +415,7 @@ th {
   right: 0;
   bottom: 0;
   background-color: #ccc;
-  transition: .4s;
+  transition: 0.4s;
   border-radius: 34px;
 }
 
@@ -300,7 +427,7 @@ th {
   left: 4px;
   bottom: 4px;
   background-color: white;
-  transition: .4s;
+  transition: 0.4s;
   border-radius: 50%;
 }
 
@@ -316,7 +443,10 @@ input:checked + .slider:before {
   transform: translateX(26px);
 }
 
-/* Estilo para el estado "activo" e "inactivo" */
+/* ============================= */
+/*    Estilo de Estado Check     */
+/* ============================= */
+
 input[type="checkbox"] {
   display: none;
 }
@@ -332,51 +462,13 @@ input[type="checkbox"]:checked + .slider:before {
   color: white;
 }
 
-/* Centra verticalmente el contenido en las celdas */
-tbody tr td {
-  vertical-align: middle;
-}
+/* ============================= */
+/*      Contenedor del Mapa      */
+/* ============================= */
 
-/* Para asegurar que las filas se mantengan ordenadas en altura */
-tbody tr {
-  height: 60px; /* Establece una altura mínima para las filas */
-  border-bottom: 1px solid #e0e0e0;
-}
-
-/* Estilo general de la tabla */
-tbody tr:nth-child(even) {
-  background-color: #f9f9f9; /* Alterna color de fondo para filas pares */
-}
 .map-container {
   width: 100%;
-  height: 400px; /* Ajusta el alto según tus necesidades */
+  height: 400px;
   margin-top: 20px;
 }
-.btn-save {
-  width: 70px; /* Ajusta el ancho del botón según sea necesario */
-  height: 40px; /* Ajusta la altura del botón */
-  background-color: #28a745; /* Color verde */
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 16px;
-  font-weight: bold;
-  text-align: center;
-  cursor: pointer;
-  transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
-}
-
-.btn-save:hover {
-  background-color: #218838; /* Color más oscuro al pasar el cursor */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra al hacer hover */
-  transform: scale(1.05); /* Ligero zoom al hacer hover */
-}
-
-.btn-save:active {
-  background-color: #1e7e34; /* Color más oscuro al hacer clic */
-  transform: scale(1); /* Restablece el tamaño al hacer clic */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra más ligera al hacer clic */
-}
-
-
 </style>

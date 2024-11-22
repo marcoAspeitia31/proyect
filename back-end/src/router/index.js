@@ -84,23 +84,22 @@ const routes = [
     path: "/orders/order-list",
     name: "order_list",
     component: order_list,
-    meta: { layout: layout1, breadcrumb: { type: 2, title: "Order List" } },
+    meta: { layout: layout1, breadcrumb: { type: 2, title: "Lista de Pedidos" } },
   },
   {
-    path: "/orders/order-detail",
+    path: "/orders/order-detail/:orderUid",
     name: "order_detail",
     component: order_detail,
     meta: {
       layout: layout1,
       breadcrumb: {
-        type: 3,
-        title: "Order #36648",
-        lis: ["October 21, 2021 at 9:08 pm", "6 items", "Total $5,882.00"],
+        type: 2,
+        title: "Informacion del Pedido"
       },
     },
   },
   {
-    path: "/orders/order-tracking",
+    path: "/orders/order-tracking/:orderUid",
     name: "order_tracking",
     component: order_tracking,
     meta: { layout: layout1, breadcrumb: { type: 2, title: "Order Tracking" } },
