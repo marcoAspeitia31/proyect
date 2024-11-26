@@ -1,4 +1,6 @@
 <template>
+  <div>
+    <!-- Información del Pedido -->
     <div v-if="selectedOrder">
       <h1 class="order-title">{{ selectedOrder.orderId }}</h1>
       <div class="info-card">
@@ -25,6 +27,8 @@
           </tbody>
         </table>
       </div>
+
+      <!-- Información del Cliente -->
       <div class="info-card">
         <h3>Información de Cliente</h3>
         <div class="client-info">
@@ -47,6 +51,50 @@
           </div>
         </div>
       </div>
+      <!-- Barra de Progreso Interactiva -->
+      <div v-if="formattedProgress.length" class="progress-container">
+        <div
+          v-for="(step, index) in formattedProgress"
+          :key="index"
+          class="progress-step"
+          :class="{
+            active: step.status === 'complete',
+            pending: step.status === 'pending',
+          }"
+        >
+          <div class="step-indicator">
+            <span>{{ index + 1 }}</span>
+          </div>
+          <div class="step-info">
+            <h5>{{ step.heading }}</h5>
+            <h6>{{ step.time }}</h6>
+          </div>
+        </div>
+      </div>
+
+      <div v-else>
+        <p>Cargando progreso...</p>
+      </div>
+
+      <div v-if="formattedProgress.length" class="state-table-container">
+        <h3>Detalles de los Estados</h3>
+        <table class="state-table">
+          <thead>
+            <tr>
+              <th>Estado</th>
+              <th>Fecha y Hora</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(step, index) in formattedProgress" :key="index">
+              <td>{{ step.heading }}</td>
+              <td>{{ step.time }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Detalles de Artículos -->
       <div class="info-card">
         <h3>Artículos</h3>
         <table class="articles-table">
@@ -55,10 +103,9 @@
               <th>ID</th>
               <th>Imagen</th>
               <th>Nombre</th>
-              <th>Cantidad Piezas o Gramaje</th>
+              <th>Cantidad</th>
               <th>Precio</th>
               <th>Comentarios</th>
-              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -74,74 +121,64 @@
               <td>{{ item.nombre }}</td>
               <td>{{ item.cantidad }}{{ item.unidad }}</td>
               <td>${{ item.total }}</td>
-              <td>{{ item.comentarios || 'Sin comentarios' }}</td>
-              <td>-</td>
+              <td>{{ item.comentarios }}</td>
             </tr>
           </tbody>
         </table>
         <p>Total de {{ selectedOrder.articles.length }} artículos</p>
       </div>
+
+      <!-- Detalle de Pago -->
       <div class="info-card">
         <h3>Detalle de Pago</h3>
-        <br>
         <div class="payment-details">
-          <div class="payment-left">
-            <div class="payment-field">
-              <span>Subtotal</span>
-              <span>${{ paymentDetails.subtotal }}</span>
-            </div>
-            <div class="payment-field">
-              <span>Envío</span>
-              <span>${{ paymentDetails.envio }}</span>
-            </div>
-            <div class="payment-field total">
-              <span>Total</span>
-              <span>${{ paymentDetails.total }}</span>
-            </div>
+          <div class="payment-field">
+            <span>Subtotal:</span>
+            <span>${{ paymentDetails.subtotal }}</span>
           </div>
-          <div class="payment-right">
-            <div class="payment-method">
-              <span><strong>Método de pago</strong></span>
-              <span>{{ paymentDetails.metodo }}</span>
-              <img
-                :src="paymentDetails.icono"
-                alt="Icono método de pago"
-                class="payment-icon"
-                v-if="paymentDetails.icono"
-              />
-            </div>
+          <div class="payment-field">
+            <span>Envío:</span>
+            <span>${{ paymentDetails.envio }}</span>
+          </div>
+          <div class="payment-field total">
+            <span>Total:</span>
+            <span>${{ paymentDetails.total }}</span>
           </div>
         </div>
-        <button @click="downloadPDF" class="download-btn">
-          Descargar PDF <i class="fas fa-download"></i>
-        </button>
+        <button @click="downloadPDF" class="download-btn">Descargar PDF</button>
       </div>
     </div>
     <div v-else>
       <p>Cargando detalles del pedido o pedido no encontrado...</p>
     </div>
+  </div>
 </template>
 
 <script>
 import { jsPDF } from "jspdf";
 import { onMounted, ref } from "vue";
-import { useRoute } from "vue-router";
 import { getDatabase, ref as dbRef, onValue } from "firebase/database";
-
+import { useRoute, useRouter } from "vue-router";
 
 export default {
+  props: ["progress"],
   setup() {
     const route = useRoute();
     const selectedOrder = ref(null);
     const clientFields = ref([]);
     const paymentDetails = ref({});
+    const router = useRouter();
+    const formattedProgress = ref([]);
 
     const fetchOrderDetails = async () => {
       const orderUid = route.params.orderUid;
       if (!orderUid) return;
 
       const db = getDatabase();
-      const orderRef = dbRef(db, `/projects/proj_tCJWQHSHNf7WoMu7r64pUJ/data/Pedidos/${orderUid}`);
+      const orderRef = dbRef(
+        db,
+        `/projects/proj_tCJWQHSHNf7WoMu7r64pUJ/data/Pedidos/${orderUid}`
+      );
       onValue(orderRef, (snapshot) => {
         const orderData = snapshot.val();
         if (orderData) {
@@ -156,6 +193,14 @@ export default {
             telefono: orderData["Cliente telefono"] || "No disponible",
             direccion: orderData.Direccion || "No disponible",
             codigoTarjetaClub: orderData.TarjetaClub || "No disponible",
+            TimeSolicitud: orderData.TimeSolicitud,
+            TimeEnProceso: orderData.TimeEnProceso,
+            TimeEnRuta: orderData.TimeEnRuta,
+            TimeConcluido: orderData.TimeConcluido,
+            TimeCancelado: orderData.TimeCancelado,
+            subtotal: orderData.Subtotal || "", // Asegúrate de que este campo está disponible en Firebase
+            envio: orderData.Envio || "", 
+            total: orderData.Total,
             fotografia: orderData["Fotografia"] || "",
             articles: Object.keys(orderData.Productos || {}).map((key) => {
               const product = orderData.Productos[key];
@@ -169,7 +214,7 @@ export default {
                 nombre: product.Nombre || "N/A",
                 total: product.Total || 0,
                 unidad: product.Unidad || "N/A",
-                comentarios: product.Comentarios || "Sin comentarios"
+                comentarios: product.Comentarios,
               };
             }),
             paymentDetails: {
@@ -177,7 +222,7 @@ export default {
               envio: orderData.Envio || 0,
               total: orderData.Total || 0,
               metodo: orderData.Pago || "No especificado",
-              icono: orderData.IconoMetodoPago || "" // Ruta de la imagen del método de pago
+              icono: orderData.IconoMetodoPago || "",
             },
           };
           clientFields.value = [
@@ -207,14 +252,70 @@ export default {
               value: selectedOrder.value.codigoTarjetaClub,
             },
           ];
+
           paymentDetails.value = selectedOrder.value.paymentDetails;
+          formatProgress(orderData);
         }
       });
     };
 
+    const goToOrderTracking = () => {
+      if (selectedOrder.value && selectedOrder.value.orderId) {
+        router.push({
+          name: "order_tracking",
+          params: { orderUid: selectedOrder.value.orderId },
+        });
+      } else {
+        console.error(
+          "No se puede redirigir porque no hay información del pedido."
+        );
+      }
+    };
+
+    const formatProgress = (orderData) => {
+      formattedProgress.value = [
+        {
+          key: "TimeSolicitud",
+          heading: "Solicitud",
+          time: formatTimestamp(orderData.TimeSolicitud),
+          status: orderData.TimeSolicitud ? "complete" : "pending",
+        },
+        {
+          key: "TimeEnProceso",
+          heading: "En Proceso",
+          time: formatTimestamp(orderData.TimeEnProceso),
+          status: orderData.TimeEnProceso ? "complete" : "pending",
+        },
+        {
+          key: "TimeEnRuta",
+          heading: "En Ruta",
+          time: formatTimestamp(orderData.TimeEnRuta),
+          status: orderData.TimeEnRuta ? "complete" : "pending",
+        },
+        {
+          key: "TimeConcluido",
+          heading: "Concluido",
+          time: formatTimestamp(orderData.TimeConcluido),
+          status: orderData.TimeConcluido ? "complete" : "pending",
+        },
+      ];
+
+      // Agregar estado cancelado si existe
+      if (orderData.TimeCancelado) {
+        formattedProgress.value.push({
+          key: "TimeCancelado",
+          heading: "Cancelado",
+          time: formatTimestamp(orderData.TimeCancelado),
+          status: "complete",
+        });
+      }
+    };
+
     const formatTimestamp = (timestamp) => {
-      if (!timestamp) return "Fecha no válida";
-      const date = new Date(timestamp.toString().length === 10 ? timestamp * 1000 : timestamp);
+      if (!timestamp) return "";
+      const date = new Date(
+        timestamp.toString().length === 10 ? timestamp * 1000 : timestamp
+      );
       return date.toLocaleString("es-ES", {
         day: "2-digit",
         month: "2-digit",
@@ -227,14 +328,14 @@ export default {
 
     const downloadPDF = () => {
       if (!selectedOrder.value || !selectedOrder.value.folio) {
-        console.error("No se puede descargar el PDF porque no hay datos de pedido.");
+        console.error(
+          "No se puede descargar el PDF porque no hay datos de pedido."
+        );
         return;
       }
 
       const pdf = new jsPDF();
       pdf.setFontSize(12);
-
-      // Encabezados de la orden
       pdf.text(`Folio: ${selectedOrder.value.folio}`, 10, 10);
       pdf.text(`Cliente: ${selectedOrder.value.cliente}`, 10, 20);
       pdf.text(`Teléfono: ${selectedOrder.value.telefono}`, 10, 30);
@@ -242,21 +343,21 @@ export default {
 
       // Encabezados de la tabla
       pdf.setFontSize(10);
-      pdf.text('Código', 10, 60);
-      pdf.text('Nombre', 50, 60);
-      pdf.text('Cantidad', 130, 60);
-      pdf.text('Precio', 170, 60);
+      pdf.text("Código", 10, 60);
+      pdf.text("Nombre", 50, 60);
+      pdf.text("Cantidad", 130, 60);
+      pdf.text("Precio", 170, 60);
       pdf.setDrawColor(0);
       pdf.setLineWidth(0.5);
-      pdf.line(10, 62, 200, 62); // Línea horizontal bajo los encabezados
+      pdf.line(10, 62, 200, 62);
 
       // Listado de artículos
-      let y = 70;
+      let y = 100;
       selectedOrder.value.articles.forEach((item) => {
         pdf.text(item.codigo, 10, y);
         pdf.text(item.nombre, 50, y, { maxWidth: 80 });
         pdf.text(item.cantidad, 130, y);
-        pdf.text(`$${item.precio}`, 170, y);
+        pdf.text(`$${item.total}`, 170, y);
         y += 10;
       });
 
@@ -264,11 +365,11 @@ export default {
       pdf.text(`Subtotal: $${selectedOrder.value.subtotal}`, 130, y);
       pdf.text(`Envío: $${selectedOrder.value.envio}`, 130, y + 10);
       pdf.text(`Total: $${selectedOrder.value.total}`, 130, y + 20);
+
       // Guardar el PDF con un nombre basado en el folio
       const fileName = `detalle_${selectedOrder.value.folio}.pdf`;
       pdf.save(fileName);
     };
-
 
     onMounted(fetchOrderDetails);
 
@@ -276,15 +377,21 @@ export default {
       selectedOrder,
       clientFields,
       paymentDetails,
-      downloadPDF
+      downloadPDF,
+      goToOrderTracking,
+      formattedProgress,
+      getClass(status) {
+        return {
+          "progtrckr-todo": status.status === "pending",
+          "progtrckr-done": status.status === "complete",
+        };
+      },
     };
-  }
+  },
 };
 </script>
 
-
 <style scoped>
-
 @media (max-width: 600px) {
   .summary {
     flex-direction: column;
@@ -297,8 +404,8 @@ export default {
   }
 
   .table-container {
-    padding: 1rem; 
-    overflow-x: auto;/* Reduce el padding en contenedores más pequeños */
+    padding: 1rem;
+    overflow-x: auto; /* Reduce el padding en contenedores más pequeños */
   }
 
   .filters {
@@ -314,7 +421,8 @@ export default {
     font-size: 14px; /* Reduce la fuente para la tabla */
   }
 
-  .detail-btn, .page-link {
+  .detail-btn,
+  .page-link {
     padding: 0.5rem 1rem; /* Reduce el tamaño de los botones */
     font-size: 14px;
   }
@@ -325,6 +433,96 @@ export default {
   }
 }
 
+.progress-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 20px 0;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.progress-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  position: relative;
+  text-align: center;
+}
+
+.progress-step .step-indicator {
+  width: 30px;
+  height: 30px;
+  background: #ddd;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 10px;
+}
+
+.progress-step.active .step-indicator {
+  background: #4caf50;
+}
+
+.progress-step.pending .step-indicator {
+  background: #ccc;
+}
+
+.progress-step h5 {
+  font-size: 14px;
+  font-weight: bold;
+  margin: 0;
+  color: #333;
+}
+
+.progress-step h6 {
+  font-size: 12px;
+  color: #777;
+}
+
+.progress-container::before,
+.progress-container::after {
+  content: "";
+  width: 50px;
+  height: 1px;
+  background-color: #d3d3d3;
+  position: absolute;
+  top: 50%;
+  z-index: 1;
+}
+
+/* Tabla de Estados */
+.state-table-container {
+  margin-top: 30px;
+  padding: 20px;
+  background-color: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+}
+
+.state-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.state-table th,
+.state-table td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.state-table th {
+  background-color: #f2f2f2;
+  font-weight: bold;
+}
+
+.state-table tr:hover {
+  background-color: #f9f9f9;
+}
 .client-selector {
   margin-bottom: 1.5rem;
 }
@@ -457,5 +655,4 @@ export default {
   gap: 0.5rem;
   margin-top: 1rem; /* Espacio extra entre el botón y el contenido de arriba */
 }
-
 </style>

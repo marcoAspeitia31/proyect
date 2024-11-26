@@ -1,188 +1,158 @@
 <template>
-  <div>
-    <div class="selector-container">
-      <label for="folio-selector">Selecciona un pedido por folio:</label>
-      <select id="folio-selector" v-model="selectedFolio" @change="fetchOrderTracking">
-        <option v-for="order in ordersList" :key="order.folio" :value="order.folio">
-          {{ order.folio }}
-        </option>
-      </select>
-    </div>
+  <div class="row">
+    <div class="col-12">
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="card">
+            <div class="card-body">
+              <div class="row">
+                <!-- Encabezado -->
+                <div class="col-12">
+                  <h2>Detalles del Pedido</h2>
+                </div>
 
-    <div v-if="selectedOrder">
-      <h1 class="order-title">{{ selectedOrder.orderId }}</h1>
-      <div class="info-card">
-        <table class="info-table">
-          <tbody>
-            <tr>
-              <td><strong>Fecha y hora</strong></td>
-              <td><strong>Estado de envío</strong></td>
-              <td><strong>Sucursal</strong></td>
-              <td><strong>Estatus</strong></td>
-            </tr>
-            <tr>
-              <td>{{ selectedOrder.fechaHora }}</td>
-              <td>{{ selectedOrder.estadoEnvio }}</td>
-              <td>{{ selectedOrder.sucursal }}</td>
-              <td>
-                <span :class="`status ${selectedOrder.estatus?.toLowerCase()}`">
-                  {{ selectedOrder.estatus || "Desconocido" }}
-                </span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="info-card">
-        <h3>Historial de Estados</h3>
-        <table class="articles-table">
-          <thead>
-            <tr>
-              <th>Fecha</th>
-              <th>Hora</th>
-              <th>Estado</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="estado in historialEstados" :key="estado.time">
-              <td>{{ formatDate(estado.time) }}</td>
-              <td>{{ formatTime(estado.time) }}</td>
-              <td>{{ estado.nombre }}</td>
-            </tr>
-          </tbody>
-        </table>
+                <!-- Detalles del Producto -->
+                <div class="col-12 overflow-hidden" v-if="orderTracking">
+                  <product :product="orderTracking.product" />
+                </div>
+
+                <!-- Progreso del Pedido -->
+                <div class="col-12" v-if="orderTracking">
+                  <orderProgress
+                    :progress="orderTimes['En Proceso']"
+                    :selectedOrder="orderTracking"
+                  />
+                </div>
+
+                <!-- Tabla de Etapas del Pedido -->
+                <div class="col-12 overflow-visible" v-if="orderTracking">
+                  <ordersTable :order-times="orderTimes" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { onMounted, ref } from "vue";
-import { getDatabase, ref as dbRef, onValue } from "firebase/database";
+import { getDatabase, ref, onValue } from "firebase/database";
+import { app as firebaseApp } from '@/firebase';
+import ordersTable from "@/components/application/orders/order_tracking/ordersTable.vue";
+import product from "@/components/application/orders/order_tracking/product.vue";
+import orderProgress from "@/components/application/orders/order_tracking/orderProgress.vue";
 
 export default {
-  setup() {
-    const selectedFolio = ref("");
-    const selectedOrder = ref(null);
-    const historialEstados = ref([]);
-    const ordersList = ref([]);
-
-    const fetchOrdersList = () => {
-      const db = getDatabase();
-      const ordersRef = dbRef(db, `/projects/proj_tCJWQHSHNf7WoMu7r64pUJ/data/Pedidos`);
-      onValue(ordersRef, (snapshot) => {
-        const ordersData = snapshot.val();
-        if (ordersData) {
-          ordersList.value = Object.keys(ordersData).map((key) => ({
-            folio: key,
-            sucursal: ordersData[key].sucursal || "Desconocida",
-          }));
-        }
-      });
-    };
-
-    const fetchOrderTracking = async () => {
-      if (!selectedFolio.value) return;
-
-      const db = getDatabase();
-      const orderRef = dbRef(
-        db,
-        `/projects/proj_tCJWQHSHNf7WoMu7r64pUJ/data/Pedidos/${selectedFolio.value}`
-      );
-      onValue(orderRef, (snapshot) => {
-        const orderData = snapshot.val();
-        if (orderData) {
-          selectedOrder.value = {
-            orderId: selectedFolio.value,
-            sucursal: orderData.sucursal || "No disponible",
-            fechaHora: formatTimestamp(orderData["Time pedido"]),
-            estatus: orderData.Status || "Desconocido",
-            estadoEnvio: orderData.EstadoEnvio || "No especificado",
-          };
-
-          // Crear historial de estados
-          historialEstados.value = [
-            { nombre: "Solicitud", time: orderData.TimeSolicitud || null },
-            { nombre: "En Proceso", time: orderData.TimeEnProceso || null },
-            { nombre: "En Ruta", time: orderData.TimeEnRuta || null },
-            { nombre: "Concluido", time: orderData.TimeConcluido || null },
-          ].filter((estado) => estado.time); // Filtrar estados sin timestamp
-        }
-      });
-    };
-
-    const formatTimestamp = (timestamp) => {
-      if (!timestamp) return "Fecha no válida";
-      const date = new Date(timestamp.toString().length === 10 ? timestamp * 1000 : timestamp);
-      return date.toLocaleString("es-ES", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true,
-      });
-    };
-
-    const formatDate = (timestamp) => {
-      if (!timestamp) return "Fecha no válida";
-      const date = new Date(timestamp);
-      return date.toLocaleDateString("es-ES");
-    };
-
-    const formatTime = (timestamp) => {
-      if (!timestamp) return "Hora no válida";
-      const date = new Date(timestamp);
-      return date.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", hour12: true });
-    };
-
-    onMounted(() => {
-      fetchOrdersList();
-    });
-
+  components: { ordersTable, product, orderProgress },
+  data() {
     return {
-      selectedFolio,
-      selectedOrder,
-      historialEstados,
-      ordersList,
-      fetchOrderTracking,
-      formatDate,
-      formatTime,
+      selectedOrderId: "", // ID del pedido seleccionado
+      orders: [], // Lista de pedidos cargados desde Firebase
+      orderTracking: null, // Detalles del pedido actual
     };
+  },
+  mounted() {
+    // Asignar el ID del pedido desde los parámetros de la ruta
+    this.selectedOrderId = this.$route.params.orderUid;
+    console.log("Order ID de la ruta:", this.selectedOrderId);
+
+    // Cargar pedidos desde Firebase
+    this.fetchOrders();
+
+    // Observar cambios en los pedidos para cargar datos del pedido
+    this.$watch(
+      "orders",
+      () => {
+        this.loadOrderData();
+      },
+      { deep: true }
+    );
+  },
+  computed: {
+    orderTimes() {
+      if (!this.orderTracking) return {};
+      const times = {
+        Pedido: this.orderTracking.TimePedido || "No disponible",
+        Concluido: this.orderTracking.TimeConcluido || "No disponible",
+        "En Proceso": this.orderTracking.TimeEnProceso || "No disponible",
+        "En Ruta": this.orderTracking.TimeEnRuta || "No disponible",
+        Solicitud: this.orderTracking.TimeSolicitud || "No disponible",
+      };
+      console.log("Historial de estados del pedido:", times); // Log del historial
+      return times;
+    },
+  },
+  methods: {
+    // Cargar pedidos desde Firebase
+    fetchOrders() {
+      const db = getDatabase(firebaseApp);
+      const ordersRef = ref(
+        db,
+        "/projects/proj_tCJWQHSHNf7WoMu7r64pUJ/data/Pedidos"
+      );
+      onValue(
+        ordersRef,
+        (snapshot) => {
+          const orders = snapshot.val()
+            ? Object.entries(snapshot.val()).map(([id, order]) => ({
+                ...order,
+                id,
+              }))
+            : [];
+          this.orders = orders;
+          console.log("Pedidos cargados:", this.orders);
+        },
+        (error) => {
+          console.error("Error al cargar pedidos:", error);
+        }
+      );
+    },
+    // Filtrar y cargar los datos del pedido seleccionado
+    loadOrderData() {
+      console.log("IDs cargados:", this.orders.map((order) => order.id));
+      console.log("ID seleccionado:", this.selectedOrderId);
+
+      const order = this.orders.find(
+        (order) => order.id.trim() === this.selectedOrderId.trim()
+      );
+
+      if (order) {
+        this.orderTracking = {
+          ...order,
+          product: order.product || {}, // Manejar datos faltantes
+        };
+        console.log("Pedido encontrado:", this.orderTracking);
+      } else {
+        console.warn(
+          "No se encontró el pedido con el ID:",
+          this.selectedOrderId
+        );
+        this.orderTracking = null;
+      }
+    },
+  },
+  watch: {
+    // Observar cambios en orderTracking y mostrar historial en consola
+    orderTracking(newVal) {
+      if (newVal) {
+        console.log("Nuevo historial de estados cargado:", this.orderTimes);
+      }
+    },
   },
 };
 </script>
 
 
 <style scoped>
-/* Reutilización del estilo anterior */
-.order-title {
-  font-size: 24px;
-  font-weight: bold;
-  margin-bottom: 1rem;
-}
-.info-card {
-  background-color: #ffffff;
-  border-radius: 8px;
-  padding: 1.5rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  margin-bottom: 1.5rem;
-}
-.articles-table {
-  width: 100%;
-  font-size: 16px;
-  border-collapse: collapse;
-  margin-bottom: 1rem;
-}
-.articles-table th,
-.articles-table td {
-  padding: 0.75rem;
+.table-head {
+  background-color: #f8f9fa;
   text-align: left;
-  border: 1px solid #ddd;
 }
-.status {
-  padding: 0.5rem;
-  border-radius: 4px;
-  text-transform: capitalize;
+.table td,
+.table th {
+  padding: 12px;
+  vertical-align: middle;
 }
 </style>

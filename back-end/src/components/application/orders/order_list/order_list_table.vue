@@ -66,15 +66,17 @@
           <td>{{ order.total }}</td>
           <td :class="['status', assignStatusColor(order.estatus)]">
             {{ order.estatus }}
-          </td> 
+          </td>
           <td class="actions-cell">
             <button class="detail-btn" @click="viewOrderDetail(order.orderUid)">
               Ver detalle
             </button>
           </td>
-          <td class="action-cell"><button @click="downloadPDF" class="download-btn">
-          Descargar PDF <i class="fas fa-download"></i>
-        </button></td>
+          <td class="action-cell">
+            <button @click="downloadPDF(order)" class="download-btn">
+              Descargar PDF
+            </button>
+          </td>
         </tr>
       </tbody>
     </table>
@@ -120,6 +122,7 @@ import { useRouter } from "vue-router";
 import { getDatabase, ref as dbRef, onValue } from "firebase/database";
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
+import { usePdfDownloader } from "@/data/usePdfDownloader";
 
 export default {
   setup() {
@@ -133,6 +136,7 @@ export default {
     const selectedDate = ref(""); // Filtro de fecha
     const currentPage = ref(1); // Página actual
     const perPage = 25; // Elementos por página
+    const { downloadPDF } = usePdfDownloader();
 
     // Función para establecer la página actual
     function setCurrentPage(page) {
@@ -223,7 +227,10 @@ export default {
       return filteredOrders.value.slice(start, start + perPage);
     });
 
+    let debounceTimeout;
     function fetchOrders() {
+      clearTimeout(debounceTimeout);
+      debounceTimeout = setTimeout(() => {
       const db = getDatabase();
       const ordersRef = dbRef(
         db,
@@ -232,12 +239,11 @@ export default {
       onValue(ordersRef, (snapshot) => {
         const ordersData = snapshot.val();
         const tenDaysAgo = new Date();
-        tenDaysAgo.setDate(tenDaysAgo.getDate() - 10); // Obtener la fecha de hace 10 días
-
+        tenDaysAgo.setDate(tenDaysAgo.getDate() - 10);
         orders.value = Object.keys(ordersData)
           .map((key) => {
             const order = ordersData[key];
-            const orderDate = new Date(order.TimeSolicitud); // Convertir la fecha de solicitud a objeto Date
+            const orderDate = new Date(order.TimeSolicitud);
             return {
               orderUid: key,
               folio: order.Folio,
@@ -250,22 +256,45 @@ export default {
               fechaHora: formatTimestamp(order.TimeSolicitud),
               total: order.Total,
               estatus: order.Status || "Sin estatus",
-              TimeEnProceso: order.TimeEnProceso || "", // Asegúrate de que este campo está disponible en Firebase
+              TimeEnProceso: order.TimeEnProceso || "",
               TimeEnRuta: order.TimeEnRuta || "",
               TimeConcluido: order.TimeConcluido || "",
+              TimeCancelado: order.TimeCancelado,
               Pago: order.Pago || "",
-              subtotal: order.Subtotal || "", // Asegúrate de que este campo está disponible en Firebase
-              Envio: order.Envio || "", // Asegúrate de que este campo está disponible en Firebase
-              TarjetaClub: order.TarjetaClub || "", // Asegúrate de que este campo está disponible en Firebase
-              recogerTienda: order.recogerTienda || "", // Asegúrate de que este campo está disponible en Firebase
-              // Filtramos los pedidos de los últimos 10 días
+              subtotal: order.Subtotal || "",
+              envio: order.Envio || "",
+              TarjetaClub: order.TarjetaClub || "",
+              recogerTienda: order.recogerTienda || "",
+              articles: order.Productos
+                ? Object.keys(order.Productos).map((productKey) => {
+                    const product = order.Productos[productKey];
+                    return {
+                      id: productKey,
+                      categoria: product.CATEGORIAAPP || "N/A",
+                      cantidad: product.Cantidad || "N/A",
+                      cantidadGramos: product.CantidadGRPZ || "N/A",
+                      codigo: product.Codigo || "N/A",
+                      imagen: product.Imagen || "",
+                      nombre: product.Nombre || "N/A",
+                      total: product.Total || 0,
+                      unidad: product.Unidad || "N/A",
+                      comentarios: product.Comentarios || "",
+                    };
+                  })
+                : [],
+              paymentDetails: {
+                subtotal: order.Subtotal || 0,
+                envio: order.Envio || 0,
+                total: order.Total || 0,
+                metodo: order.Pago || "No especificado",
+                icono: order.IconoMetodoPago || "",
+              },
+              total: order.Total || 0,
               isRecent: orderDate >= tenDaysAgo,
             };
           })
-          .filter((order) => order.isRecent) // Solo dejamos los pedidos dentro del rango de 10 días
-          .sort((a, b) => b.fechaHoraOriginal - a.fechaHoraOriginal); // Ordenar por fecha descendente
-
-        // Filtramos tiendas únicas
+          .filter((order) => order.isRecent)
+          .sort((a, b) => b.fechaHoraOriginal - a.fechaHoraOriginal);
         tiendas.value = [
           ...new Set(orders.value.map((order) => order.sucursal)),
         ].map((name) => ({ name }));
@@ -275,15 +304,17 @@ export default {
           ...new Set(orders.value.map((order) => order.estatus)),
         ];
 
-        updateSummary(); // Llamar a la actualización del resumen después de cargar los pedidos
+        updateSummary();
       });
-    }
+      onValue(ordersRef, (snapshot) => {
+      // Procesar los datos
+    });
+  }, 300);
+  }
 
-    // Función para navegar a los detalles del pedido
     function viewOrderDetail(orderUid) {
-      console.log("Order UID:", orderUid);
       if (!orderUid) {
-        console.error("No se proporcionó un Order UID válido");
+        console.error("Order UID no válido");
         return;
       }
       router.push({ name: "order_detail", params: { orderUid } });
@@ -292,7 +323,7 @@ export default {
     // Formatear la fecha
     function formatTimestamp(timestamp) {
       if (!timestamp) {
-        return "Fecha no válida";
+        return "";
       }
       const date = new Date(
         timestamp.toString().length === 10 ? timestamp * 1000 : timestamp
@@ -308,10 +339,8 @@ export default {
     }
 
     function getStatusColor(status) {
-      // Normalizamos el estatus para que se maneje correctamente
       const cleanStatus = (status || "").trim().toLowerCase();
-      console.log("Estatus procesado:", cleanStatus); // Verifica cómo se procesa el estatus
-
+      console.log("Estatus procesado:", cleanStatus);
       const colors = {
         solicitud: "orange",
         "en proceso": "blue",
@@ -320,7 +349,7 @@ export default {
         cancelado: "red",
       };
 
-      return colors[cleanStatus] || "gray"; // Color predeterminado si no hay coincidencia
+      return colors[cleanStatus] || "gray";
     }
 
     function updateSummary() {
@@ -334,26 +363,20 @@ export default {
       ];
 
       const statusCounts = orders.value.reduce((acc, order) => {
-        const normalizedStatus = order.estatus.trim().toLowerCase(); // Normalizamos el estatus
-        console.log("Estatus procesado:", normalizedStatus); // Para verificar cómo se está procesando el estatus
+        const normalizedStatus = order.estatus.trim().toLowerCase();
 
         if (!acc[normalizedStatus])
           acc[normalizedStatus] = { count: 0, total: 0 };
-        acc[normalizedStatus].count += 1; // Aumentamos el contador de pedidos para ese estatus
-        acc[normalizedStatus].total += order.total; // Acumulamos el total de ese estatus
+        acc[normalizedStatus].count += 1;
+        acc[normalizedStatus].total += order.total;
         return acc;
       }, {});
-
-      // Aseguramos que todos los estatus tengan una tarjeta, incluso si no hay pedidos
       summaryStatuses.value = allStatuses.map((status) => ({
         name: status,
         count: statusCounts[status.toLowerCase()]?.count || 0, // Aseguramos que el nombre esté normalizado
         total: (statusCounts[status.toLowerCase()]?.total || 0).toFixed(2), // Total por estatus
         color: getStatusColor(status), // Color basado en el estatus
       }));
-
-      // Depuración: Verifica que los totales y cuentas se estén sumando correctamente
-      console.log("Resumen de estatus:", summaryStatuses.value);
     }
 
     // Cargar los pedidos al montar el componente
@@ -375,6 +398,7 @@ export default {
       viewOrderDetail,
       getStatusColor,
       exportToExcel,
+      downloadPDF,
     };
   },
   methods: {
@@ -395,7 +419,7 @@ export default {
           return "gray"; // Retornar gris como color predeterminado si no hay coincidencia
       }
     },
-  }
+  },
 };
 </script>
 
@@ -561,24 +585,23 @@ export default {
 }
 
 .status.gray {
-  background-color: gray; /* Color predeterminado */
+  background-color: gray;
 }
 
 .detail-btn {
   background-color: #1c3faa;
   color: white;
   border: none;
-  padding: 0.75rem 1.5rem; /* Aumenta la altura */
+  padding: 0.75rem 1rem;
   border-radius: 5px;
   font-weight: bold;
   font-size: 15px;
   cursor: pointer;
-  height: 60px; /* Aumenta la altura */
-  min-width: 100px; /* Asegura el tamaño mínimo */
+  height: 60px;
+  min-width: 100px;
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Estilos para la paginación */
 .pagination-container {
   display: flex;
   align-items: center;
@@ -602,5 +625,18 @@ button.active {
 button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.download-btn {
+  background-color: #8b0000;
+  color: white;
+  border: none;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 </style>

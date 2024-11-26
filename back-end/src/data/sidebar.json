@@ -128,13 +128,6 @@
           "type": "link",
           "icon": "file-text",
           "rol": ["Administrador", "Sistemas", "Sucursal"]
-        },
-        {
-          "name": "Trayecto del Pedido",
-          "path": "/orders/order-tracking/:orderUid",
-          "type": "link",
-          "icon": "file-text",
-          "rol": ["Administrador", "Sistemas", "Sucursal"]
         }
       ]
     },

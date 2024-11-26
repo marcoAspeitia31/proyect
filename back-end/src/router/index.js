@@ -24,8 +24,8 @@ import support_ticket from "../pages/application/support_ticket.vue";
 import profile_setting from "../pages/application/settings/profile_setting.vue";
 import reports from "../pages/application/reports.vue";
 import list_page from "../pages/application/list_page.vue";
-import log_in from "../pages/application/log_in.vue";
-import forgot_password from "../pages/application/forgot_password.vue";
+import log_in from "@/components/auth/log_in.vue";
+import forgot_password from "@/components/auth/forgot_password.vue";
 import register from "../pages/application/register.vue";
 import RolsCrud from "@/components/general/users/rolsCrud.vue";
 import SucursalesCrud from "@/pages/application/store/SucursalesCrud.vue";
@@ -35,8 +35,7 @@ import viewUser from "@/pages/general/users/viewUser.vue";
 import ListSucursal from "@/components/listSucursal.vue";
 import editPolygon from "@/pages/poligonos/editPolygon.vue";
 import createPolygon from "@/pages/poligonos/createPolygon.vue";
-import viewPolygon from '@/pages/poligonos/viewPolygon.vue';
-
+import viewPolygon from "@/pages/poligonos/viewPolygon.vue";
 
 // Declaración de las rutas
 const routes = [
@@ -47,7 +46,7 @@ const routes = [
     meta: { layout: layout1, breadcrumb: { type: 0 } },
   },
   {
-    path: "/user/all-users",
+    path: "/user/all-users", 
     name: "allUsers",
     component: allUsers,
     meta: {
@@ -59,7 +58,7 @@ const routes = [
       },
       roles: ["Administrador", "Sistemas", "Sucursal"],
     },
-  },
+  },  
   {
     path: "/user/add-new-user",
     name: "add_new_user",
@@ -84,7 +83,10 @@ const routes = [
     path: "/orders/order-list",
     name: "order_list",
     component: order_list,
-    meta: { layout: layout1, breadcrumb: { type: 2, title: "Lista de Pedidos" } },
+    meta: {
+      layout: layout1,
+      breadcrumb: { type: 2, title: "Lista de Pedidos" },
+    },
   },
   {
     path: "/orders/order-detail/:orderUid",
@@ -94,7 +96,7 @@ const routes = [
       layout: layout1,
       breadcrumb: {
         type: 2,
-        title: "Informacion del Pedido"
+        title: "Informacion del Pedido",
       },
     },
   },
@@ -102,6 +104,7 @@ const routes = [
     path: "/orders/order-tracking/:orderUid",
     name: "order_tracking",
     component: order_tracking,
+    props: true,
     meta: { layout: layout1, breadcrumb: { type: 2, title: "Order Tracking" } },
   },
   {
@@ -217,6 +220,7 @@ const routes = [
     name: "log_in",
     component: log_in,
   },
+
   {
     path: "/forgot-password",
     name: "forgot_password",
@@ -288,17 +292,17 @@ const routes = [
       roles: ["Administrador", "Sistemas", "Sucursal"],
     },
   },
-  
+
   {
     path: "/polygons/create-polygon/:branchId",
     name: "createPolygon",
     component: createPolygon,
     meta: {
-        layout: layout1,
-        breadcrumb: { type: 2, title: "Crear Poligono" },
-        roles: ["Administrador", "Sistemas", "Sucursal"],
+      layout: layout1,
+      breadcrumb: { type: 2, title: "Crear Poligono" },
+      roles: ["Administrador", "Sistemas", "Sucursal"],
     },
-},
+  },
   {
     path: "/polygons/view-polygon/",
     name: "viewPolygon",
@@ -324,25 +328,21 @@ router.beforeEach((to, from, next) => {
     user = isAuthenticated ? JSON.parse(isAuthenticated) : null;
   } catch (e) {
     console.error("Error al parsear el usuario desde localStorage:", e);
-    user = null; 
+    user = null;
   }
 
-
-  
   if (
     !isAuthenticated &&
-    to.name !== "log_in" &&
+    to.name !== "log_in" && // Redirige usando el nombre de la ruta
     to.name !== "forgot_password" &&
-    to.name !== "dashboard"
+    to.name !== "register"
   ) {
-    next({ name: "log_in" });
+    next({ name: "log_in" }); // Redirige al nombre de la ruta
   } else if (to.meta.roles && user && !to.meta.roles.includes(user.rol)) {
     next({ name: "dashboard" });
   } else {
     next();
   }
 });
-
-
 
 export default router;

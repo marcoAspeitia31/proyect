@@ -223,7 +223,7 @@ export default {
     },
   },
   mounted() {
-    this.darkMode = localStorage.getItem("darkModeActive") || false;
+    this.darkMode = localStorage.getItem("darkModeActive") === "true";
     const auth = getAuth();
     onAuthStateChanged(auth, (user) => {
       if (user) {

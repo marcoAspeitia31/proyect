@@ -2,19 +2,19 @@
   <div class="container">
     <nav aria-label="breadcrumb" class="float-right">
       <ol class="breadcrumb">
-      <li class="breadcrumb-item">
-      <router-link to="/">Home</router-link>
-      </li>
-      <li class="breadcrumb-item">
-      <router-link to="#">Gestion de Sucursales</router-link>
-      </li>
-      <li class="breadcrumb-item active" aria-current="page">Direccion de Sucursales</li>
-  </ol>
-</nav>
-    <div v-if="isLoading">
-      Cargando sucursales...
-    </div>
-    
+        <li class="breadcrumb-item">
+          <router-link to="/">Home</router-link>
+        </li>
+        <li class="breadcrumb-item">
+          <router-link to="#">Gestion de Sucursales</router-link>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">
+          Direccion de Sucursales
+        </li>
+      </ol>
+    </nav>
+    <div v-if="isLoading">Cargando sucursales...</div>
+
     <div v-else class="branches-list">
       <table>
         <thead>
@@ -30,13 +30,18 @@
           <tr v-if="filteredBranches.length === 0">
             <td colspan="5">No hay sucursales disponibles.</td>
           </tr>
-          <tr v-for="(branch, index) in filteredBranches" :key="branch.id || index">
+          <tr
+            v-for="(branch, index) in filteredBranches"
+            :key="branch.id || index"
+          >
             <td>{{ branch.name }}</td>
             <td>{{ branch.division }}</td>
             <td>{{ branch.address }}</td>
             <td>{{ branch.phone }}</td>
             <td>
-              <button class="marker-button" @click="selectBranch(branch)">Ir al marcador</button>
+              <button class="marker-button" @click="selectBranch(branch)">
+                Ir al marcador
+              </button>
             </td>
           </tr>
         </tbody>
@@ -47,23 +52,23 @@
 </template>
 
 <script>
-import { ref, onValue } from 'firebase/database';
-import { db } from '@/firebase';
+import { ref, onValue } from "firebase/database";
+import { db } from "@/firebase";
 
 export default {
-  name: 'ListStores',
+  name: "ListStores",
   data() {
     return {
       branches: [],
       selectedBranch: null,
       map: null,
       marker: null,
-      isLoading: true
+      isLoading: true,
     };
   },
   computed: {
     filteredBranches() {
-      return this.branches.filter(branch => branch.status === 'activo');
+      return this.branches.filter((branch) => branch.status === "activo");
     },
   },
   methods: {
@@ -88,7 +93,7 @@ export default {
             scale: 10, // size
             fillColor: "#F00",
             fillOpacity: 0.4,
-            strokeWeight: 0.4
+            strokeWeight: 0.4,
           },
         });
       }
@@ -96,31 +101,31 @@ export default {
     initializeMap() {
       const mapOptions = {
         center: { lat: 19.4326, lng: -99.1332 }, // Centro de CDMX
-        zoom: 12
+        zoom: 12,
       };
       this.map = new google.maps.Map(this.$refs.googleMap, mapOptions);
-      this.branches.forEach(branch => {
-        if (branch.status === 'activo') {
+      this.branches.forEach((branch) => {
+        if (branch.status === "activo") {
           this.moveMarker({ lat: branch.latitude, lng: branch.longitude });
         }
       });
     },
     loadGoogleMapsScript() {
       if (!window.google) {
-        const script = document.createElement('script');
+        const script = document.createElement("script");
         script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyCQaNQ9r1XYhZjx9J3ZsLQqJ8yDK2T6gPo&callback=initMap`;
         script.async = true;
         script.defer = true;
         document.head.appendChild(script);
-        window.initMap = this.initializeMap;
+        window.initMap = () => this.initializeMap();
       } else {
         this.initializeMap();
       }
-    }
+    },
   },
   mounted() {
     this.loadGoogleMapsScript();
-    const branchesRef = ref(db, '/projects/superkomprasBackoffice/stores');
+    const branchesRef = ref(db, "/projects/superkomprasBackoffice/stores");
     onValue(branchesRef, (snapshot) => {
       const branches = [];
       snapshot.forEach((childSnapshot) => {
@@ -131,7 +136,7 @@ export default {
       this.branches = branches;
       this.isLoading = false;
     });
-  }
+  },
 };
 </script>
 
@@ -151,13 +156,14 @@ table {
   width: 100%;
   border-collapse: collapse;
 }
-th, td {
+th,
+td {
   border: 1px solid #ccc;
   padding: 8px;
   text-align: left;
 }
 .marker-button {
-  background-color: #4CAF50; /* Green background */
+  background-color: #4caf50; /* Green background */
   color: white; /* White text */
   border: none; /* No border */
   padding: 10px 20px; /* Padding around text */

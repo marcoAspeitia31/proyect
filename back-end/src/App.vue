@@ -15,22 +15,19 @@ export default {
   components: { logoutModal },
   computed: {
     user() {
-      return this.$store.state.functionalities.user;
+      return this.$store.state.functionalities?.user || null;
     },
   },
   watch: {
     $route(to, from) {
-      // Verifica si el usuario está autenticado al cambiar la ruta
       this.verifyUserAuthentication();
     },
   },
   created() {
-    // Verifica si el usuario está autenticado cuando el componente se carga
     this.verifyUserAuthentication();
   },
   methods: {
     verifyUserAuthentication() {
-      // Si no hay usuario en Vuex, intenta cargarlo desde localStorage
       if (!this.user) {
         const savedUser = localStorage.getItem("user");
         if (savedUser) {
@@ -42,9 +39,8 @@ export default {
             localStorage.removeItem("user");
           }
         } else {
-          // Si no se encuentra el usuario, redirige al login
-          if (!this.$route.path.includes("/log_in")) {
-            this.$router.push("/log_in");
+          if (this.$route.name !== "log_in") {
+            this.$router.push({ name: "log_in" });
           }
         }
       }

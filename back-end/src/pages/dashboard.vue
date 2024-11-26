@@ -80,7 +80,7 @@
 
 <script>
 import { getDatabase, ref, get } from "firebase/database";
-import { firebaseApp } from "@/firebase";
+import { app as firebaseApp } from '@/firebase';
 import { DatabaseIcon, ShoppingBagIcon, MessageCircleIcon, UserPlusIcon } from 'vue-feather-icons';
 
 const db = getDatabase(firebaseApp);
@@ -106,34 +106,23 @@ export default {
         const snapshot = await get(ref(db, "/projects/proj_tCJWQHSHNf7WoMu7r64pUJ/data/Pedidos"));
         if (snapshot.exists()) {
           const ordersData = Object.values(snapshot.val());
-
-          console.log("Datos de pedidos completos:", ordersData); // Depuración completa
-
           // Obtener el rango de fechas del mes actual
           const now = new Date();
           const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime(); // Timestamp de inicio del mes
           const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getTime(); // Timestamp de fin del mes
-
-          console.log("Rango de fechas del mes (timestamps):", startOfMonth, endOfMonth);
-
           // Filtrar pedidos dentro del rango del mes actual
           const filteredOrders = ordersData.filter(order => {
             if (!order.TimeSolicitud) {
-              console.warn("Pedido sin TimeSolicitud encontrado:", order); // Pedidos sin campo TimeSolicitud
               return false;
             }
             const orderTime = parseInt(order.TimeSolicitud); // Convertir TimeSolicitud a número
             return orderTime >= startOfMonth && orderTime <= endOfMonth;
           });
-
-          console.log("Pedidos filtrados del mes actual:", filteredOrders);
-
           // Calcular métricas
           this.totalOrders = filteredOrders.length;
           this.totalAmount = filteredOrders
             .reduce((total, order) => total + (parseFloat(order.Total) || 0), 0)
             .toFixed(2);
-
           this.totalRequestedOrders = filteredOrders.filter(order => order.Status === "Solicitud").length;
           this.totalProcessingOrders = filteredOrders.filter(order => order.Status === "En proceso").length;
         } else {

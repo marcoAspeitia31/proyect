@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build"
+    "build": "vue-cli-service build --define '__VUE_OPTIONS_API__=true' --define '__VUE_PROD_DEVTOOLS__=false' --define '__VUE_PROD_HYDRATION_MISMATCH_DETAILS__=false'"
   },
   "dependencies": {
     "@ckeditor/ckeditor5-build-classic": "^35.0.1",
@@ -19,7 +19,7 @@
     "bootstrap": "^5.2.0",
     "ckeditor5-vue3": "^1.0.2",
     "core-js": "^3.8.3",
-    "crypto-browserify": "^3.12.0",
+    "crypto-browserify": "^3.12.1",
     "datatables.net": "^2.1.8",
     "datatables.net-dt": "^2.1.8",
     "datatables.net-vue3": "^3.0.2",
