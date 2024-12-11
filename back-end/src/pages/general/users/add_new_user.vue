@@ -13,6 +13,7 @@
 <script>
 import addUser from "@/components/general/users/add_new_user/addUser.vue";
 export default {
+  title: "SK-Usuarios",
   components: { addUser },
 };
 </script>

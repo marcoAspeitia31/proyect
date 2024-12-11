@@ -11,7 +11,7 @@
         >
           <img
             class="img-fluid for-dark"
-            src="@/assets/images/logo/logo-white.png"
+            src="@/assets/images/logo/favicon1.png"
             alt=""
           />
         </router-link>
@@ -30,7 +30,7 @@
         <a href="javascript:void(0)">
           <img
             class="img-fluid main-logo"
-            src="@/assets/images/logo/logo.png"
+            src="@/assets/images/logo/favicon1.png"
             alt="logo"
           />
         </a>
@@ -153,4 +153,8 @@ export default {
 .hideSubmenu {
   display: none;
 }
+.blue-text {
+  color: blue;
+}
+
 </style>

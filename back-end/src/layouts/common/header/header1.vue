@@ -6,7 +6,7 @@
           <a href="javascript:void(0)">
             <img
               class="img-fluid main-logo"
-              src="@/assets/images/logo/logo.png"
+              src="@/assets/images/logo/favicon1.png"
               alt="logo"
             />
             <img
@@ -33,7 +33,6 @@
       <div class="form-group w-100">
     <div class="Typeahead Typeahead--twitterUsers">
       <div class="d-flex align-items-center" style="position: relative;">
-        <!-- Input del buscador -->
         <input
           class="demo-input Typeahead-input form-control-plaintext w-100"
           type="text"
@@ -46,7 +45,7 @@
           type="x"
           class="close-search"
           @click.prevent="toggleSearchbar"
-          style="cursor: pointer; margin-left: 10px;"
+          style="cursor: pointer; margin-left: 5px;"
         ></vueFeather>
 
         <div class="spinner-border Typeahead-spinner" role="status" style="margin-left: 10px;">
@@ -81,17 +80,6 @@
               <span class="lnr lnr-moon"></span>
             </div>
           </li>
-
-          <li class="onhover-dropdown">
-            <span class="lnr lnr-bubble"></span>
-            <ul class="chat-dropdown onhover-show-div">
-              <li>
-                <span class="lnr lnr-bubble"></span>
-                <h6 class="f-18 mb-0">Cuadro de mensaje</h6>
-              </li>
-            </ul>
-          </li>
-
           <li class="maximize">
             <a
               class="text-dark"

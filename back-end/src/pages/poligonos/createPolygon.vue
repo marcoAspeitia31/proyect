@@ -50,6 +50,7 @@ import { db } from "@/firebase";
 import Swal from "sweetalert2";
 
 export default {
+  title: "SK-Poligonos",
   data() {
     return {
       activeBranches: [],

@@ -40,7 +40,23 @@
       </div>
     </div>
 
-    <button @click="exportToExcel">Exportar a Excel</button>
+    <button
+      @click="exportToExcel"
+      style="
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        padding: 10px 16px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 4px 2px;
+        cursor: pointer;
+      "
+    >
+      Exportar a Excel
+    </button>
 
     <table class="orders-table">
       <thead>
@@ -138,7 +154,6 @@ export default {
     const perPage = 25; // Elementos por página
     const { downloadPDF } = usePdfDownloader();
 
-    // Función para establecer la página actual
     function setCurrentPage(page) {
       currentPage.value = page;
     }
@@ -147,20 +162,20 @@ export default {
       const ws_data = paginatedOrders.value.map((order) => [
         order.folio,
         order.sucursal,
-        order.Division, // División, asumiendo que es igual a la sucursal en este ejemplo
-        order.cliente, // Asumiendo que cliente es un objeto con el nombre
-        order.id, // Asumiendo que cliente es un objeto con el ID
+        order.Division,
+        order.cliente,
+        order.id,
         order.direccion,
         formatTimestamp(order.fechaHoraOriginal),
         formatTimestamp(order.TimeEnProceso),
         formatTimestamp(order.TimeEnRuta),
         formatTimestamp(order.TimeConcluido),
-        order.Pago || "", // Ajusta según tu estructura de datos
-        order.subtotal || "", // Ajusta según tu estructura de datos
-        order.Envio || "", // Ajusta según tu estructura de datos
+        order.Pago || "",
+        order.subtotal || "",
+        order.Envio || "",
         order.Total || "",
-        order.TarjetaClub || "", // Ajusta según tu estructura de datos
-        order.recogerTienda || "", // Ajusta según tu estructura de datos
+        order.TarjetaClub || "",
+        order.recogerTienda || "",
         order.estatus,
       ]);
 
@@ -231,90 +246,89 @@ export default {
     function fetchOrders() {
       clearTimeout(debounceTimeout);
       debounceTimeout = setTimeout(() => {
-      const db = getDatabase();
-      const ordersRef = dbRef(
-        db,
-        "/projects/proj_tCJWQHSHNf7WoMu7r64pUJ/data/Pedidos"
-      );
-      onValue(ordersRef, (snapshot) => {
-        const ordersData = snapshot.val();
-        const tenDaysAgo = new Date();
-        tenDaysAgo.setDate(tenDaysAgo.getDate() - 10);
-        orders.value = Object.keys(ordersData)
-          .map((key) => {
-            const order = ordersData[key];
-            const orderDate = new Date(order.TimeSolicitud);
-            return {
-              orderUid: key,
-              folio: order.Folio,
-              sucursal: order.sucursal,
-              Division: order.Division,
-              cliente: order["Cliente name"],
-              id: order["Cliente id"],
-              direccion: order.Direccion,
-              fechaHoraOriginal: order.TimeSolicitud,
-              fechaHora: formatTimestamp(order.TimeSolicitud),
-              total: order.Total,
-              estatus: order.Status || "Sin estatus",
-              TimeEnProceso: order.TimeEnProceso || "",
-              TimeEnRuta: order.TimeEnRuta || "",
-              TimeConcluido: order.TimeConcluido || "",
-              TimeCancelado: order.TimeCancelado,
-              Pago: order.Pago || "",
-              subtotal: order.Subtotal || "",
-              envio: order.Envio || "",
-              TarjetaClub: order.TarjetaClub || "",
-              recogerTienda: order.recogerTienda || "",
-              articles: order.Productos
-                ? Object.keys(order.Productos).map((productKey) => {
-                    const product = order.Productos[productKey];
-                    return {
-                      id: productKey,
-                      categoria: product.CATEGORIAAPP || "N/A",
-                      cantidad: product.Cantidad || "N/A",
-                      cantidadGramos: product.CantidadGRPZ || "N/A",
-                      codigo: product.Codigo || "N/A",
-                      imagen: product.Imagen || "",
-                      nombre: product.Nombre || "N/A",
-                      total: product.Total || 0,
-                      unidad: product.Unidad || "N/A",
-                      comentarios: product.Comentarios || "",
-                    };
-                  })
-                : [],
-              paymentDetails: {
-                subtotal: order.Subtotal || 0,
-                envio: order.Envio || 0,
+        const db = getDatabase();
+        const ordersRef = dbRef(
+          db,
+          "/projects/proj_tCJWQHSHNf7WoMu7r64pUJ/data/Pedidos"
+        );
+        onValue(ordersRef, (snapshot) => {
+          const ordersData = snapshot.val();
+          const tenDaysAgo = new Date();
+          tenDaysAgo.setDate(tenDaysAgo.getDate() - 10);
+          orders.value = Object.keys(ordersData)
+            .map((key) => {
+              const order = ordersData[key];
+              const orderDate = new Date(order.TimeSolicitud);
+              return {
+                orderUid: key,
+                folio: order.Folio,
+                sucursal: order.sucursal,
+                Division: order.Division,
+                cliente: order["Cliente name"],
+                id: order["Cliente id"],
+                direccion: order.Direccion,
+                fechaHoraOriginal: order.TimeSolicitud,
+                fechaHora: formatTimestamp(order.TimeSolicitud),
+                total: order.Total,
+                estatus: order.Status || "Sin estatus",
+                TimeEnProceso: order.TimeEnProceso || "",
+                TimeEnRuta: order.TimeEnRuta || "",
+                TimeConcluido: order.TimeConcluido || "",
+                TimeCancelado: order.TimeCancelado,
+                Pago: order.Pago || "",
+                subtotal: order.Subtotal || "",
+                envio: order.Envio || "",
+                TarjetaClub: order.TarjetaClub || "",
+                recogerTienda: order.recogerTienda || "",
+                articles: order.Productos
+                  ? Object.keys(order.Productos).map((productKey) => {
+                      const product = order.Productos[productKey];
+                      return {
+                        id: productKey,
+                        categoria: product.CATEGORIAAPP || "N/A",
+                        cantidad: product.Cantidad || "N/A",
+                        cantidadGramos: product.CantidadGRPZ || "N/A",
+                        codigo: product.Codigo || "N/A",
+                        imagen: product.Imagen || "",
+                        nombre: product.Nombre || "N/A",
+                        total: product.Total || 0,
+                        unidad: product.Unidad || "N/A",
+                        comentarios: product.Comentarios || "",
+                      };
+                    })
+                  : [],
+                paymentDetails: {
+                  subtotal: order.Subtotal || 0,
+                  envio: order.Envio || 0,
+                  total: order.Total || 0,
+                  metodo: order.Pago || "No especificado",
+                  icono: order.IconoMetodoPago || "",
+                },
                 total: order.Total || 0,
-                metodo: order.Pago || "No especificado",
-                icono: order.IconoMetodoPago || "",
-              },
-              total: order.Total || 0,
-              isRecent: orderDate >= tenDaysAgo,
-            };
-          })
-          .filter((order) => order.isRecent)
-          .sort((a, b) => b.fechaHoraOriginal - a.fechaHoraOriginal);
-        tiendas.value = [
-          ...new Set(orders.value.map((order) => order.sucursal)),
-        ].map((name) => ({ name }));
+                isRecent: orderDate >= tenDaysAgo,
+              };
+            })
+            .filter((order) => order.isRecent)
+            .sort((a, b) => b.fechaHoraOriginal - a.fechaHoraOriginal);
+          tiendas.value = [
+            ...new Set(orders.value.map((order) => order.sucursal)),
+          ].map((name) => ({ name }));
 
-        // Filtramos los estatus únicos
-        uniqueStatuses.value = [
-          ...new Set(orders.value.map((order) => order.estatus)),
-        ];
+          // Filtramos los estatus únicos
+          uniqueStatuses.value = [
+            ...new Set(orders.value.map((order) => order.estatus)),
+          ];
 
-        updateSummary();
-      });
-      onValue(ordersRef, (snapshot) => {
-      // Procesar los datos
-    });
-  }, 300);
-  }
+          updateSummary();
+        });
+        onValue(ordersRef, (snapshot) => {
+          // Procesar los datos
+        });
+      }, 300);
+    }
 
     function viewOrderDetail(orderUid) {
       if (!orderUid) {
-        console.error("Order UID no válido");
         return;
       }
       router.push({ name: "order_detail", params: { orderUid } });
@@ -416,7 +430,7 @@ export default {
         case "cancelado":
           return "cancelado";
         default:
-          return "gray"; // Retornar gris como color predeterminado si no hay coincidencia
+          return "gray"; 
       }
     },
   },

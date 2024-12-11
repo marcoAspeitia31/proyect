@@ -86,6 +86,7 @@ import { DatabaseIcon, ShoppingBagIcon, MessageCircleIcon, UserPlusIcon } from '
 const db = getDatabase(firebaseApp);
 
 export default {
+  title: "SK-Inicio",
   components: {
     DatabaseIcon,
     ShoppingBagIcon,
@@ -126,10 +127,9 @@ export default {
           this.totalRequestedOrders = filteredOrders.filter(order => order.Status === "Solicitud").length;
           this.totalProcessingOrders = filteredOrders.filter(order => order.Status === "En proceso").length;
         } else {
-          console.warn("No se encontraron datos en la ruta especificada.");
         }
       } catch (error) {
-        console.error("Error al obtener datos de Firebase:", error);
+      
       }
     },
   },

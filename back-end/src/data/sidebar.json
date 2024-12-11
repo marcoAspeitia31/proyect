@@ -26,21 +26,21 @@
           "path": "/user/add-new-user",
           "type": "link",
           "icon": "user-plus",
-          "rol": ["Administrador", "Sistemas","Sucursal"]
+          "rol": ["Administrador", "Sistemas", "Sucursal"]
         },
         {
           "name": "Total de Usuarios",
           "path": "/user/all-users",
           "type": "link",
           "icon": "users",
-          "rol": ["Administrador", "Sistemas","Sucursal"]
+          "rol": ["Administrador", "Sistemas", "Sucursal"]
         },
         {
           "name": "Ver Usuarios",
           "path": "/user/view-user",
           "type": "link",
           "icon": "eye",
-          "rol": ["Administrador", "Sistemas","Sucursal"]
+          "rol": ["Administrador", "Sistemas", "Sucursal"]
         },
         {
           "name": "Añadir Usuarios",
@@ -116,6 +116,13 @@
       "rol": ["Administrador", "Sistemas", "Sucursal"],
       "children": [
         {
+          "name": "Crear Pedido",
+          "path": "/orders/order-shop",
+          "type": "link",
+          "icon": "list",
+          "rol": ["Administrador", "Sistemas", "Sucursal"]
+        },
+        {
           "name": "Lista de Pedidos",
           "path": "/orders/order-list",
           "type": "link",
@@ -123,10 +130,10 @@
           "rol": ["Administrador", "Sistemas", "Sucursal"]
         },
         {
-          "name": "Detalles del Pedido",
-          "path": "/orders/order-detail/:orderUid",
+          "name": "Directorio de clientes",
+          "path": "/orders/client-directory",
           "type": "link",
-          "icon": "file-text",
+          "icon": "list",
           "rol": ["Administrador", "Sistemas", "Sucursal"]
         }
       ]

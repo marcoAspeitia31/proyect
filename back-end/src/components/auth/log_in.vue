@@ -5,9 +5,15 @@
         <div class="login-section">
           <div class="materialContainer">
             <div class="box">
-              <div class="login-title">
-                <h2>Iniciar Sesion</h2>
+              <!-- Logo -->
+              <div class="login-logo">
+                <img :src="logoPath" alt="Super Kompras Logo" />
               </div>
+              <!-- Título -->
+              <div class="login-title">
+                <h2>Iniciar Sesión</h2>
+              </div>
+              <!-- Input de Email -->
               <div class="input">
                 <label
                   for="username"
@@ -30,7 +36,7 @@
                   :style="{ width: selected['username'] ? '100%' : '0%' }"
                 ></span>
               </div>
-
+              <!-- Input de Contraseña -->
               <div class="input">
                 <label
                   for="password"
@@ -53,14 +59,14 @@
                   :style="{ width: selected['password'] ? '100%' : '0%' }"
                 ></span>
               </div>
-
+              <!-- Recuperar Contraseña -->
               <a
                 @click.prevent="$router.push({ name: 'forgot_password' })"
                 class="pass-forgot"
               >
                 ¿Recuperar Contraseña?
               </a>
-
+              <!-- Botón de Login -->
               <div class="button login">
                 <button @click.prevent="handleLogin" type="submit">
                   <span>Ingresar</span>
@@ -77,18 +83,20 @@
 
 <script>
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-import { db, ref, get } from "@/firebase"; // Importar Firebase Realtime Database
-import Swal from "sweetalert2"; // Importa SweetAlert2
+import { db, ref, get } from "@/firebase";
+import Swal from "sweetalert2";
+import logo from "@/assets/images/logo/favicon1.png"; // Importar el logo
 
 export default {
   title: "SK Iniciar Sesión",
   data() {
     return {
+      logoPath: logo, // Ruta del logo
       values: {
-        username: "", // Email del usuario
-        password: "", // Contraseña del usuario
+        username: "",
+        password: "",
       },
-      selected: { username: false, password: false }, // Para manejar la selección de los inputs
+      selected: { username: false, password: false },
     };
   },
   methods: {
@@ -116,15 +124,6 @@ export default {
                   permissions: userData.permissions,
                 },
               });
-              localStorage.setItem(
-                "user",
-                JSON.stringify({
-                  uid: user.uid,
-                  email: user.email,
-                  rol: userData.rol,
-                  permissions: userData.permissions,
-                })
-              );
               Swal.fire({
                 icon: "success",
                 title: "¡Inicio de sesión exitoso!",
@@ -153,29 +152,33 @@ export default {
     select(field) {
       this.selected[field] = true;
     },
-    checkAuthentication() {
-      const storedUser = localStorage.getItem("user");
-      if (storedUser) {
-        const user = JSON.parse(storedUser);
-        this.$store.dispatch("functionalities/setUser", user);
-        // Redirige al usuario a la página principal si ya está autenticado
-        this.$router.push("/");
-      }
-    },
   },
   mounted() {
-    console.log("El componente de inicio de sesión se montó correctamente");
     this.selected.username = this.values.username.length !== 0;
     this.selected.password = this.values.password.length !== 0;
-
-    // Verificar si el usuario ya está logueado
-    this.checkAuthentication();
   },
 };
 </script>
 
 <style scoped>
-/* Estilos personalizados */
+/* Estilos adaptados al logo */
+.login-section {
+  color: #ffffff; /* Blanco */
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-logo {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.login-logo img {
+  max-width: 150px;
+}
+
 .input {
   margin-bottom: 20px;
   position: relative;
@@ -185,15 +188,16 @@ input,
 select {
   width: 100%;
   padding: 10px;
-  border: 1px solid #ccc;
+  border: 1px solid #007bff; /* Azul claro */
   border-radius: 5px;
   font-size: 16px;
   transition: border-color 0.3s;
+  color: #001f3f; /* Azul oscuro */
 }
 
 label {
   font-size: 16px;
-  color: #333;
+  color: #ffffff; /* Blanco */
   display: block;
   margin-bottom: 5px;
 }
@@ -201,7 +205,7 @@ label {
 button {
   padding: 10px 20px;
   font-size: 16px;
-  background-color: #4caf50;
+  background-color: #ff3366; /* Rojo */
   color: white;
   border: none;
   border-radius: 5px;
@@ -209,13 +213,13 @@ button {
 }
 
 button:hover {
-  background-color: #45a049;
+  background-color: #cc0033; /* Rojo oscuro */
 }
 
 .pass-forgot {
   display: block;
   margin-top: 10px;
-  color: #007bff;
+  color: #ffcc00; /* Amarillo */
   cursor: pointer;
 }
 

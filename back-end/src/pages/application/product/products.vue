@@ -3,583 +3,70 @@
     <div class="col-sm-12">
       <div class="card">
         <div class="card-body">
-          <div>
-            <div class="table-responsive table-desi table-product">
-              <table class="table table-1d all-package">
-                <thead>
-                  <tr>
-                    <th>Product Image</th>
-                    <th>Product Name</th>
-                    <th>Category</th>
-                    <th>Current Qty</th>
-                    <th>Price</th>
-                    <th>Published</th>
-                    <th>Option</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  <tr>
-                    <td>
-                      <img
-                        src="@/assets/images/profile/4.jpg"
-                        class="img-fluid"
-                        alt=""
-                      />
-                    </td>
-
-                    <td>
-                      <a href="javascript:void(0)">Outwear & Coats</a>
-                    </td>
-
-                    <td>
-                      <a href="javascript:void(0)">Fashion</a>
-                    </td>
-
-                    <td>2</td>
-
-                    <td class="td-price">$95.97</td>
-
-                    <td class="td-cross">
-                      <span class="lnr lnr-cross-circle"></span>
-                    </td>
-
-                    <td>
-                      <ul>
-                        <li>
-                          <router-link
-                            to="/order_detail"
-                            href="javascript:void(0)"
-                          >
-                            <span class="lnr lnr-eye"></span>
-                          </router-link>
-                        </li>
-
-                        <li>
-                          <a href="javascript:void(0)">
-                            <span class="lnr lnr-pencil"></span>
-                          </a>
-                        </li>
-
-                        <li>
-                          <a href="javascript:void(0)">
-                            <i class="far fa-trash-alt theme-color"></i>
-                          </a>
-                        </li>
-                      </ul>
-                    </td>
-                  </tr>
-
-                  <tr>
-                    <td>
-                      <img
-                        src="@/assets/images/profile/2.jpg"
-                        class="img-fluid"
-                        alt=""
-                      />
-                    </td>
-
-                    <td>
-                      <a href="javascript:void(0)">Outwear & Coats</a>
-                    </td>
-
-                    <td>
-                      <a href="javascript:void(0)">Fashion</a>
-                    </td>
-
-                    <td>2</td>
-
-                    <td class="td-price">$95.97</td>
-
-                    <td class="td-check">
-                      <span class="lnr lnr-checkmark-circle"></span>
-                    </td>
-
-                    <td>
-                      <ul>
-                        <li>
-                          <a href="javascript:void(0)">
-                            <span class="lnr lnr-eye"></span>
-                          </a>
-                        </li>
-
-                        <li>
-                          <a href="javascript:void(0)">
-                            <span class="lnr lnr-pencil"></span>
-                          </a>
-                        </li>
-
-                        <li>
-                          <a href="javascript:void(0)">
-                            <i class="far fa-trash-alt theme-color"></i>
-                          </a>
-                        </li>
-                      </ul>
-                    </td>
-                  </tr>
-
-                  <tr>
-                    <td>
-                      <img
-                        src="@/assets/images/profile/3.jpg"
-                        class="img-fluid"
-                        alt=""
-                      />
-                    </td>
-
-                    <td>
-                      <a href="javascript:void(0)">Outwear & Coats</a>
-                    </td>
-
-                    <td>
-                      <a href="javascript:void(0)">Fashion</a>
-                    </td>
-
-                    <td>1</td>
-
-                    <td class="td-price">$86.35</td>
-
-                    <td class="td-check">
-                      <span class="lnr lnr-checkmark-circle"></span>
-                    </td>
-
-                    <td>
-                      <ul>
-                        <li>
-                          <a href="javascript:void(0)">
-                            <span class="lnr lnr-eye"></span>
-                          </a>
-                        </li>
-
-                        <li>
-                          <a href="javascript:void(0)">
-                            <span class="lnr lnr-pencil"></span>
-                          </a>
-                        </li>
-
-                        <li>
-                          <a href="javascript:void(0)">
-                            <span class="lnr lnr-trash"></span>
-                          </a>
-                        </li>
-                      </ul>
-                    </td>
-                  </tr>
-
-                  <tr>
-                    <td>
-                      <img
-                        src="@/assets/images/profile/4.jpg"
-                        class="img-fluid"
-                        alt=""
-                      />
-                    </td>
-
-                    <td>
-                      <a href="javascript:void(0)">Outwear & Coats</a>
-                    </td>
-
-                    <td>
-                      <a href="javascript:void(0)">Fashion</a>
-                    </td>
-
-                    <td>2</td>
-
-                    <td class="td-price">$95.97</td>
-
-                    <td class="td-cross">
-                      <span class="lnr lnr-cross-circle"></span>
-                    </td>
-
-                    <td>
-                      <ul>
-                        <li>
-                          <a href="javascript:void(0)">
-                            <span class="lnr lnr-eye"></span>
-                          </a>
-                        </li>
-
-                        <li>
-                          <a href="javascript:void(0)">
-                            <span class="lnr lnr-pencil"></span>
-                          </a>
-                        </li>
-
-                        <li>
-                          <a href="javascript:void(0)">
-                            <i class="far fa-trash-alt theme-color"></i>
-                          </a>
-                        </li>
-                      </ul>
-                    </td>
-                  </tr>
-
-                  <tr>
-                    <td>
-                      <img
-                        src="@/assets/images/profile/1.jpg"
-                        class="img-fluid"
-                        alt=""
-                      />
-                    </td>
-
-                    <td>
-                      <a href="javascript:void(0)">Outwear & Coats</a>
-                    </td>
-
-                    <td>
-                      <a href="javascript:void(0)">Fashion</a>
-                    </td>
-
-                    <td>1</td>
-
-                    <td class="td-price">$95.97</td>
-
-                    <td class="td-cross">
-                      <span class="lnr lnr-cross-circle"></span>
-                    </td>
-
-                    <td>
-                      <ul>
-                        <li>
-                          <a href="javascript:void(0)">
-                            <span class="lnr lnr-eye"></span>
-                          </a>
-                        </li>
-
-                        <li>
-                          <a href="javascript:void(0)">
-                            <span class="lnr lnr-pencil"></span>
-                          </a>
-                        </li>
-
-                        <li>
-                          <a href="javascript:void(0)">
-                            <i class="far fa-trash-alt theme-color"></i>
-                          </a>
-                        </li>
-                      </ul>
-                    </td>
-                  </tr>
-
-                  <tr>
-                    <td>
-                      <img
-                        src="@/assets/images/profile/2.jpg"
-                        class="img-fluid"
-                        alt=""
-                      />
-                    </td>
-
-                    <td>
-                      <a href="javascript:void(0)">Outwear & Coats</a>
-                    </td>
-
-                    <td>
-                      <a href="javascript:void(0)">Fashion</a>
-                    </td>
-
-                    <td>1</td>
-
-                    <td class="td-price">$95.97</td>
-
-                    <td class="td-check">
-                      <span class="lnr lnr-checkmark-circle"></span>
-                    </td>
-
-                    <td>
-                      <ul>
-                        <li>
-                          <a href="javascript:void(0)">
-                            <span class="lnr lnr-eye"></span>
-                          </a>
-                        </li>
-
-                        <li>
-                          <a href="javascript:void(0)">
-                            <span class="lnr lnr-pencil"></span>
-                          </a>
-                        </li>
-
-                        <li>
-                          <a href="javascript:void(0)">
-                            <i class="far fa-trash-alt theme-color"></i>
-                          </a>
-                        </li>
-                      </ul>
-                    </td>
-                  </tr>
-
-                  <tr>
-                    <td>
-                      <img
-                        src="@/assets/images/profile/3.jpg"
-                        class="img-fluid"
-                        alt=""
-                      />
-                    </td>
-
-                    <td>
-                      <a href="javascript:void(0)">Outwear & Coats</a>
-                    </td>
-
-                    <td>
-                      <a href="javascript:void(0)">Fashion</a>
-                    </td>
-
-                    <td>2</td>
-
-                    <td class="td-price">$121.43</td>
-
-                    <td class="td-check">
-                      <span class="lnr lnr-checkmark-circle"></span>
-                    </td>
-
-                    <td>
-                      <ul>
-                        <li>
-                          <a href="javascript:void(0)">
-                            <span class="lnr lnr-eye"></span>
-                          </a>
-                        </li>
-
-                        <li>
-                          <a href="javascript:void(0)">
-                            <span class="lnr lnr-pencil"></span>
-                          </a>
-                        </li>
-
-                        <li>
-                          <a href="javascript:void(0)">
-                            <i class="far fa-trash-alt theme-color"></i>
-                          </a>
-                        </li>
-                      </ul>
-                    </td>
-                  </tr>
-
-                  <tr>
-                    <td>
-                      <img
-                        src="@/assets/images/profile/4.jpg"
-                        class="img-fluid"
-                        alt=""
-                      />
-                    </td>
-
-                    <td>
-                      <a href="javascript:void(0)">Outwear & Coats</a>
-                    </td>
-
-                    <td>
-                      <a href="javascript:void(0)">Fashion</a>
-                    </td>
-
-                    <td>3</td>
-
-                    <td class="td-price">$95.97</td>
-
-                    <td class="td-check">
-                      <span class="lnr lnr-checkmark-circle"></span>
-                    </td>
-
-                    <td>
-                      <ul>
-                        <li>
-                          <a href="javascript:void(0)">
-                            <span class="lnr lnr-eye"></span>
-                          </a>
-                        </li>
-
-                        <li>
-                          <a href="javascript:void(0)">
-                            <span class="lnr lnr-pencil"></span>
-                          </a>
-                        </li>
-
-                        <li>
-                          <a href="javascript:void(0)">
-                            <i class="far fa-trash-alt theme-color"></i>
-                          </a>
-                        </li>
-                      </ul>
-                    </td>
-                  </tr>
-
-                  <tr>
-                    <td>
-                      <img
-                        src="@/assets/images/profile/2.jpg"
-                        class="img-fluid"
-                        alt=""
-                      />
-                    </td>
-
-                    <td>
-                      <a href="javascript:void(0)">Outwear & Coats</a>
-                    </td>
-
-                    <td>
-                      <a href="javascript:void(0)">Fashion</a>
-                    </td>
-
-                    <td>2</td>
-
-                    <td class="td-price">$95.97</td>
-
-                    <td class="td-cross">
-                      <span class="lnr lnr-cross-circle"></span>
-                    </td>
-
-                    <td>
-                      <ul>
-                        <li>
-                          <a href="javascript:void(0)">
-                            <span class="lnr lnr-eye"></span>
-                          </a>
-                        </li>
-
-                        <li>
-                          <a href="javascript:void(0)">
-                            <span class="lnr lnr-pencil"></span>
-                          </a>
-                        </li>
-
-                        <li>
-                          <a href="javascript:void(0)">
-                            <i class="far fa-trash-alt theme-color"></i>
-                          </a>
-                        </li>
-                      </ul>
-                    </td>
-                  </tr>
-
-                  <tr>
-                    <td>
-                      <img
-                        src="@/assets/images/profile/2.jpg"
-                        class="img-fluid"
-                        alt=""
-                      />
-                    </td>
-
-                    <td>
-                      <a href="javascript:void(0)">Outwear & Coats</a>
-                    </td>
-
-                    <td>
-                      <a href="javascript:void(0)">Fashion</a>
-                    </td>
-
-                    <td>1</td>
-
-                    <td class="td-price">$95.97</td>
-
-                    <td class="td-cross">
-                      <span class="lnr lnr-cross-circle"></span>
-                    </td>
-
-                    <td>
-                      <ul>
-                        <li>
-                          <a href="javascript:void(0)">
-                            <span class="lnr lnr-eye"></span>
-                          </a>
-                        </li>
-
-                        <li>
-                          <a href="javascript:void(0)">
-                            <span class="lnr lnr-pencil"></span>
-                          </a>
-                        </li>
-
-                        <li>
-                          <a href="javascript:void(0)">
-                            <i class="far fa-trash-alt theme-color"></i>
-                          </a>
-                        </li>
-                      </ul>
-                    </td>
-                  </tr>
-
-                  <tr>
-                    <td>
-                      <img
-                        src="@/assets/images/profile/3.jpg"
-                        class="img-fluid"
-                        alt=""
-                      />
-                    </td>
-
-                    <td>
-                      <a href="javascript:void(0)">Outwear & Coats</a>
-                    </td>
-
-                    <td>
-                      <a href="javascript:void(0)">Fashion</a>
-                    </td>
-
-                    <td>1</td>
-
-                    <td class="td-price">$86.35</td>
-
-                    <td class="td-cross">
-                      <span class="lnr lnr-cross-circle"></span>
-                    </td>
-
-                    <td>
-                      <ul>
-                        <li>
-                          <a href="javascript:void(0)">
-                            <span class="lnr lnr-eye"></span>
-                          </a>
-                        </li>
-
-                        <li>
-                          <a href="javascript:void(0)">
-                            <span class="lnr lnr-pencil"></span>
-                          </a>
-                        </li>
-
-                        <li>
-                          <a href="javascript:void(0)">
-                            <i class="far fa-trash-alt theme-color"></i>
-                          </a>
-                        </li>
-                      </ul>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+          <div class="table-responsive table-desi table-product">
+            <table class="table table-1d all-package">
+              <thead>
+                <tr>
+                  <th>Imagen del Producto</th>
+                  <th>Nombre del Producto</th>
+                  <th>Categoría</th>
+                  <th>Cantidad Actual</th>
+                  <th>Precio</th>
+                  <th>Opciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="product in products" :key="product.id">
+                  <td>
+                    <img :src="product.image" class="img-fluid" :alt="product.name" />
+                  </td>
+                  <td>
+                    <a href="javascript:void(0)">{{ product.name }}</a>
+                  </td>
+                  <td>
+                    <a href="javascript:void(0)">{{ product.category }}</a>
+                  </td>
+                  <td>{{ product.quantity }}</td>
+                  <td class="td-price">${{ product.price }}</td>
+                  <td class="td-check">
+                    <span :class="{'lnr lnr-checkmark-circle': product.published, 'lnr lnr-cross-circle': !product.published}"></span>
+                  </td>
+                  <td>
+                    <ul>
+                      <li>
+                        <router-link to="/order_detail">
+                          <span class="lnr lnr-eye"></span>
+                        </router-link>
+                      </li>
+                      <li>
+                        <a href="javascript:void(0)">
+                          <span class="lnr lnr-pencil"></span>
+                        </a>
+                      </li>
+                      <li>
+                        <a href="javascript:void(0)">
+                          <i class="far fa-trash-alt theme-color"></i>
+                        </a>
+                      </li>
+                    </ul>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
 
         <div class="pagination-box">
           <nav class="ms-auto me-auto" aria-label="...">
             <ul class="pagination pagination-primary">
-              <li class="page-item disabled">
-                <a class="page-link" href="javascript:void(0)" tabindex="-1"
-                  >Previous</a
-                >
+              <li class="page-item" :class="{'disabled': currentPage === 1}">
+                <a class="page-link" href="javascript:void(0)" @click="changePage(currentPage - 1)">Anterior</a>
               </li>
-
-              <li class="page-item active">
-                <a class="page-link" href="javascript:void(0)">1</a>
+              <li v-for="page in totalPages" :class="{'active': currentPage === page}" class="page-item">
+                <a class="page-link" href="javascript:void(0)" @click="changePage(page)">{{ page }}</a>
               </li>
-
-              <li class="page-item">
-                <a class="page-link" href="javascript:void(0)"
-                  >2 <span class="sr-only">(current)</span>
-                </a>
-              </li>
-
-              <li class="page-item">
-                <a class="page-link" href="javascript:void(0)">3</a>
-              </li>
-
-              <li class="page-item">
-                <a class="page-link" href="javascript:void(0)">Next</a>
+              <li class="page-item" :class="{'disabled': currentPage === totalPages}">
+                <a class="page-link" href="javascript:void(0)" @click="changePage(currentPage + 1)">Siguiente</a>
               </li>
             </ul>
           </nav>
@@ -591,7 +78,7 @@
 
 <script>
 export default {
-  title: "Voxo-Products",
+  title: "SK-Productos",
 };
 </script>
 

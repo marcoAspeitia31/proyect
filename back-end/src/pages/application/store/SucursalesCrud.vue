@@ -58,6 +58,7 @@ import Swal from 'sweetalert2';
 
 
 export default {
+  title: "SK-Sucursales",
   name: 'BranchForm',
   data() {
     return {
