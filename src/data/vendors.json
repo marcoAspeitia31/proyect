@@ -1,0 +1,13 @@
+{
+  "proyects": {
+    "users": {
+      "": {
+        "name": "",
+        "email": "",
+        "password": "",
+        "status": "",
+        "defaultStore":""
+      }
+    }
+  }
+}

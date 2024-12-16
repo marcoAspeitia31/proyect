@@ -1,0 +1,12 @@
+{
+  "project": {
+    "users": {
+      "": {
+        "name": "",
+        "email": "",
+        "password": "",
+        "status": ""
+      }
+    }
+  }
+}
