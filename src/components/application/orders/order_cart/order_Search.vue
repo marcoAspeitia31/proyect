@@ -5,7 +5,8 @@
       <input
         type="text"
         v-model="query"
-        @input="resetAndSearch"
+        @keyup.enter="resetAndSearch"
+        @input="debouncedSearch"
         placeholder="Buscar productos..."
         class="search-input"
       />
@@ -104,6 +105,7 @@
 </template>
 
 <script>
+import debounce from "lodash/debounce";
 import { apiBuscarProducto } from "@/boot/axios";
 
 export default {
@@ -131,6 +133,7 @@ export default {
     },
   },
   methods: {
+    // Método para obtener la división
     getDivisionSuffix() {
       const customerOperCarts =
         JSON.parse(localStorage.getItem("customerOperCarts")) || {};
@@ -142,6 +145,8 @@ export default {
         this.divisionSuffix = "";
       }
     },
+
+    // Método para realizar la búsqueda de productos
     async searchProducts() {
       const customerOperCarts =
         JSON.parse(localStorage.getItem("customerOperCarts")) || {};
@@ -179,14 +184,20 @@ export default {
         this.filteredProducts = [];
       }
     },
+
+    // Método para obtener el precio dinámico
     getDynamicPrice(product) {
       const priceKey = `PRECIO_${this.divisionSuffix}`;
       return product[priceKey] || "N/A";
     },
+
+    // Método para reiniciar y realizar la búsqueda
     resetAndSearch() {
       this.currentPage = 1;
       this.searchProducts();
     },
+
+    // Métodos para cambiar de página
     nextPage() {
       if (this.currentPage < this.totalPages) {
         this.currentPage++;
@@ -199,10 +210,14 @@ export default {
         this.searchProducts();
       }
     },
+
+    // Métodos para agregar al carrito
     addToCart(product) {
       this.cartItems.push(product);
       console.log("Producto añadido al carrito:", product);
     },
+
+    // Métodos para manejar el modal
     openModal(product) {
       this.selectedProduct = product;
       this.quantity = 1;
@@ -211,15 +226,23 @@ export default {
     closeModal() {
       this.showModal = false;
     },
+
+    // Métodos para manejar la cantidad
     incrementQty() {
       this.quantity++;
     },
     decrementQty() {
       if (this.quantity > 1) this.quantity--;
     },
+
+    // Método debounced para la búsqueda
+    debouncedSearch: debounce(function () {
+      this.resetAndSearch();
+    }, 500),
   },
 };
 </script>
+
 
 <style>
 /* Panel de búsqueda */
