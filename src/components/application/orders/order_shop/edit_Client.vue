@@ -146,7 +146,7 @@ export default {
         this.marker = new google.maps.Marker({
           map: this.map,
           position: position,
-          draggable: false, // Evitar que el marcador se arrastre
+          draggable: false, 
         });
       } else {
         this.marker.setPosition(position);

@@ -7,8 +7,8 @@
       <h3 class="branch-name">Sucursal seleccionada</h3>
       <h3 class="branch-division">{{ selectedStore.division }}</h3>
       <h4 class="branch-value">{{ selectedStore.name }}</h4>
-      <h4 class="branch-address">Direccion: {{ selectedStore.address }}</h4>
-      <h4 class="branch-phone">Telefono: {{ selectedStore.phone }}</h4>
+      <h4 class="branch-address">Dirección: {{ selectedStore.address }}</h4>
+      <h4 class="branch-phone">Teléfono: {{ selectedStore.phone }}</h4>
     </div>
 
     <!-- Información del usuario -->
@@ -21,7 +21,9 @@
     <!-- Acciones del usuario -->
     <div class="actions">
       <button class="new-order" @click="goToNewOrder">Nuevo pedido</button>
-      <button class="continue-order">Continuar Pedido</button>
+      <button class="continue-order" @click="continueOrder">
+        Continuar Pedido
+      </button>
     </div>
 
     <!-- Modal para selección de sucursal -->
@@ -38,7 +40,7 @@
             <h3 class="store-division">{{ store.division }}</h3>
             <h3 class="store-name">{{ store.name }}</h3>
             <h4 class="store-address">Dirección:{{ store.address }}</h4>
-            <h4 class="store-phone">Telefono: {{ store.phone }}</h4>
+            <h4 class="store-phone">Teléfono: {{ store.phone }}</h4>
           </li>
         </ul>
       </div>
@@ -60,13 +62,13 @@
         <ul class="customer-list">
           <li
             v-for="customer in filteredCustomers"
-            :key="customer.phone"
+            :key="customer.id"
             class="customer-item"
             @click="selectCustomer(customer)"
           >
             <h3 class="customer-name">{{ customer.name }}</h3>
             <h4 class="customer-address">Dirección: {{ customer.address }}</h4>
-            <h4 class="customer-phone">Telefono: {{ customer.phone }}</h4>
+            <h4 class="customer-phone">Teléfono: {{ customer.phone }}</h4>
           </li>
         </ul>
       </div>
@@ -77,7 +79,6 @@
 <script>
 import { getDatabase, ref, onValue } from "firebase/database";
 import Swal from "sweetalert2";
-import { useRouter } from "vue-router";
 
 export default {
   name: "WelcomeComponent",
@@ -114,25 +115,81 @@ export default {
     this.fetchCustomers();
   },
   methods: {
-    saveStoreToLocalStorage() {
-      const customerOperCarts =
-        JSON.parse(localStorage.getItem("customerOperCarts")) || {};
-      customerOperCarts.selectedStore = this.selectedStore;
-      localStorage.setItem(
-        "customerOperCarts",
-        JSON.stringify(customerOperCarts)
-      );
+    saveNewOrderToLocalStorage() {
+      if (
+        this.selectedStore.name !== "Seleccione una sucursal" &&
+        this.selectedCustomer.name !== "Cliente no seleccionado"
+      ) {
+        const customerOpenCarts =
+          JSON.parse(localStorage.getItem("customerOpenCarts")) || {};
+
+        const customerId = this.selectedCustomer.id;
+        console.log("ID del cliente seleccionado:", customerId);
+
+        if (!customerId) {
+          Swal.fire({
+            title: "Error",
+            text: "No se pudo encontrar el ID del cliente seleccionado.",
+            icon: "error",
+            confirmButtonText: "OK",
+          });
+          return;
+        }
+
+        // Guardar datos en `customerOpenCarts` y asignar `customerUID`
+        customerOpenCarts.customerUID = customerId;
+        customerOpenCarts[customerId] = {
+          store: {
+            address: this.selectedStore.address,
+            division: this.selectedStore.division,
+            name: this.selectedStore.name,
+            phone: this.selectedStore.phone,
+          },
+          customer: {
+            address: this.selectedCustomer.address,
+            name: this.selectedCustomer.name,
+            phone: this.selectedCustomer.phone,
+          },
+        };
+
+        console.log("Datos guardados en localStorage:", customerOpenCarts);
+        localStorage.setItem(
+          "customerOpenCarts",
+          JSON.stringify(customerOpenCarts)
+        );
+
+        Swal.fire({
+          title: "Pedido iniciado",
+          text: "Se ha creado un nuevo pedido para este cliente y sucursal.",
+          icon: "success",
+          confirmButtonText: "OK",
+        });
+      } else {
+        Swal.fire({
+          title: "Faltan datos",
+          text: "Por favor, seleccione tanto una sucursal como un cliente antes de continuar.",
+          icon: "warning",
+          confirmButtonText: "OK",
+        });
+      }
     },
 
-    saveCustomerToLocalStorage() {
-      const customerOperCarts =
-        JSON.parse(localStorage.getItem("customerOperCarts")) || {};
-      customerOperCarts.selectedCustomer = this.selectedCustomer;
-      localStorage.setItem(
-        "customerOperCarts",
-        JSON.stringify(customerOperCarts)
-      );
+    selectStore(store) {
+      this.selectedStore = store;
+      this.closeModal();
     },
+
+    selectCustomer(customer) {
+      this.selectedCustomer = {
+        id: customer.id,
+        name: customer.name,
+        address: customer.address,
+        phone: customer.phone,
+      };
+      console.log("Cliente seleccionado:", this.selectedCustomer);
+      this.closeCustomerModal();
+    },
+
     openModal() {
       this.isModalOpen = true;
     },
@@ -157,10 +214,6 @@ export default {
         }
       );
     },
-    selectStore(store) {
-      this.selectedStore = store;
-      this.closeModal();
-    },
     openCustomerModal() {
       this.isCustomerModalOpen = true;
     },
@@ -176,19 +229,17 @@ export default {
           this.customers = [];
           snapshot.forEach((childSnapshot) => {
             const customer = childSnapshot.val();
-            customer.phone = customer.phone || "No disponible";
+            customer.id = childSnapshot.key;
             this.customers.push(customer);
           });
+          console.log("Clientes cargados:", this.customers);
         },
         {
           onlyOnce: true,
         }
       );
     },
-    selectCustomer(customer) {
-      this.selectedCustomer = customer;
-      this.closeCustomerModal();
-    },
+
     validateSelection() {
       if (
         this.selectedStore.name === "Seleccione una sucursal" ||
@@ -208,31 +259,20 @@ export default {
           confirmButtonText: "Ok",
         });
       } else {
-        this.continueOrder();
+        this.saveNewOrderToLocalStorage();
       }
     },
-    continueOrder() {
-      console.log("Continuando con el pedido...");
-    },
+
     goToNewOrder() {
       if (
         this.selectedStore.name === "Seleccione una sucursal" ||
         this.selectedCustomer.name === "Cliente no seleccionado"
       ) {
-        this.validateSelection(); // Llama a la validación antes de continuar
+        this.validateSelection();
       } else {
-        this.$router.push({ name: "order_search" }); // Navega si todo está validado
+        this.saveNewOrderToLocalStorage();
+        this.$router.push({ name: "order_search" });
       }
-    },
-    selectStore(store) {
-      this.selectedStore = store;
-      this.saveStoreToLocalStorage();
-      this.closeModal();
-    },
-    selectCustomer(customer) {
-      this.selectedCustomer = customer;
-      this.saveCustomerToLocalStorage();
-      this.closeCustomerModal();
     },
   },
 };

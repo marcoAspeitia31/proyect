@@ -10,9 +10,8 @@
         class="search-input"
       />
       <button @click="resetAndSearch" class="search-button">🔍</button>
-
       <!-- Ícono del carrito -->
-      <div class="cart-icon">
+      <div class="cart-icon" @click="openCart">
         🛒
         <span class="cart-counter">{{ cartItemCount }}</span>
       </div>
@@ -31,55 +30,75 @@
         :key="product.CODIGO"
         class="product-card"
       >
-        <img
-          :src="product.URLS512 || 'https://via.placeholder.com/150'"
-          alt="Imagen del producto"
-          class="product-image"
-          @click="openModal(product)"
-        />
+        <div class="product-image-container">
+          <img
+            :src="product.URLS512 || 'https://via.placeholder.com/150'"
+            alt="Imagen del producto"
+            class="product-image"
+            @click="openModal(product)"
+          />
+          <img
+            v-if="isOffer101(product)"
+            src="https://firebasestorage.googleapis.com/v0/b/apphive-inc.appspot.com/o/usersmedia%2Fp6M835K2zkUCMUop3demkm?alt=media&token=be39dd3e-4f83-4502-9b44-5824832ad22f"
+            class="offer-tag"
+            alt="Etiqueta de Oferta"
+          />
+          <img
+            v-if="isOffer103(product)"
+            src="https://firebasestorage.googleapis.com/v0/b/apphive-inc.appspot.com/o/usersmedia%2F8nrXKvJUCVdUDFcMTC7Ddr?alt=media&token=d96ab3c7-0788-43cd-ab14-80bd9a0638fb"
+            class="bonificacion-tag"
+            alt="Etiqueta de Bonificación"
+          />
+        </div>
         <div class="product-details">
           <h3 class="product-title">{{ product.DESCRIPCION }}</h3>
           <p class="product-description">{{ product.CATEGORIAAPP }}</p>
-          <p class="product-price">${{ getDynamicPrice(product) }}</p>
-          <button class="add-to-cart-btn" @click="addToCart(product)">
-            Agregar
-          </button>
+          <p
+            class="product-price"
+            :class="{ 'original-price': hasOffer(product) }"
+          >
+            ${{ product[`PRECIO_${this.divisionSuffix}`] }}
+          </p>
+          <template v-if="hasOffer(product)">
+            <p class="product-price offer-price" v-if="isOffer101(product)">
+              ${{ product[`PRECIOOFERTA_${this.divisionSuffix}`] }}
+            </p>
+            <p
+              class="product-price bonificacion-price"
+              v-if="isOffer103(product)"
+            >
+              {{ getBonification(product) }} de bonificación a tarjeta club
+            </p>
+          </template>
         </div>
       </div>
     </div>
-
     <div v-else class="no-products">
       <p v-if="query.trim()">No se encontraron productos.</p>
       <p v-else>Introduce un término de búsqueda para ver productos.</p>
     </div>
-
     <!-- Controles de paginación -->
-    <div class="pagination-controls" v-if="filteredProducts.length">
+    <div class="pagination-controls" v-if="totalPages > 1">
       <button
-        @click="prevPage"
-        :disabled="currentPage === 1"
         class="pagination-btn"
+        @click="prevPage"
+        :disabled="currentPage <= 1"
       >
         Anterior
       </button>
+      <span>Página {{ currentPage }} de {{ totalPages }}</span>
       <button
+        class="pagination-btn"
         @click="nextPage"
         :disabled="currentPage >= totalPages"
-        class="pagination-btn"
       >
-        Siguiente →
+        Siguiente
       </button>
     </div>
-
     <!-- Modal -->
     <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
       <div class="modal-content">
         <button class="close-btn" @click="closeModal">X</button>
-        <!-- Ícono del carrito en modal -->
-        <div class="cart-icon-modal">
-          🛒
-          <span class="cart-counter">{{ cartItemCount }}</span>
-        </div>
         <img
           :src="selectedProduct.URLS512 || 'https://via.placeholder.com/150'"
           alt="Producto"
@@ -88,22 +107,65 @@
         <div class="modal-details">
           <h3>{{ selectedProduct.DESCRIPCION }}</h3>
           <p class="category">{{ selectedProduct.CATEGORIAAPP }}</p>
-          <div class="counter">
-            <button @click="decrementQty">-</button>
-            <span>{{ quantity }}</span>
-            <button @click="incrementQty">+</button>
+          <p>
+            Precio Normal: ${{
+              selectedProduct[`PRECIO_${this.divisionSuffix}`]
+            }}
+          </p>
+          <p v-if="isOffer101(selectedProduct)">
+            Precio de Oferta: ${{
+              selectedProduct[`PRECIOOFERTA_${this.divisionSuffix}`]
+            }}
+          </p>
+          <p v-if="isOffer103(selectedProduct)">
+            Bonificación: ${{
+              (
+                selectedProduct[`PRECIO_${this.divisionSuffix}`] -
+                selectedProduct[`PRECIOOFERTA_${this.divisionSuffix}`]
+              ).toFixed(2)
+            }}
+            a tarjeta club
+          </p>
+          <div class="unit-toggle-container">
+            <div class="quantity-and-units">
+              <div class="quantity-selector">
+                <button @click="decrementQty" class="quantity-btn">-</button>
+                <span class="quantity-display">{{ quantity }}</span>
+                <button @click="incrementQty" class="quantity-btn">+</button>
+              </div>
+              <div class="unit-buttons">
+                <button
+                  :class="{ active: selectedUnit === 'KG' }"
+                  @click="selectUnit('KG')"
+                  v-if="
+                    selectedProduct.UNIDAD === 'KG' ||
+                    selectedProduct.UNIDAD === 'ST/KG'
+                  "
+                >
+                  PESO
+                </button>
+                <button
+                  :class="{ active: selectedUnit === 'ST' }"
+                  @click="selectUnit('ST')"
+                >
+                  PIEZA
+                </button>
+              </div>
+            </div>
           </div>
-          <textarea placeholder="Agrega comentarios"></textarea>
-          <button class="add-to-cart-btn" @click="addToCart(selectedProduct)">
-            ${{ getDynamicPrice(selectedProduct) }}
-          </button>
         </div>
+        <textarea placeholder="Agrega comentarios"></textarea>
+        <button class="add-to-cart-btn" @click="addToCart">
+          Agregar al Carrito
+        </button>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import Swal from "sweetalert2";
+
 import { apiBuscarProducto } from "@/boot/axios";
 
 export default {
@@ -113,17 +175,26 @@ export default {
       filteredProducts: [],
       currentPage: 1,
       totalPages: 1,
-      hitsPerPage: 20,
+      hitsPerPage: 25,
       totalHits: 0,
-      divisionSuffix: "",
+      divisionSuffix: "7105", // Sucursal fija definida aquí
       showModal: false,
       selectedProduct: null,
       quantity: 1,
-      cartItems: [],
+      selectedUnit: "ST",
+      cartItems: JSON.parse(localStorage.getItem("carts")) || [],
     };
   },
+  watch: {
+    selectedStore(newStore, oldStore) {
+      if (newStore && newStore !== oldStore) {
+        this.divisionSuffix = newStore.division; // Actualiza divisionSuffix cuando cambia selectedStore
+        this.resetAndSearch(); // Opcional: reinicia la búsqueda con la nueva sucursal
+      }
+    },
+  },
   created() {
-    this.getDivisionSuffix();
+    this.searchProducts();
   },
   computed: {
     cartItemCount() {
@@ -131,39 +202,62 @@ export default {
     },
   },
   methods: {
-    getDivisionSuffix() {
-      const customerOperCarts =
-        JSON.parse(localStorage.getItem("customerOperCarts")) || {};
-      const store = customerOperCarts.selectedStore;
-
-      if (store && store.division) {
-        this.divisionSuffix = store.division;
-      } else {
-        this.divisionSuffix = "";
+    hasOffer(product) {
+      const tipoOfertaKey = `TIPOOFERTA_${this.divisionSuffix}`;
+      return product[tipoOfertaKey] === 101 || product[tipoOfertaKey] === 103;
+    },
+    isOffer101(product) {
+      const tipoOfertaKey = `TIPOOFERTA_${this.divisionSuffix}`;
+      return (
+        product[tipoOfertaKey] === 101 &&
+        product[`PRECIOOFERTA_${this.divisionSuffix}`]
+      );
+    },
+    isOffer103(product) {
+      const tipoOfertaKey = `TIPOOFERTA_${this.divisionSuffix}`;
+      return (
+        product[tipoOfertaKey] === 103 &&
+        product[`PRECIOOFERTA_${this.divisionSuffix}`]
+      );
+    },
+    getBonification(product) {
+      if (this.isOffer103(product)) {
+        const precio = Number(product[`PRECIO_${this.divisionSuffix}`]);
+        const precioOferta = Number(
+          product[`PRECIOOFERTA_${this.divisionSuffix}`]
+        );
+        const bonificacion = precio - precioOferta;
+        return bonificacion.toFixed(2);
       }
+      return "0.00";
     },
     async searchProducts() {
-      const customerOperCarts =
-        JSON.parse(localStorage.getItem("customerOperCarts")) || {};
-      const sucursal = customerOperCarts.selectedStore
-        ? customerOperCarts.selectedStore.division
-        : "Sucursal no definida";
+      if (!this.divisionSuffix) {
+        console.error("Sucursal no definida. No se puede buscar productos.");
+        return;
+      }
 
       if (this.query.trim()) {
         try {
-          const response = await apiBuscarProducto({
-            method: "POST",
-            url: "/buscar-producto",
-            data: {
-              page: this.currentPage,
-              hitsPerPage: this.hitsPerPage,
-              sucursal,
-              textoBusqueda: this.query,
-            },
-          });
+          const payload = {
+            page: this.currentPage - 1,
+            hitsPerPage: this.hitsPerPage,
+            sucursal: this.divisionSuffix,
+            textoBusqueda: this.query,
+          };
+
+          console.log("Datos enviados a la API:", payload);
+
+          const response = await apiBuscarProducto.post(
+            "/buscar-producto",
+            payload
+          );
 
           if (response.data?.data?.hits) {
-            this.filteredProducts = response.data.data.hits;
+            this.filteredProducts = response.data.data.hits.map((product) => ({
+              ...product,
+              UNIDAD: product.UNIDAD || "ST",
+            }));
             this.totalPages = response.data.data.nbPages || 1;
             this.totalHits = response.data.data.nbHits || 0;
           } else {
@@ -172,16 +266,18 @@ export default {
             this.totalHits = 0;
           }
         } catch (error) {
-          console.error("Error al buscar productos:", error);
+          console.error(
+            "Error al buscar productos:",
+            error.response?.data || error
+          );
           this.filteredProducts = [];
         }
       } else {
+        console.warn(
+          "La consulta está vacía. Introduce un término de búsqueda."
+        );
         this.filteredProducts = [];
       }
-    },
-    getDynamicPrice(product) {
-      const priceKey = `PRECIO_${this.divisionSuffix}`;
-      return product[priceKey] || "N/A";
     },
     resetAndSearch() {
       this.currentPage = 1;
@@ -199,23 +295,115 @@ export default {
         this.searchProducts();
       }
     },
-    addToCart(product) {
-      this.cartItems.push(product);
-      console.log("Producto añadido al carrito:", product);
+    addToCart() {
+      console.log("Ejecutando addToCart...");
+
+      if (!this.selectedProduct) {
+        console.error("No se ha seleccionado un producto.");
+        Swal.fire({
+          title: "Error",
+          text: "No se ha seleccionado un producto para agregar al carrito.",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
+        return;
+      }
+
+      const customerOperCarts =
+        JSON.parse(localStorage.getItem("customerOpenCarts")) || {};
+      const customerId = customerOperCarts.customerUID; // Asegúrate de que el UID esté correctamente inicializado
+
+      if (!customerId) {
+        console.error("UID del cliente no está disponible.");
+        Swal.fire({
+          title: "Error",
+          text: "No se pudo encontrar el ID del cliente.",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
+        return;
+      }
+
+      // Determinar el precio basado en la prioridad de ofertas
+      let productPrice = this.selectedProduct[`PRECIO_${this.divisionSuffix}`]; // Precio normal
+      if (this.isOffer101(this.selectedProduct)) {
+        productPrice =
+          this.selectedProduct[`PRECIOOFERTA_${this.divisionSuffix}`]; // Oferta 101
+      } else if (this.isOffer103(this.selectedProduct)) {
+        productPrice =
+          this.selectedProduct[`PRECIOOFERTA_${this.divisionSuffix}`]; // Oferta 103
+      }
+
+      const cartItem = {
+        name: this.selectedProduct.DESCRIPCION,
+        picture:
+          this.selectedProduct.URLS512 || "https://via.placeholder.com/150",
+        price: productPrice * this.quantity, // Multiplica por la cantidad seleccionada
+        quantity: this.quantity,
+        unit: this.selectedUnit,
+      };
+
+      let carts = JSON.parse(localStorage.getItem("carts")) || {};
+
+      if (!carts[customerId]) {
+        carts[customerId] = { products: {} };
+      }
+
+      const productCode = this.selectedProduct.CODIGO;
+      if (carts[customerId].products[productCode]) {
+        const existingProduct = carts[customerId].products[productCode];
+        existingProduct.quantity += this.quantity;
+        existingProduct.price += productPrice * this.quantity; // Actualiza el precio total
+        console.log(`Cantidad actualizada para el producto ${productCode}`);
+      } else {
+        carts[customerId].products[productCode] = cartItem;
+        console.log(`Producto ${productCode} agregado al carrito`);
+      }
+
+      localStorage.setItem("carts", JSON.stringify(carts));
+
+      console.log(
+        "Estado final del carrito:",
+        JSON.parse(localStorage.getItem("carts"))
+      );
+
+      Swal.fire({
+        title: "Producto agregado",
+        text: "El producto se agregó al carrito correctamente.",
+        icon: "success",
+        confirmButtonText: "OK",
+      });
+
+      this.closeModal();
     },
+
     openModal(product) {
       this.selectedProduct = product;
-      this.quantity = 1;
+      this.quantity = product.UNIDAD.includes("KG") ? 50 : 1;
+      this.selectedUnit = product.UNIDAD.includes("KG") ? "KG" : "ST";
       this.showModal = true;
     },
     closeModal() {
       this.showModal = false;
+      this.selectedProduct = null;
+    },
+    selectUnit(unit) {
+      this.selectedUnit = unit;
+      this.quantity = unit === "KG" ? 50 : 1;
     },
     incrementQty() {
-      this.quantity++;
+      if (this.selectedUnit === "KG") {
+        this.quantity += 50;
+      } else if (this.selectedUnit === "ST") {
+        this.quantity += 1;
+      }
     },
     decrementQty() {
-      if (this.quantity > 1) this.quantity--;
+      if (this.selectedUnit === "KG" && this.quantity > 50) {
+        this.quantity -= 50;
+      } else if (this.selectedUnit === "ST" && this.quantity > 1) {
+        this.quantity -= 1;
+      }
     },
   },
 };
@@ -319,7 +507,7 @@ export default {
 /* Grilla de productos */
 .products-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 15px;
 }
 
@@ -341,6 +529,30 @@ export default {
 
 .product-details {
   margin-top: 10px;
+}
+.offer-price {
+  color: red; /* Color para el precio de oferta */
+}
+
+.original-price {
+  text-decoration: line-through; /* Tachado para el precio original */
+}
+
+.product-image-container {
+  position: relative;
+  display: inline-block;
+}
+
+.product-image {
+  display: block;
+  width: 100%; /* Ajusta según necesites */
+}
+
+.offer-tag {
+  position: absolute;
+  top: 0; /* Ajusta la posición según necesites */
+  right: 0; /* Ajusta la posición según necesites */
+  width: 50%; /* Tamaño de la etiqueta de oferta */
 }
 
 .product-title {
@@ -444,13 +656,79 @@ export default {
   margin-bottom: 15px;
 }
 
-/* Contador de cantidad */
-.counter {
+.unit-toggle-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.quantity-and-units {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.quantity-selector {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.quantity-btn {
+  background-color: #f0f0f0;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.quantity-btn:hover {
+  background-color: #e0e0e0;
+}
+
+.quantity-display {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+}
+
+.unit-buttons {
   display: flex;
   justify-content: center;
-  align-items: center;
-  gap: 20px;
-  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.unit-buttons button {
+  flex: 1;
+  padding: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  color: white;
+  background-color: #6574cd;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.unit-buttons button.active {
+  background-color: #3b4cca;
+}
+
+.unit-buttons button:not(.active) {
+  background-color: #a2b2ec;
+}
+
+.unit-buttons button:hover {
+  background-color: #8092d8;
 }
 
 .counter button {
@@ -512,5 +790,26 @@ textarea {
   color: #777;
   font-size: 16px;
   margin-top: 20px;
+}
+
+.product-image-container {
+  position: relative;
+}
+
+.bonificacion-tag {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50px;
+  height: 50px;
+}
+
+.product-price {
+  font-size: 1rem;
+}
+
+.original-price {
+  text-decoration: line-through;
+  color: grey;
 }
 </style>
