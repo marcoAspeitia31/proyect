@@ -10,3 +10,5 @@ const apiBuscarCategoria = axios.create({
 
 export { apiBuscarProducto };
 export { apiBuscarCategoria};
+
+
