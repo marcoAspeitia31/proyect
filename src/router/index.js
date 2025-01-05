@@ -27,6 +27,8 @@ import client_Directory from "@/components/application/orders/order_shop/client_
 import create_Client from "@/components/application/orders/order_shop/create_Client.vue";
 import edit_Client from "@/components/application/orders/order_shop/edit_Client.vue";
 import order_Search from "@/components/application/orders/order_cart/order_Search.vue";
+import order_Continue from "@/components/application/orders/order_cart/oder_Continue.vue";
+import order_CheckCart from "@/components/application/orders/order_cart/order_CheckCart.vue";
 
 // Declaración de las rutas
 const routes = [
@@ -37,7 +39,7 @@ const routes = [
     meta: { layout: layout1, breadcrumb: { type: 0 } },
   },
   {
-    path: "/user/all-users", 
+    path: "/user/all-users",
     name: "allUsers",
     component: allUsers,
     meta: {
@@ -49,7 +51,7 @@ const routes = [
       },
       roles: ["Administrador", "Sistemas", "Sucursal"],
     },
-  },  
+  },
   {
     path: "/user/add-new-user",
     name: "add_new_user",
@@ -108,7 +110,7 @@ const routes = [
     },
   },
   {
-    path: "/orders/order-search",
+    path: "/orders/order-search/:customerUID",
     name: "order_search",
     component: order_Search,
     meta: {
@@ -117,13 +119,34 @@ const routes = [
     },
   },
   {
+    path: "/orders/order-continue",
+    name: "order_continue",
+    component: order_Continue,
+    meta: {
+      layout: layout1,
+      breadcrumb: { type: 2, title: "Continuar Pedido" },
+    },
+  },
+  {
+    path: "/orders/cart/:customerUID",
+    name: "cart",
+    component: order_CheckCart,
+    meta: {
+      layout: layout1,
+      breadcrumb: { type: 2 },
+    },
+  },
+  {
     path: "/orders/client-directory",
     name: "client_Directory",
     component: client_Directory,
     meta: {
       layout: layout1,
-      breadcrumb: { type: 1, title: "Directorio de clientes",
-        buttonPath: "/orders/create-client", },
+      breadcrumb: {
+        type: 1,
+        title: "Directorio de clientes",
+        buttonPath: "/orders/create-client",
+      },
     },
   },
   {

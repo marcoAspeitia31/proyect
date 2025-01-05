@@ -165,10 +165,14 @@
 
 <script>
 import Swal from "sweetalert2";
-
 import { apiBuscarProducto } from "@/boot/axios";
+import { useRouter } from "vue-router"; // Importa useRouter
 
 export default {
+  setup() {
+    const router = useRouter(); // Utiliza useRouter para controlar la navegación
+    return { router };
+  },
   data() {
     return {
       query: "",
@@ -177,7 +181,7 @@ export default {
       totalPages: 1,
       hitsPerPage: 25,
       totalHits: 0,
-      divisionSuffix: "7105", // Sucursal fija definida aquí
+      divisionSuffix: "", // Aquí se inicializa divisionSuffix
       showModal: false,
       selectedProduct: null,
       quantity: 1,
@@ -188,20 +192,73 @@ export default {
   watch: {
     selectedStore(newStore, oldStore) {
       if (newStore && newStore !== oldStore) {
-        this.divisionSuffix = newStore.division; // Actualiza divisionSuffix cuando cambia selectedStore
-        this.resetAndSearch(); // Opcional: reinicia la búsqueda con la nueva sucursal
+        this.divisionSuffix = newStore.division; // Asignación de divisionSuffix al cambiar de sucursal
+        this.resetAndSearch(); // Reinicia la búsqueda con la nueva sucursal
       }
     },
   },
   created() {
+    // Intenta obtener la división desde localStorage
+    const customerOpenCarts =
+      JSON.parse(localStorage.getItem("customerOpenCarts")) || {};
+    const activeCustomerUID = customerOpenCarts.customerUID; // El cliente activo
+
+    if (
+      activeCustomerUID &&
+      customerOpenCarts[activeCustomerUID]?.store?.division
+    ) {
+      // Asigna la división desde el localStorage
+      this.divisionSuffix = customerOpenCarts[activeCustomerUID].store.division;
+    } else {
+      console.warn(
+        "No se pudo encontrar la división en customerOpenCarts. Usando valor predeterminado."
+      );
+      this.divisionSuffix = ""; // Valor predeterminado
+    }
+
+    // Continua con la lógica del componente
     this.searchProducts();
+    this.updateCartCount();
   },
+
   computed: {
     cartItemCount() {
-      return this.cartItems.length;
+      const customerOperCarts =
+        JSON.parse(localStorage.getItem("customerOpenCarts")) || {};
+      const customerId = customerOperCarts.customerUID;
+
+      if (!customerId) {
+        return 0;
+      }
+
+      const carts = JSON.parse(localStorage.getItem("carts")) || {};
+      if (carts[customerId] && carts[customerId].products) {
+        return Object.keys(carts[customerId].products).length;
+      }
+      return 0;
     },
   },
   methods: {
+    openCart() {
+      const customerOperCarts =
+        JSON.parse(localStorage.getItem("customerOpenCarts")) || {};
+      const customerId = customerOperCarts.customerUID;
+
+      if (customerId) {
+        this.router
+          .push({ name: "cart", params: { customerUID: customerId } })
+          .catch((err) => {
+            console.error("Routing error:", err);
+          });
+      } else {
+        Swal.fire({
+          title: "Error",
+          text: "No se pudo encontrar el ID del cliente.",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
+      }
+    },
     hasOffer(product) {
       const tipoOfertaKey = `TIPOOFERTA_${this.divisionSuffix}`;
       return product[tipoOfertaKey] === 101 || product[tipoOfertaKey] === 103;
@@ -226,8 +283,7 @@ export default {
         const precioOferta = Number(
           product[`PRECIOOFERTA_${this.divisionSuffix}`]
         );
-        const bonificacion = precio - precioOferta;
-        return bonificacion.toFixed(2);
+        return (precio - precioOferta).toFixed(2);
       }
       return "0.00";
     },
@@ -245,8 +301,6 @@ export default {
             sucursal: this.divisionSuffix,
             textoBusqueda: this.query,
           };
-
-          console.log("Datos enviados a la API:", payload);
 
           const response = await apiBuscarProducto.post(
             "/buscar-producto",
@@ -266,16 +320,10 @@ export default {
             this.totalHits = 0;
           }
         } catch (error) {
-          console.error(
-            "Error al buscar productos:",
-            error.response?.data || error
-          );
+          console.error("Error al buscar productos:", error);
           this.filteredProducts = [];
         }
       } else {
-        console.warn(
-          "La consulta está vacía. Introduce un término de búsqueda."
-        );
         this.filteredProducts = [];
       }
     },
@@ -295,11 +343,28 @@ export default {
         this.searchProducts();
       }
     },
-    addToCart() {
-      console.log("Ejecutando addToCart...");
+    updateCartCount() {
+      const customerOperCarts =
+        JSON.parse(localStorage.getItem("customerOpenCarts")) || {};
+      const customerId = customerOperCarts.customerUID;
 
+      if (!customerId) {
+        // En lugar de modificar cartItemCount, regresa 0 o realiza una operación en otro lugar
+        console.log(
+          "No se encontró customerUID. No se puede actualizar el conteo."
+        );
+        return;
+      }
+
+      const carts = JSON.parse(localStorage.getItem("carts")) || {};
+      if (carts[customerId] && carts[customerId].products) {
+        // Los datos de cartItemCount se actualizarán automáticamente
+        return Object.keys(carts[customerId].products).length;
+      }
+      return 0;
+    },
+    addToCart() {
       if (!this.selectedProduct) {
-        console.error("No se ha seleccionado un producto.");
         Swal.fire({
           title: "Error",
           text: "No se ha seleccionado un producto para agregar al carrito.",
@@ -311,10 +376,9 @@ export default {
 
       const customerOperCarts =
         JSON.parse(localStorage.getItem("customerOpenCarts")) || {};
-      const customerId = customerOperCarts.customerUID; // Asegúrate de que el UID esté correctamente inicializado
+      const customerId = customerOperCarts.customerUID;
 
       if (!customerId) {
-        console.error("UID del cliente no está disponible.");
         Swal.fire({
           title: "Error",
           text: "No se pudo encontrar el ID del cliente.",
@@ -324,27 +388,25 @@ export default {
         return;
       }
 
-      // Determinar el precio basado en la prioridad de ofertas
-      let productPrice = this.selectedProduct[`PRECIO_${this.divisionSuffix}`]; // Precio normal
+      let productPrice = this.selectedProduct[`PRECIO_${this.divisionSuffix}`];
       if (this.isOffer101(this.selectedProduct)) {
         productPrice =
-          this.selectedProduct[`PRECIOOFERTA_${this.divisionSuffix}`]; // Oferta 101
+          this.selectedProduct[`PRECIOOFERTA_${this.divisionSuffix}`];
       } else if (this.isOffer103(this.selectedProduct)) {
         productPrice =
-          this.selectedProduct[`PRECIOOFERTA_${this.divisionSuffix}`]; // Oferta 103
+          this.selectedProduct[`PRECIOOFERTA_${this.divisionSuffix}`];
       }
 
       const cartItem = {
         name: this.selectedProduct.DESCRIPCION,
         picture:
           this.selectedProduct.URLS512 || "https://via.placeholder.com/150",
-        price: productPrice * this.quantity, // Multiplica por la cantidad seleccionada
+        price: productPrice * this.quantity,
         quantity: this.quantity,
         unit: this.selectedUnit,
       };
 
       let carts = JSON.parse(localStorage.getItem("carts")) || {};
-
       if (!carts[customerId]) {
         carts[customerId] = { products: {} };
       }
@@ -353,19 +415,13 @@ export default {
       if (carts[customerId].products[productCode]) {
         const existingProduct = carts[customerId].products[productCode];
         existingProduct.quantity += this.quantity;
-        existingProduct.price += productPrice * this.quantity; // Actualiza el precio total
-        console.log(`Cantidad actualizada para el producto ${productCode}`);
+        existingProduct.price += productPrice * this.quantity;
       } else {
         carts[customerId].products[productCode] = cartItem;
-        console.log(`Producto ${productCode} agregado al carrito`);
       }
 
       localStorage.setItem("carts", JSON.stringify(carts));
-
-      console.log(
-        "Estado final del carrito:",
-        JSON.parse(localStorage.getItem("carts"))
-      );
+      this.updateCartCount();
 
       Swal.fire({
         title: "Producto agregado",
@@ -376,7 +432,6 @@ export default {
 
       this.closeModal();
     },
-
     openModal(product) {
       this.selectedProduct = product;
       this.quantity = product.UNIDAD.includes("KG") ? 50 : 1;

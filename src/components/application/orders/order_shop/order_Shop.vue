@@ -4,24 +4,31 @@
 
     <!-- Información de la sucursal seleccionada -->
     <div class="branch-info" @click="openModal">
-      <h3 class="branch-name">Sucursal seleccionada</h3>
-      <h3 class="branch-division">{{ selectedStore.division }}</h3>
-      <h4 class="branch-value">{{ selectedStore.name }}</h4>
-      <h4 class="branch-address">Dirección: {{ selectedStore.address }}</h4>
-      <h4 class="branch-phone">Teléfono: {{ selectedStore.phone }}</h4>
+      <h3 class="branch-title">Sucursal Seleccionada</h3>
+      <div class="branch-details">
+        <p><strong>División:</strong> {{ selectedStore.division }}</p>
+        <p><strong>Nombre:</strong> {{ selectedStore.name }}</p>
+        <p><strong>Dirección:</strong> {{ selectedStore.address }}</p>
+        <p><strong>Teléfono:</strong> {{ selectedStore.phone }}</p>
+      </div>
     </div>
 
     <!-- Información del usuario -->
     <div class="user-info" @click="openCustomerModal">
-      <h3 class="user-name">{{ selectedCustomer.name }}</h3>
-      <h4 class="user-address">Dirección: {{ selectedCustomer.address }}</h4>
-      <h4 class="user-phone">Teléfono: {{ selectedCustomer.phone }}</h4>
+      <h3 class="user-title">Cliente Seleccionado</h3>
+      <div class="user-details">
+        <p><strong>Nombre:</strong> {{ selectedCustomer.name }}</p>
+        <p><strong>Dirección:</strong> {{ selectedCustomer.address }}</p>
+        <p><strong>Teléfono:</strong> {{ selectedCustomer.phone }}</p>
+      </div>
     </div>
 
     <!-- Acciones del usuario -->
     <div class="actions">
-      <button class="new-order" @click="goToNewOrder">Nuevo pedido</button>
-      <button class="continue-order" @click="continueOrder">
+      <button class="action-button new-order" @click="goToNewOrder">
+        Nuevo Pedido
+      </button>
+      <button class="action-button continue-order" @click="continueOrder">
         Continuar Pedido
       </button>
     </div>
@@ -29,7 +36,7 @@
     <!-- Modal para selección de sucursal -->
     <div v-if="isModalOpen" class="modal-overlay" @click.self="closeModal">
       <div class="modal-content">
-        <h3>Selecciona una sucursal</h3>
+        <h3 class="modal-title">Selecciona una Sucursal</h3>
         <ul class="store-list">
           <li
             v-for="store in stores"
@@ -37,10 +44,10 @@
             class="store-item"
             @click="selectStore(store)"
           >
-            <h3 class="store-division">{{ store.division }}</h3>
-            <h3 class="store-name">{{ store.name }}</h3>
-            <h4 class="store-address">Dirección:{{ store.address }}</h4>
-            <h4 class="store-phone">Teléfono: {{ store.phone }}</h4>
+            <p><strong>División:</strong> {{ store.division }}</p>
+            <p><strong>Nombre:</strong> {{ store.name }}</p>
+            <p><strong>Dirección:</strong> {{ store.address }}</p>
+            <p><strong>Teléfono:</strong> {{ store.phone }}</p>
           </li>
         </ul>
       </div>
@@ -53,10 +60,11 @@
       @click.self="closeCustomerModal"
     >
       <div class="modal-content">
-        <h3>Selecciona un cliente</h3>
+        <h3 class="modal-title">Selecciona un Cliente</h3>
         <input
           type="text"
           v-model="phoneFilter"
+          class="filter-input"
           placeholder="Filtrar por teléfono"
         />
         <ul class="customer-list">
@@ -66,9 +74,9 @@
             class="customer-item"
             @click="selectCustomer(customer)"
           >
-            <h3 class="customer-name">{{ customer.name }}</h3>
-            <h4 class="customer-address">Dirección: {{ customer.address }}</h4>
-            <h4 class="customer-phone">Teléfono: {{ customer.phone }}</h4>
+            <p><strong>Nombre:</strong> {{ customer.name }}</p>
+            <p><strong>Dirección:</strong> {{ customer.address }}</p>
+            <p><strong>Teléfono:</strong> {{ customer.phone }}</p>
           </li>
         </ul>
       </div>
@@ -269,10 +277,47 @@ export default {
         this.selectedCustomer.name === "Cliente no seleccionado"
       ) {
         this.validateSelection();
-      } else {
-        this.saveNewOrderToLocalStorage();
-        this.$router.push({ name: "order_search" });
+        return;
       }
+
+      // Guardar los datos en localStorage antes de redirigir
+      this.saveNewOrderToLocalStorage();
+
+      const customerOpenCarts =
+        JSON.parse(localStorage.getItem("customerOpenCarts")) || {};
+
+      if (!customerOpenCarts.customerUID) {
+        Swal.fire({
+          title: "Error",
+          text: "No se pudo iniciar un nuevo pedido. Faltan datos importantes.",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
+        return;
+      }
+
+      // Redirigir a la ruta del nuevo pedido
+      this.$router.push({
+        name: "order_search",
+        params: { customerUID: customerOpenCarts.customerUID },
+      });
+    },
+    continueOrder() {
+      const customerOpenCarts =
+        JSON.parse(localStorage.getItem("customerOpenCarts")) || {};
+
+      if (!customerOpenCarts.customerUID) {
+        Swal.fire({
+          title: "Error",
+          text: "No hay un pedido previo que continuar.",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
+        return;
+      }
+
+      // Redirigir a la ruta del pedido en curso
+      this.$router.push({ name: "order_continue" });
     },
   },
 };
@@ -280,99 +325,85 @@ export default {
 
 <style scoped>
 .welcome-container {
-  max-width: 1200px;
+  max-width: 900px;
   margin: 0 auto;
   padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background-color: #fdfdfd;
+  margin-bottom: 50px; /* Separación con el footer */
 }
 
 .welcome-title {
   text-align: center;
-  font-size: 1.5rem;
+  font-size: 2rem;
   margin-bottom: 20px;
-  color: #333;
+  color: #444;
 }
 
-.branch-info {
-  text-align: center;
+.branch-info,
+.user-info {
+  border: 1px solid #ddd;
+  padding: 15px;
+  border-radius: 8px;
+  background-color: #f5f5f5;
   margin-bottom: 20px;
   cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.branch-selected {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.branch-info:hover,
+.user-info:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
 
-.branch-icon {
-  width: 40px;
-  height: 40px;
-}
-
-.branch-name {
+.branch-title,
+.user-title {
+  font-size: 1.25rem;
   font-weight: bold;
-  color: #555;
-}
-
-.branch-value {
   color: #333;
+  margin-bottom: 10px;
 }
 
-.user-info {
-  margin-bottom: 20px;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  background-color: #f9f9f9;
-}
-
-.user-name {
-  color: #e91e63;
-  font-weight: bold;
-  margin-bottom: 8px;
-}
-
-.user-address,
-.user-phone {
-  color: #555;
+.branch-details p,
+.user-details p {
   margin: 5px 0;
+  font-size: 1rem;
+  color: #555;
 }
 
 .actions {
   display: flex;
-  justify-content: space-around;
+  justify-content: space-between;
   gap: 10px;
 }
 
-.new-order {
-  background-color: #e91e63;
-  color: #fff;
+.action-button {
+  padding: 10px 20px;
+  font-size: 1rem;
   border: none;
   border-radius: 8px;
-  padding: 10px 20px;
   cursor: pointer;
   font-weight: bold;
+}
+
+.new-order {
+  background-color: #d81b60;
+  color: white;
 }
 
 .continue-order {
-  background-color: #3f51b5;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 10px 20px;
-  cursor: pointer;
-  font-weight: bold;
+  background-color: #3b4cca;
+  color: white;
 }
 
 .new-order:hover {
-  background-color: #d81b60;
+  background-color: #f32a74;
 }
 
 .continue-order:hover {
-  background-color: #303f9f;
+  background-color: #4457e7;
 }
 
 .modal-overlay {
@@ -381,87 +412,56 @@ export default {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.6); /* Fondo más oscuro para mejor contraste */
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000; /* Asegura que la modal esté sobre otros elementos */
-  transition: opacity 0.3s; /* Transición suave al mostrar */
 }
 
 .modal-content {
-  background: #fff;
+  background: white;
   padding: 20px;
-  border-radius: 8px;
-  width: 100%;
+  border-radius: 10px;
+  width: 90%;
   max-width: 600px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-  transition: transform 0.3s;
-  transform: scale(0.9);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
-.modal-overlay.active .modal-content {
-  transform: scale(1);
+.modal-title {
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  color: #333;
+  text-align: center;
 }
 
-.store-list {
-  list-style: none;
-  padding: 0;
-}
-
-.store-item {
-  margin-bottom: 15px;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  background-color: #f9f9f9;
-}
-
-.store-name {
-  font-weight: bold;
-  color: #e91e63;
-}
-
-.store-address,
-.store-phone {
-  color: #555;
-  margin: 5px 0;
-}
-
+.store-list,
 .customer-list {
   list-style: none;
   padding: 0;
-  text-align: left;
 }
 
+.store-item,
 .customer-item {
-  margin-bottom: 15px;
   padding: 10px;
+  margin-bottom: 10px;
   border: 1px solid #ddd;
   border-radius: 8px;
   background-color: #f9f9f9;
-}
-
-.customer-name {
-  font-weight: bold;
-  color: #e91e63;
-}
-
-.customer-phone {
-  color: #555;
-  margin-top: 5px;
-}
-.select-button {
-  background-color: #3f51b5;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 5px 10px;
   cursor: pointer;
-  font-size: 0.9rem;
+  transition: background-color 0.2s;
 }
 
-.select-button:hover {
-  background-color: #303f9f;
+.store-item:hover,
+.customer-item:hover {
+  background-color: #f0f0f0;
+}
+
+.filter-input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
 }
 </style>

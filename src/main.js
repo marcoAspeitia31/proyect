@@ -11,7 +11,8 @@ import "@/assets/css/vendors/font-awesome.css";
 import vueFeather from "vue-feather";
 import CKEditor from "@ckeditor/ckeditor5-vue";
 import VueApexCharts from "vue3-apexcharts";
-import { VueFire, VueFireAuth } from 'vuefire'; 
+import { VueFire, VueFireAuth } from 'vuefire';
+ 
 
 
 

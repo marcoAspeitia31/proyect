@@ -1,31 +1,38 @@
 <template>
   <div class="client-directory">
-    <!-- Tabla de clientes -->
-    <table>
-      <thead>
-        <tr>
-          <th>Nombre</th>
-          <th>Dirección</th>
-          <th>Teléfono</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="client in filteredClients" :key="client.id">
-          <td>{{ client.name }}</td>
-          <td>{{ client.address }}</td>
-          <td>{{ client.phone }}</td>
-          <td>
-            <button @click="editClient(client.id)" class="edit-button">
-              Editar
-            </button>
-            <button class="delete-button" @click="deleteClient(client.id)">
-              Eliminar
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <input
+      type="text"
+      v-model="searchQuery"
+      placeholder="Buscar cliente..."
+      class="search-input"
+    />
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Dirección</th>
+            <th>Teléfono</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="client in filteredClients" :key="client.id">
+            <td>{{ client.name }}</td>
+            <td>{{ client.address }}</td>
+            <td>{{ client.phone }}</td>
+            <td>
+              <button @click="editClient(client.id)" class="edit-button">
+                Editar
+              </button>
+              <button class="delete-button" @click="deleteClient(client.id)">
+                Eliminar
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </template>
 
@@ -33,15 +40,14 @@
 import { ref, computed } from "vue";
 import { getDatabase, ref as dbRef, onValue, remove } from "firebase/database";
 import { useRouter } from "vue-router";
-import Swal from "sweetalert2"; 
+import Swal from "sweetalert2";
 
 export default {
   setup() {
     const db = getDatabase();
-    const clients = ref([]); // Lista de clientes
-    const searchQuery = ref(""); 
+    const clients = ref([]);
+    const searchQuery = ref("");
     const router = useRouter();
-
 
     const clientsRef = dbRef(db, "/projects/superkomprasBackoffice/customer");
 
@@ -65,7 +71,6 @@ export default {
     };
 
     const deleteClient = async (id) => {
-
       const result = await Swal.fire({
         title: "¿Estás seguro?",
         text: "No podrás revertir esto!",
@@ -84,7 +89,6 @@ export default {
         await remove(clientRef);
         Swal.fire("Eliminado!", "El cliente ha sido eliminado.", "success");
 
-        // Elimina el cliente de la lista local para evitar inconsistencias
         clients.value = clients.value.filter((client) => client.id !== id);
       }
     };
@@ -102,45 +106,80 @@ export default {
 };
 </script>
 
+<style scoped>
+.client-directory {
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
 
-<style>
+.title {
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 20px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
+  margin-bottom: 20px;
 }
+
 th,
 td {
   border: 1px solid #ddd;
-  padding: 8px;
+  padding: 12px;
+  text-align: left;
 }
+
 th {
   background-color: #f4f4f4;
+  font-weight: bold;
 }
-.delete-button {
-  padding: 6px 12px;
+
+tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+tr:hover {
+  background-color: #f1f1f1;
+}
+
+button {
+  padding: 8px 16px;
   margin: 4px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  display: inline-block;
-  background-color: #f44336;
-  color: white;
+  font-size: 0.9rem;
 }
-.edit-button:hover {
-  background-color: #f44336;
-}
+
 .edit-button {
   background-color: #4caf50;
-  border: none;
-  padding: 6px 12px;
-  text-decoration: none;
-  display: inline-block;
-  margin: 4px;
-  cursor: pointer;
-  border-radius: 4px;
+  color: white;
 }
 
 .edit-button:hover {
-  background-color: #45a049; /* Cambio de color al pasar el mouse */
+  background-color: #45a049;
+}
+
+.delete-button {
+  background-color: #f44336;
+  color: white;
+}
+
+.delete-button:hover {
+  background-color: #d32f2f;
 }
 </style>

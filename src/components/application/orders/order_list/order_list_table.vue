@@ -35,28 +35,12 @@
       </div>
 
       <div class="filter-item">
-        <label for="fecha">Filtrado Por Fecha:</label>
+        <label for="fecha">Filtrar Por Fecha:</label>
         <input type="date" v-model="selectedDate" />
       </div>
     </div>
 
-    <button
-      @click="exportToExcel"
-      style="
-        background-color: #4caf50;
-        color: white;
-        border: none;
-        padding: 10px 16px;
-        text-align: center;
-        text-decoration: none;
-        display: inline-block;
-        font-size: 16px;
-        margin: 4px 2px;
-        cursor: pointer;
-      "
-    >
-      Exportar a Excel
-    </button>
+    <button class="export-btn" @click="exportToExcel">Exportar a Excel</button>
 
     <table class="orders-table">
       <thead>
@@ -430,7 +414,7 @@ export default {
         case "cancelado":
           return "cancelado";
         default:
-          return "gray"; 
+          return "gray";
       }
     },
   },
@@ -438,7 +422,7 @@ export default {
 </script>
 
 <style scoped>
-@media (max-width: 600px) {
+@media (max-width: 400px) {
   .orders-table th:nth-child(4),
   .orders-table td:nth-child(4) {
     display: none;
@@ -455,9 +439,10 @@ export default {
 }
 
 .card {
-  width: 200px;
+  width: 70%;
+  max-width: 250px;
   background-color: #ffffff;
-  border-radius: 16px;
+  border-radius: 14px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   text-align: center;
   padding: 1rem;
@@ -467,7 +452,7 @@ export default {
 .card-header {
   font-size: 14px;
   font-weight: 600;
-  padding: 6px 12px;
+  padding: 8px 16px;
   line-height: 1;
   border-radius: 8px;
   color: #ffffff;
@@ -483,18 +468,18 @@ export default {
 }
 
 .count {
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   font-weight: bold;
   margin: 0.5rem 0;
 }
 
 .total {
-  font-size: 0.85rem;
+  font-size: 1rem;
   color: #666666;
 }
 
 .total strong {
-  font-size: 1rem;
+  font-size: 1.2rem;
   font-weight: bold;
 }
 
@@ -522,16 +507,15 @@ export default {
 .table-container {
   background-color: #ffffff;
   border-radius: 8px;
-  padding: 1.5rem;
+  padding: 1.1rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   overflow-x: auto;
 }
 
 .filters {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
   margin-bottom: 1rem;
 }
 
@@ -539,29 +523,46 @@ export default {
   display: flex;
   flex-direction: column;
   width: 100%;
+  max-width: 300px;
 }
 
 .filter-item label {
-  font-size: 0.85rem;
+  font-size: 1rem;
   color: #666666;
-  margin-bottom: 0.3rem;
+  margin-bottom: 0.5rem;
 }
 
 .filter-item select,
 .filter-item input {
   width: 100%;
-  padding: 1%; /* Aumenta la altura */
+  padding: 0.5rem;
   border: 1px solid #ddd;
   border-radius: 4px;
-  font-size: 0.9rem;
-  text-align: center; /* Centra el texto */
+  font-size: 1rem;
+  text-align: center;
+}
+
+.export-btn {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  border-radius: 8px;
+  display: inline-block;
+  margin-bottom: 1rem;
+}
+
+.export-btn:hover {
+  background-color: #45a049;
 }
 
 /* Estilos para la tabla de órdenes */
 .orders-table {
   width: 100%;
   border-collapse: separate;
-  border-spacing: 1 10px;
+  border-spacing: 0 8px;
   font-size: 16px;
 }
 
@@ -570,6 +571,7 @@ export default {
   font-weight: bold;
   color: #555555;
   padding: 12px;
+  background-color: #f1f1f1;
 }
 
 .orders-table td {
@@ -580,26 +582,42 @@ export default {
 
 .status.solicitud {
   background-color: #ff8a3d;
+  color: white;
+  padding: 0.5rem;
+  border-radius: 4px;
+  text-align: center;
 }
 
 .status.enruta {
   background-color: #6f42c1;
+  color: white;
+  padding: 0.5rem;
+  border-radius: 4px;
+  text-align: center;
 }
 
 .status.concluido {
   background-color: #28a745;
+  color: white;
+  padding: 0.5rem;
+  border-radius: 4px;
+  text-align: center;
 }
 
 .status.cancelado {
   background-color: #dc3545;
+  color: white;
+  padding: 0.5rem;
+  border-radius: 4px;
+  text-align: center;
 }
 
 .status.enproceso {
   background-color: #007bff;
-}
-
-.status.gray {
-  background-color: gray;
+  color: white;
+  padding: 0.5rem;
+  border-radius: 4px;
+  text-align: center;
 }
 
 .detail-btn {
@@ -609,26 +627,37 @@ export default {
   padding: 0.75rem 1rem;
   border-radius: 5px;
   font-weight: bold;
-  font-size: 15px;
+  font-size: 1rem;
   cursor: pointer;
-  height: 60px;
-  min-width: 100px;
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s;
+}
+
+.detail-btn:hover {
+  background-color: #154a8a;
 }
 
 .pagination-container {
   display: flex;
+  justify-content: center;
   align-items: center;
-  gap: 8px;
+  gap: 1rem;
+  margin-top: 1rem;
 }
 
 button {
-  padding: 5px 10px;
+  padding: 0.5rem 1rem;
   border: 1px solid #007bff;
   background-color: #ffffff;
   color: #007bff;
   border-radius: 5px;
   cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #007bff;
+  color: white;
 }
 
 button.active {
@@ -645,12 +674,14 @@ button:disabled {
   background-color: #8b0000;
   color: white;
   border: none;
-  padding: 0.75rem 1rem;
+  padding: 0.75rem 1.5rem;
   border-radius: 8px;
   font-weight: bold;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  transition: background-color 0.3s;
+}
+
+.download-btn:hover {
+  background-color: #a40000;
 }
 </style>

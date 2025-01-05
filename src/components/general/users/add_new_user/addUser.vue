@@ -167,7 +167,7 @@ export default {
           name: this.values.name,
           rol: this.values.rol,
           defaultStore: this.values.defaultStore,
-          status: "activo",
+          status: "Activo",
           email,
           hashedPassword
         });
