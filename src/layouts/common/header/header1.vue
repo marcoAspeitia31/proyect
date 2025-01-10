@@ -322,7 +322,7 @@ export default {
   top: -5px;
   right: -10px;
   background: #ff6f61;
-  color: #fff;
+  color: transparent;
   font-size: 10px;
   padding: 2px 6px;
   border-radius: 50%;
@@ -331,10 +331,7 @@ export default {
   max-height: 300px;
   overflow-y: auto;
 }
-.notification-dropdown li {
-  padding: 10px;
-  border-bottom: 1px solid #ddd;
-}
+
 .notification-dropdown li:last-child {
   border-bottom: none;
 }

@@ -123,6 +123,13 @@
           "rol": ["Administrador", "Sistemas", "Sucursal"]
         },
         {
+          "name": "Continuar Pedido",
+          "path": "/orders/order-continue",
+          "type": "link",
+          "icon": "list",
+          "rol": ["Administrador", "Sistemas", "Sucursal"]
+        },
+        {
           "name": "Lista de Pedidos",
           "path": "/orders/order-list",
           "type": "link",

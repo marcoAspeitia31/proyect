@@ -40,7 +40,12 @@
               />
               <div class="flex-grow-1">
                 <h6 class="mb-1">{{ product.name }}</h6>
-                <p class="text-danger mb-1">${{ product.price }}</p>
+                <p class="text-muted mb-1">
+                  Cantidad: {{ mostrarCantidad(product) }}
+                </p>
+                <p class="text-danger mb-1">
+                  Precio: {{ formatoPrecio(product.price) }}
+                </p>
               </div>
               <button
                 class="btn btn-danger btn-sm"
@@ -67,9 +72,15 @@
           </div>
 
           <div class="text-end">
-            <p class="subtotal"><strong>Subtotal:</strong> ${{ subtotal }}</p>
-            <p class="subtotal"><strong>Envío:</strong> ${{ envio }}</p>
-            <p class="subtotal"><strong>Total:</strong> ${{ total }}</p>
+            <p class="subtotal">
+              <strong>Subtotal:</strong> {{ formatoPrecio(subtotal) }}
+            </p>
+            <p class="subtotal">
+              <strong>Envío:</strong> {{ formatoPrecio(envio) }}
+            </p>
+            <p class="subtotal">
+              <strong>Total:</strong> {{ formatoPrecio(total) }}
+            </p>
           </div>
         </div>
 
@@ -151,9 +162,15 @@
             placeholder="Comentarios"
           ></textarea>
           <div class="text-end mt-3">
-            <p class="subtotal"><strong>Subtotal:</strong> ${{ subtotal }}</p>
-            <p class="subtotal"><strong>Envío:</strong> ${{ envio }}</p>
-            <p class="subtotal"><strong>Total:</strong> ${{ total }}</p>
+            <p class="subtotal">
+              <strong>Subtotal:</strong> {{ formatoPrecio(subtotal) }}
+            </p>
+            <p class="subtotal">
+              <strong>Envío:</strong> {{ formatoPrecio(envio) }}
+            </p>
+            <p class="subtotal">
+              <strong>Total:</strong> {{ formatoPrecio(total) }}
+            </p>
           </div>
         </div>
       </div>
@@ -180,7 +197,7 @@ import Swal from "sweetalert2";
 export default {
   data() {
     return {
-      paso: 1, 
+      paso: 1,
       customerUID: null,
       carrito: {
         products: [],
@@ -190,7 +207,7 @@ export default {
         address: "",
         phone: "",
       },
-      envio: 35.0, // Valor de envío fijo
+      envio: 0, // Valor de envío fijo
       subtotal: 0,
       total: 0,
       metodoPago: {
@@ -198,7 +215,7 @@ export default {
         terminal: false,
       },
       billeteSeleccionado: null,
-      billeteOtro: null, 
+      billeteOtro: null,
       comentarios: "",
     };
   },
@@ -207,6 +224,25 @@ export default {
     this.cargarDatos();
   },
   methods: {
+    formatoPrecio(precio) {
+      return precio.toLocaleString("es-MX", {
+        style: "currency",
+        currency: "MXN",
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+    },
+
+    mostrarCantidad(product) {
+      if (product.unit === "KG") {
+        if (product.quantity >= 1000) {
+          const cantidadEnKg = product.quantity / 1000;
+          return `${cantidadEnKg.toFixed(1)} KG`; // Muestra en kilogramos si es 1000 gramos o más
+        }
+        return `${product.quantity} g`; // Muestra en gramos si es menos de 1000
+      }
+      return product.quantity; // Muestra la cantidad sin unidad si no es en KG
+    },
     obtenerCustomerUID() {
       const customerOpenCarts =
         JSON.parse(localStorage.getItem("customerOpenCarts")) || {};
@@ -237,11 +273,10 @@ export default {
       }
     },
     calcularSubtotal() {
-      this.subtotal = this.carrito.products.reduce(
-        (total, product) => total + product.price,
-        0
-      );
-      this.total = this.subtotal + this.envio;
+      this.subtotal = this.carrito.products.reduce((total, product) => {
+        return total + parseFloat(product.price);
+      }, 0);
+      this.total = this.subtotal + this.envio; // Calcula el total añadiendo el envío
     },
     validarMetodoPago(metodo) {
       if (

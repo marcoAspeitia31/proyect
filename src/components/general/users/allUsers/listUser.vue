@@ -42,7 +42,7 @@
             <td class="action-cell">
               <!-- Botón de Editar con confirmación SweetAlert -->
               <button @click="confirmEditUser(user)" class="edit-button">
-                <i class="fas fa-edit"></i>
+                Editar usuario
               </button>
             </td>
           </tr>
@@ -85,10 +85,10 @@
             </select>
           </div>
           <button type="submit" class="save-button">
-            <i class="fas fa-save"></i>
+             Guardar
           </button>
           <button type="button" @click="cancelEdit" class="cancel-button">
-            <i class="fas fa-times"></i>
+            Cancelar
           </button>
         </form>
       </div>
@@ -107,36 +107,35 @@ export default {
       stores: {
         7104: "SK LAS MARINAS",
         7105: "SK LERMA",
-        "7120": "SK TOLLOCAN",
-          "7121": "SK PINO SUAREZ",
-          "7122": "SK TENANCINGO",
-          "7125": "SK SAN BUENA VENTURA",
-          "7126": "SK CENTRO",
-          "7127": "SK LA ASUNCION",
-          "7128": "SK SANTIAGO TIANGUISTENCO",
-          "7129": "SK ATLACOMULCO",
-          "7130": "SK ZITACUARO",
-          "7150": "SK IXTLAHUACA",
-          "7305": "SKM ZITACUARO",
-          "7306": "SKM VALLE DE BRAVO AV TOLUCA",
-          "7308": "SKM SAN PEDRO",
-          "7309": "SKM SAN MATEO",
-          "7310": "SKM LAS PARTIDAS",
-          "7319": "SKM LEANDRO VALLE",
-          "7323": "SKM FIDEL VELAZQUEZ",
-          "7324": "SKM VALLE DE BRAVO",
-          "7331": "SKM XONACATLAN",
-          "7332": "SKM ALAMEDA",
-          "7333": "SKM GALERIAS",
-          "7334": "SKM METEPEC",
-          "7335": "SKM LERDO",
-          "7337": "SKM XINANTECATL",
-          "7338": "SKM SEMINARIO",
-          "7339": "SKM ATLACOMULCO",
-          "7344": "SKM SANTIAGO MILTEPEC",
-          "7346": "SKM TENANGO",
-          "7347": "SKM IXTLAHUACA",
-        // Añade el resto de las sucursales aquí...
+        7120: "SK TOLLOCAN",
+        7121: "SK PINO SUAREZ",
+        7122: "SK TENANCINGO",
+        7125: "SK SAN BUENA VENTURA",
+        7126: "SK CENTRO",
+        7127: "SK LA ASUNCION",
+        7128: "SK SANTIAGO TIANGUISTENCO",
+        7129: "SK ATLACOMULCO",
+        7130: "SK ZITACUARO",
+        7150: "SK IXTLAHUACA",
+        7305: "SKM ZITACUARO",
+        7306: "SKM VALLE DE BRAVO AV TOLUCA",
+        7308: "SKM SAN PEDRO",
+        7309: "SKM SAN MATEO",
+        7310: "SKM LAS PARTIDAS",
+        7319: "SKM LEANDRO VALLE",
+        7323: "SKM FIDEL VELAZQUEZ",
+        7324: "SKM VALLE DE BRAVO",
+        7331: "SKM XONACATLAN",
+        7332: "SKM ALAMEDA",
+        7333: "SKM GALERIAS",
+        7334: "SKM METEPEC",
+        7335: "SKM LERDO",
+        7337: "SKM XINANTECATL",
+        7338: "SKM SEMINARIO",
+        7339: "SKM ATLACOMULCO",
+        7344: "SKM SANTIAGO MILTEPEC",
+        7346: "SKM TENANGO",
+        7347: "SKM IXTLAHUACA",
       },
       selectedUser: null, // Usuario seleccionado para editar
     };

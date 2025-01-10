@@ -45,7 +45,7 @@
             </td>
             <td>
               <button @click="editBranch(branch)" class="btn btn-sm btn-edit">
-                <i class="fas fa-edit"></i>
+                Editar
               </button>
             </td>
           </tr>
@@ -74,7 +74,7 @@
           <label>Teléfono:</label>
           <input v-model="selectedBranch.phone" required placeholder="Teléfono" />
         </div>
-        <button type="submit" class="btn btn-save"><i class="fas fa-save"></i></button>
+        <button type="submit" class="btn btn-save">Guardar</button>
       </form>
     </div>
   </div>
@@ -315,12 +315,11 @@ select:focus {
   background-color: #28a745;
   color: white;
   border: none;
-  border-radius: 6px;
-  font-size: 16px;
+  border-radius: 5px;
+  font-size: 12px;
   font-weight: bold;
   text-align: center;
   cursor: pointer;
-  transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
 }
 
 .btn-save:hover {

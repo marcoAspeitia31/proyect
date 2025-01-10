@@ -19,7 +19,7 @@
 </template>
 
 <script>
-import usersTable from "@/components/general/users/allUsers/usersTable.vue";
+import usersTable from "@/components/general/users/allUsers/listUser.vue";
 import pagination from "@/layouts/elements/pagination.vue";
 import Users from "@/data/users.json";
 export default {

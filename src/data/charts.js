@@ -20,7 +20,7 @@ const charts = {
       legend: {
         show: false,
       },
-      colors: ["#e22454", "#2483e2"],
+      colors: ["#f02d96 ", "#2483e2"],
       markers: {
         size: 1,
       },
@@ -115,7 +115,7 @@ const charts = {
           columnWidth: "40%",
         },
       },
-      colors: ["#e22454"],
+      colors: ["#f02d96 "],
       dataLabels: {
         enabled: false,
       },
@@ -282,9 +282,9 @@ const charts = {
       stroke: {
         show: true,
         width: 2,
-        colors: ["transparent"],
+        colors: ["#2a3e92 "],
       },
-      colors: ["#e22454", "#2483e2", "#3d3d3d"],
+      colors: ["#f02d96 ", "#2483e2", "#3d3d3d"],
       xaxis: {
         categories: [
           "Feb",
@@ -339,7 +339,7 @@ const charts = {
       },
     ],
     chartOptions: {
-      colors: ["#e22454"],
+      colors: ["#f02d96 "],
 
       chart: {
         type: "area",
@@ -432,7 +432,7 @@ const charts = {
         height: 300,
         type: "bar",
       },
-      colors: ["#e22454", "#2483e2", "#3d3d3d"],
+      colors: ["#f02d96 ", "#2483e2", "#3d3d3d"],
       plotOptions: {
         bar: {
           columnWidth: "45%",
@@ -459,7 +459,7 @@ const charts = {
         ],
         labels: {
           style: {
-            colors: ["#e22454", "#2483e2", "#3d3d3d"],
+            colors: ["#f02d96 ", "#2483e2", "#3d3d3d"],
             fontSize: "12px",
           },
         },
@@ -490,7 +490,7 @@ const charts = {
         width: [3, 3],
       },
 
-      colors: ["#e22454", "#2483e2", "#e2c924"],
+      colors: ["#f02d96 ", "#2483e2", "#e2c924"],
 
       xaxis: {
         type: "time",
