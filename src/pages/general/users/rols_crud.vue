@@ -27,7 +27,6 @@
           </tr>
         </tbody>
       </table>
-      
       <!-- Formulario de edición de rol -->
       <div v-if="selectedUser" class="edit-form">
         <h4>Editar Rol del Usuario</h4>
@@ -58,6 +57,7 @@
 import { db, ref, onValue, update } from '@/firebase';
 
 export default {
+  title: "SK-Gestion-Rol",
   data() {
     return {
       users: [], // Lista de usuarios inicializada como un array vacío

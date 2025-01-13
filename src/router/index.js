@@ -298,7 +298,9 @@ router.beforeEach((to, from, next) => {
   let user = null;
 
   try {
-    user = isAuthenticated ? JSON.parse(isAuthenticated) : null;
+    user = isAuthenticated && isAuthenticated !== "[object Object]"
+      ? JSON.parse(isAuthenticated)
+      : null;
   } catch (e) {
     console.error("Error al parsear el usuario desde localStorage:", e);
     user = null;
@@ -306,11 +308,11 @@ router.beforeEach((to, from, next) => {
 
   if (
     !isAuthenticated &&
-    to.name !== "log_in" && // Redirige usando el nombre de la ruta
+    to.name !== "log_in" &&
     to.name !== "forgot_password" &&
     to.name !== "register"
   ) {
-    next({ name: "log_in" }); // Redirige al nombre de la ruta
+    next({ name: "log_in" });
   } else if (to.meta.roles && user && !to.meta.roles.includes(user.rol)) {
     next({ name: "dashboard" });
   } else {

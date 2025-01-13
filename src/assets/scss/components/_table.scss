@@ -845,7 +845,7 @@ table {
 
 				&.status-danger {
 					span {
-						background-color: rgba($color: #e22454, $alpha: .15);
+						background-color: rgba($color: #f02d96 , $alpha: .15);
 						color: var(--theme-color);
 						padding: 5px 10px;
 						text-transform: capitalize;
@@ -972,7 +972,7 @@ table {
 						&:first-child {
 							.transactions-icon {
 								background-color: rgba(226, 36, 84, .12);
-								color: #e22454;
+								color: #f02d96 ;
 							}
 						}
 					}

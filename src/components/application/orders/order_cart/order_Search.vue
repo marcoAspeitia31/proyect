@@ -57,11 +57,11 @@
             class="product-price"
             :class="{ 'original-price': hasOffer(product) }"
           >
-            ${{ product[`PRECIO_${this.divisionSuffix}`] }}
+            {{ formatoPrecio(product[`PRECIO_${divisionSuffix}`]) }}
           </p>
           <template v-if="hasOffer(product)">
             <p class="product-price offer-price" v-if="isOffer101(product)">
-              ${{ product[`PRECIOOFERTA_${this.divisionSuffix}`] }}
+              {{ formatoPrecio(product[`PRECIOOFERTA_${divisionSuffix}`]) }}
             </p>
             <p
               class="product-price bonificacion-price"
@@ -108,21 +108,22 @@
           <h3>{{ selectedProduct.DESCRIPCION }}</h3>
           <p class="category">{{ selectedProduct.CATEGORIAAPP }}</p>
           <p>
-            Precio Normal: ${{
-              selectedProduct[`PRECIO_${this.divisionSuffix}`]
-            }}
+            Precio Normal:
+            {{ formatoPrecio(selectedProduct[`PRECIO_${divisionSuffix}`]) }}
           </p>
           <p v-if="isOffer101(selectedProduct)">
-            Precio de Oferta: ${{
-              selectedProduct[`PRECIOOFERTA_${this.divisionSuffix}`]
+            Precio de Oferta:
+            {{
+              formatoPrecio(selectedProduct[`PRECIOOFERTA_${divisionSuffix}`])
             }}
           </p>
           <p v-if="isOffer103(selectedProduct)">
-            Bonificación: ${{
-              (
-                selectedProduct[`PRECIO_${this.divisionSuffix}`] -
-                selectedProduct[`PRECIOOFERTA_${this.divisionSuffix}`]
-              ).toFixed(2)
+            Bonificación:
+            {{
+              formatoPrecio(
+                selectedProduct[`PRECIO_${divisionSuffix}`] -
+                  selectedProduct[`PRECIOOFERTA_${divisionSuffix}`]
+              )
             }}
             a tarjeta club
           </p>
@@ -166,11 +167,11 @@
 <script>
 import Swal from "sweetalert2";
 import { apiBuscarProducto } from "@/boot/axios";
-import { useRouter } from "vue-router"; // Importa useRouter
+import { useRouter } from "vue-router";
 
 export default {
   setup() {
-    const router = useRouter(); // Utiliza useRouter para controlar la navegación
+    const router = useRouter();
     return { router };
   },
   data() {
@@ -181,7 +182,7 @@ export default {
       totalPages: 1,
       hitsPerPage: 25,
       totalHits: 0,
-      divisionSuffix: "", // Aquí se inicializa divisionSuffix
+      divisionSuffix: "",
       showModal: false,
       selectedProduct: null,
       quantity: 1,
@@ -215,8 +216,6 @@ export default {
       );
       this.divisionSuffix = ""; // Valor predeterminado
     }
-
-    // Continua con la lógica del componente
     this.searchProducts();
     this.updateCartCount();
   },
@@ -239,6 +238,15 @@ export default {
     },
   },
   methods: {
+    calcularPrecioPorPeso(precioPorKilo, cantidadEnGramos) {
+      const cantidadEnKilos = cantidadEnGramos / 1000;
+      return (cantidadEnKilos * precioPorKilo).toFixed(2);
+    },
+    formatoPrecio(precio) {
+      return `$${precio
+        .toLocaleString("es-MX", { style: "currency", currency: "MXN" })
+        .slice(1)}`;
+    },
     openCart() {
       const customerOperCarts =
         JSON.parse(localStorage.getItem("customerOpenCarts")) || {};
@@ -311,6 +319,7 @@ export default {
             this.filteredProducts = response.data.data.hits.map((product) => ({
               ...product,
               UNIDAD: product.UNIDAD || "ST",
+              EXISTENCIA: product[`EXISTENCIA_${this.divisionSuffix}`],
             }));
             this.totalPages = response.data.data.nbPages || 1;
             this.totalHits = response.data.data.nbHits || 0;
@@ -349,7 +358,6 @@ export default {
       const customerId = customerOperCarts.customerUID;
 
       if (!customerId) {
-        // En lugar de modificar cartItemCount, regresa 0 o realiza una operación en otro lugar
         console.log(
           "No se encontró customerUID. No se puede actualizar el conteo."
         );
@@ -358,55 +366,39 @@ export default {
 
       const carts = JSON.parse(localStorage.getItem("carts")) || {};
       if (carts[customerId] && carts[customerId].products) {
-        // Los datos de cartItemCount se actualizarán automáticamente
         return Object.keys(carts[customerId].products).length;
       }
       return 0;
     },
     addToCart() {
-      if (!this.selectedProduct) {
-        Swal.fire({
-          title: "Error",
-          text: "No se ha seleccionado un producto para agregar al carrito.",
-          icon: "error",
-          confirmButtonText: "OK",
-        });
-        return;
-      }
+      // Determinar si el producto tiene oferta y usar el precio de oferta si es aplicable
+      let productPrice =
+        this.isOffer101(this.selectedProduct) ||
+        this.isOffer103(this.selectedProduct)
+          ? parseFloat(
+              this.selectedProduct[`PRECIOOFERTA_${this.divisionSuffix}`]
+            )
+          : parseFloat(this.selectedProduct[`PRECIO_${this.divisionSuffix}`]);
 
-      const customerOperCarts =
-        JSON.parse(localStorage.getItem("customerOpenCarts")) || {};
-      const customerId = customerOperCarts.customerUID;
-
-      if (!customerId) {
-        Swal.fire({
-          title: "Error",
-          text: "No se pudo encontrar el ID del cliente.",
-          icon: "error",
-          confirmButtonText: "OK",
-        });
-        return;
-      }
-
-      let productPrice = this.selectedProduct[`PRECIO_${this.divisionSuffix}`];
-      if (this.isOffer101(this.selectedProduct)) {
-        productPrice =
-          this.selectedProduct[`PRECIOOFERTA_${this.divisionSuffix}`];
-      } else if (this.isOffer103(this.selectedProduct)) {
-        productPrice =
-          this.selectedProduct[`PRECIOOFERTA_${this.divisionSuffix}`];
+      if (this.selectedUnit === "KG") {
+        productPrice = this.calcularPrecioPorPeso(productPrice, this.quantity);
+      } else {
+        productPrice *= this.quantity; // Precio total por la cantidad de unidades ST
       }
 
       const cartItem = {
         name: this.selectedProduct.DESCRIPCION,
         picture:
           this.selectedProduct.URLS512 || "https://via.placeholder.com/150",
-        price: productPrice * this.quantity,
+        price: productPrice,
         quantity: this.quantity,
         unit: this.selectedUnit,
       };
 
       let carts = JSON.parse(localStorage.getItem("carts")) || {};
+      const customerOperCarts =
+        JSON.parse(localStorage.getItem("customerOpenCarts")) || {};
+      const customerId = customerOperCarts.customerUID;
       if (!carts[customerId]) {
         carts[customerId] = { products: {} };
       }
@@ -415,7 +407,7 @@ export default {
       if (carts[customerId].products[productCode]) {
         const existingProduct = carts[customerId].products[productCode];
         existingProduct.quantity += this.quantity;
-        existingProduct.price += productPrice * this.quantity;
+        existingProduct.price += productPrice;
       } else {
         carts[customerId].products[productCode] = cartItem;
       }
@@ -434,8 +426,9 @@ export default {
     },
     openModal(product) {
       this.selectedProduct = product;
-      this.quantity = product.UNIDAD.includes("KG") ? 50 : 1;
+      // Determinar la unidad inicial y cantidad según si el producto se maneja en KG o GR
       this.selectedUnit = product.UNIDAD.includes("KG") ? "KG" : "ST";
+      this.quantity = this.selectedUnit === "KG" ? 500 : 1; // Inicia con 500 gr si es KG, o 1 si es ST
       this.showModal = true;
     },
     closeModal() {
@@ -447,17 +440,21 @@ export default {
       this.quantity = unit === "KG" ? 50 : 1;
     },
     incrementQty() {
-      if (this.selectedUnit === "KG") {
-        this.quantity += 50;
-      } else if (this.selectedUnit === "ST") {
-        this.quantity += 1;
+      const incrementAmount = this.selectedUnit === "KG" ? 50 : 1; // Incremento en 50 gramos o 1 unidad
+      const maxQuantity =
+        this.selectedProduct[`EXISTENCIA_${this.divisionSuffix}`] *
+        (this.selectedUnit === "KG" ? 1000 : 1);
+      if (this.quantity + incrementAmount <= maxQuantity) {
+        this.quantity += incrementAmount;
       }
     },
     decrementQty() {
-      if (this.selectedUnit === "KG" && this.quantity > 50) {
-        this.quantity -= 50;
-      } else if (this.selectedUnit === "ST" && this.quantity > 1) {
-        this.quantity -= 1;
+      const decrementAmount = this.selectedUnit === "KG" ? 50 : 1; // Decremento en 50 gramos o 1 unidad
+      if (
+        (this.selectedUnit === "KG" && this.quantity > 50) ||
+        (this.selectedUnit === "ST" && this.quantity > 1)
+      ) {
+        this.quantity -= decrementAmount;
       }
     },
   },

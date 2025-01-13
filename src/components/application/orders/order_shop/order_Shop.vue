@@ -89,7 +89,7 @@ import { getDatabase, ref, onValue } from "firebase/database";
 import Swal from "sweetalert2";
 
 export default {
-  name: "WelcomeComponent",
+  title: "SK-Pedidos",
   data() {
     return {
       isModalOpen: false,
