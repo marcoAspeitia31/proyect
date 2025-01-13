@@ -9,7 +9,7 @@
       <li class="breadcrumb-item">
       <router-link to="#">Gestion de Sucursales</router-link>
       </li>
-      <li class="breadcrumb-item active" aria-current="page">Total de sucursales</li>
+      <li class="breadcrumb-item active" aria-current="page">Crear Sucursales </li>
   </ol>
 </nav>
       <form @submit.prevent="createNewBranch" class="branch-form">
@@ -133,7 +133,7 @@ export default {
     createNewBranch() {
   if (this.newBranch.name && this.newBranch.division && this.newBranch.address && this.newBranch.latitude && this.newBranch.longitude && this.newBranch.phone) {
     // Usa la ruta correcta para almacenar las sucursales
-    const branchRef = push(ref(db, '/projects/superkomprasBackoffice/stores'));  // Cambiar 'branches' por 'stores'
+    const branchRef = push(ref(db, '/projects/superkomprasBackoffice/stores'));  
     set(branchRef, this.newBranch)
       .then(() => {
         Swal.fire('Sucursal creada', 'La sucursal ha sido creada exitosamente', 'success');
