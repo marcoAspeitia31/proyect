@@ -111,7 +111,7 @@ export default {
 
       const customerRef = ref(
         db,
-        `/projects/superkomprasBackoffice/customer/${customerId}`
+        `/projects/superkomprasBackoffice/clienteSAD/${customerId}`
       );
       onValue(customerRef, (snapshot) => {
         if (snapshot.exists()) {
@@ -146,7 +146,7 @@ export default {
         this.marker = new google.maps.Marker({
           map: this.map,
           position: position,
-          draggable: false, 
+          draggable: false,
         });
       } else {
         this.marker.setPosition(position);
@@ -175,12 +175,12 @@ export default {
 
       const customerRef = ref(
         db,
-        `/projects/superkomprasBackoffice/customer/${this.customerId}`
+        `/projects/superkomprasBackoffice/clienteSAD/${this.customerId}`
       );
 
       const updatedData = {
         ...this.values,
-        updateDate: new Date().toISOString(), // Fecha de actualización
+        updateDate: Date.now(), // Fecha de actualización como timestamp
       };
 
       update(customerRef, updatedData)
@@ -206,7 +206,6 @@ export default {
   },
 };
 </script>
-
 
 <style>
 .input {

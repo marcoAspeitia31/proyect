@@ -96,7 +96,10 @@
             ref="modalAutocomplete"
           />
         </div>
-        <div id="modal-map" style="width: 100%; height: 400px; margin-top: 20px"></div>
+        <div
+          id="modal-map"
+          style="width: 100%; height: 400px; margin-top: 20px"
+        ></div>
         <button @click="confirmAddress" class="btn btn-success mt-3">
           Confirmar Dirección
         </button>
@@ -110,6 +113,7 @@
 
 <script>
 import { db, ref, set } from "@/firebase";
+import { v4 as uuidv4 } from "uuid";
 import Swal from "sweetalert2";
 
 export default {
@@ -122,7 +126,8 @@ export default {
         phone: "",
         additionalPhone: "",
         clubCard: "",
-        coordinates: { lat: null, lng: null },
+        latitude: null,
+        longitude: null,
         registryDate: Date.now(),
         updateDate: null,
       },
@@ -155,25 +160,23 @@ export default {
       this.showModal = false;
     },
     confirmAddress() {
-  if (!this.modalMarker || !this.modalMarker.getPosition()) {
-    this.showAlert(
-      "error",
-      "Posición no definida",
-      "Por favor, selecciona una ubicación en el mapa."
-    );
-    return;
-  }
+      if (!this.modalMarker || !this.modalMarker.getPosition()) {
+        this.showAlert(
+          "error",
+          "Posición no definida",
+          "Por favor, selecciona una ubicación en el mapa."
+        );
+        return;
+      }
 
-  const position = this.modalMarker.getPosition();
-  this.values.address = this.tempAddress;
-  this.values.coordinates = {
-    lat: position.lat(),
-    lng: position.lng(),
-  };
-  this.isAddressConfirmed = true;
-  this.closeModal();
-  this.initStaticMap(); // Muestra el mapa estático después de cerrar la modal
-},
+      const position = this.modalMarker.getPosition();
+      this.values.address = this.tempAddress;
+      this.values.latitude = position.lat();
+      this.values.longitude = position.lng();
+      this.isAddressConfirmed = true;
+      this.closeModal();
+      this.initStaticMap();
+    },
 
     initModalMap() {
       if (this.modalMap) return;
@@ -222,12 +225,12 @@ export default {
         }
 
         this.staticMap = new google.maps.Map(mapElement, {
-          center: this.values.coordinates,
+          center: { lat: this.values.latitude, lng: this.values.longitude },
           zoom: 15,
         });
 
         new google.maps.Marker({
-          position: this.values.coordinates,
+          position: { lat: this.values.latitude, lng: this.values.longitude },
           map: this.staticMap,
         });
       });
@@ -256,12 +259,12 @@ export default {
     },
     async registerCustomer() {
       try {
-        const customerId = Date.now().toString(); // Generar un ID único
+        const customerId = uuidv4(); // Generar un ID único usando UUID
         await set(
-          ref(db, `/projects/superkomprasBackoffice/customer/${customerId}`),
+          ref(db, `/projects/superkomprasBackoffice/clienteSAD/${customerId}`),
           {
             ...this.values,
-            updateDate: Date.now(),
+            updateDate: Date.now(), // Actualiza el timestamp en el momento del registro
           }
         );
         Swal.fire({
@@ -287,7 +290,8 @@ export default {
         phone: "",
         additionalPhone: "",
         clubCard: "",
-        coordinates: { lat: null, lng: null },
+        latitude: null,
+        longitude: null,
         registryDate: Date.now(),
         updateDate: null,
       };
@@ -357,5 +361,4 @@ export default {
     width: 95%; /* Más ancho en dispositivos pequeños */
   }
 }
-
 </style>

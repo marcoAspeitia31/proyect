@@ -21,9 +21,9 @@
         <div v-if="paso === 1">
           <!-- Paso 1: Resumen del carrito -->
           <div
-            v-if="carrito.products.length"
-            v-for="(product, key) in carrito.products"
-            :key="key"
+            v-if="Object.keys(carrito.products).length"
+            v-for="(product, code) in carrito.products"
+            :key="code"
             class="card mb-3"
           >
             <div class="card-body d-flex align-items-center">
@@ -49,7 +49,7 @@
               </div>
               <button
                 class="btn btn-danger btn-sm"
-                @click="eliminarProducto(key)"
+                @click="eliminarProducto(code)"
               >
                 <i class="fas fa-trash-alt"></i>
               </button>
@@ -86,10 +86,19 @@
 
         <div v-else-if="paso === 2">
           <!-- Paso 2: Métodos de pago -->
-          <h6><strong>Entrega</strong></h6>
-          <p>{{ cliente.name }}</p>
-          <p>{{ cliente.address }}</p>
-          <p>{{ cliente.phone }}</p>
+          <div class="card p-3 mb-3">
+            <p class="mb-1"><strong>Nombre:</strong> {{ cliente.name }}</p>
+            <p class="mb-1">
+              <strong>Dirección:</strong> {{ cliente.address }}
+            </p>
+            <p class="mb-1"><strong>Teléfono:</strong> {{ cliente.phone }}</p>
+            <p class="mb-1">
+              <strong>Teléfono adicional:</strong> {{ cliente.additionalPhone }}
+            </p>
+            <p class="mb-1">
+              <strong>Tarjeta de Club:</strong> {{ cliente.clubCard }}
+            </p>
+          </div>
 
           <h6><strong>Método de Pago</strong></h6>
           <div
@@ -118,7 +127,6 @@
               <option value="100">$100</option>
               <option value="200">$200</option>
               <option value="500">$500</option>
-              <option value="1000">$1000</option>
               <option value="otro">Otro</option>
             </select>
             <div v-if="billeteSeleccionado === 'otro'" class="mt-3">
@@ -193,6 +201,7 @@
 
 <script>
 import Swal from "sweetalert2";
+import { db, ref, set } from "@/firebase";
 
 export default {
   data() {
@@ -200,14 +209,16 @@ export default {
       paso: 1,
       customerUID: null,
       carrito: {
-        products: [],
+        products: {},
       },
       cliente: {
         name: "",
         address: "",
         phone: "",
+        additionalPhone: "", // Nuevo campo
+        clubCard: "",
       },
-      envio: 0, // Valor de envío fijo
+      envio: 0,
       subtotal: 0,
       total: 0,
       metodoPago: {
@@ -219,11 +230,100 @@ export default {
       comentarios: "",
     };
   },
+  computed: {
+    subtotal() {
+      return Object.values(this.carrito.products).reduce(
+        (total, product) => total + parseFloat(product.price),
+        0
+      );
+    },
+    total() {
+      return this.subtotal + this.envio;
+    },
+  },
   mounted() {
     this.obtenerCustomerUID();
     this.cargarDatos();
+    this.calcularDistanciaEnvio();
   },
   methods: {
+    calcularRutaOSRM(lat1, lon1, lat2, lon2) {
+      return new Promise((resolve, reject) => {
+        const profile = "driving";
+        const coordinates = `${lon1},${lat1};${lon2},${lat2}`;
+        const url = `https://router.project-osrm.org/route/v1/${profile}/${coordinates}?overview=false&alternatives=false&steps=false&geometries=polyline`;
+
+        fetch(url)
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.code === "Ok") {
+              const route = data.routes[0];
+              resolve({
+                distance: route.distance / 1000,
+                duration: route.duration,
+              });
+            } else {
+              reject("No se encontró una ruta.");
+            }
+          })
+          .catch((error) => {
+            console.error("Error al conectar con la API de OSRM:", error);
+            reject(error);
+          });
+      });
+    },
+
+    calcularDistanciaEnvio() {
+      const customerOpenCarts =
+        JSON.parse(localStorage.getItem("customerOpenCarts")) || {};
+
+      if (!customerOpenCarts || !this.customerUID) {
+        console.error("Datos insuficientes para calcular la distancia.");
+        return;
+      }
+
+      const clienteData = customerOpenCarts[this.customerUID]?.customer || {};
+      const customerLat = clienteData.latitude;
+      const customerLng = clienteData.longitude;
+
+      const storeData = customerOpenCarts[this.customerUID]?.store || {};
+      const storeLat = storeData.latitude;
+      const storeLng = storeData.longitude;
+
+      if (customerLat && customerLng && storeLat && storeLng) {
+        this.calcularRutaOSRM(storeLat, storeLng, customerLat, customerLng)
+          .then((data) => {
+            this.envio = this.calcularCostoEnvio(data.distance);
+            this.total = this.subtotal + this.envio;
+            console.log(`Distancia calculada: ${data.distance.toFixed(2)} km`);
+            console.log(`Costo de envío: ${this.envio}`);
+          })
+          .catch((error) => {
+            console.error("Error al calcular la ruta: ", error);
+          });
+      } else {
+        console.error("Coordenadas no disponibles.");
+      }
+    },
+
+    calcularCostoEnvio(distancia) {
+      let costoEnvioBase = 0;
+      if (this.subtotal <= 200) {
+        costoEnvioBase = 55;
+      } else if (this.subtotal <= 500) {
+        costoEnvioBase = 45;
+      } else {
+        costoEnvioBase = 35;
+      }
+
+      if (distancia > 3) {
+        const kmExtra = distancia - 3;
+        costoEnvioBase += kmExtra * 10;
+      }
+
+      return costoEnvioBase;
+    },
+
     formatoPrecio(precio) {
       return precio.toLocaleString("es-MX", {
         style: "currency",
@@ -237,12 +337,13 @@ export default {
       if (product.unit === "KG") {
         if (product.quantity >= 1000) {
           const cantidadEnKg = product.quantity / 1000;
-          return `${cantidadEnKg.toFixed(1)} KG`; // Muestra en kilogramos si es 1000 gramos o más
+          return `${cantidadEnKg.toFixed(1)} KG`;
         }
-        return `${product.quantity} g`; // Muestra en gramos si es menos de 1000
+        return `${product.quantity} g`;
       }
-      return product.quantity; // Muestra la cantidad sin unidad si no es en KG
+      return product.quantity;
     },
+
     obtenerCustomerUID() {
       const customerOpenCarts =
         JSON.parse(localStorage.getItem("customerOpenCarts")) || {};
@@ -252,6 +353,7 @@ export default {
         alert("No se encontró un UID seleccionado.");
       }
     },
+
     cargarDatos() {
       if (!this.customerUID) return;
 
@@ -264,20 +366,29 @@ export default {
           customerOpenCarts[this.customerUID].customer || {};
         const selectedCart = carts[this.customerUID]?.products || {};
 
-        this.carrito.products = Object.values(selectedCart);
+        this.carrito.products = selectedCart;
         this.cliente.name = selectedCustomer.name || "Sin nombre";
         this.cliente.address = selectedCustomer.address || "Sin dirección";
         this.cliente.phone = selectedCustomer.phone || "Sin teléfono";
+        this.cliente.additionalPhone =
+          selectedCustomer.additionalPhone || "Sin teléfono adicional";
+        this.cliente.clubCard =
+          selectedCustomer.clubCard || "Sin tarjeta de club";
 
         this.calcularSubtotal();
       }
     },
+
     calcularSubtotal() {
-      this.subtotal = this.carrito.products.reduce((total, product) => {
-        return total + parseFloat(product.price);
-      }, 0);
-      this.total = this.subtotal + this.envio; // Calcula el total añadiendo el envío
+      this.subtotal = Object.values(this.carrito.products).reduce(
+        (total, product) => {
+          return total + parseFloat(product.price);
+        },
+        0
+      );
+      this.total = this.subtotal + this.envio;
     },
+
     validarMetodoPago(metodo) {
       if (
         metodo === "efectivo" &&
@@ -303,54 +414,91 @@ export default {
         });
       }
     },
+
     avanzarPaso() {
       this.paso++;
     },
+
     volver() {
       if (this.paso === 1) {
         this.$router.push({
           name: "order_search",
-          query: { customerUID: this.customerUID },
         });
       } else {
         this.paso--;
       }
     },
+
     vaciarCarrito() {
-      this.carrito.products = [];
+      this.carrito.products = {};
       this.actualizarLocalStorage();
       this.subtotal = 0;
       this.total = this.envio;
+      this.$router.push({ name: "order_search" });
     },
-    eliminarProducto(index) {
-      this.carrito.products.splice(index, 1);
+
+    eliminarProducto(code) {
+      delete this.carrito.products[code];
       this.actualizarLocalStorage();
       this.calcularSubtotal();
     },
+
     actualizarLocalStorage() {
       const carts = JSON.parse(localStorage.getItem("carts")) || {};
-      carts[this.customerUID].products = this.carrito.products.reduce(
-        (acc, product, i) => {
-          acc[i] = product;
-          return acc;
-        },
-        {}
-      );
+      carts[this.customerUID] = { products: this.carrito.products };
       localStorage.setItem("carts", JSON.stringify(carts));
     },
+
     finalizarCompra() {
-      const billete =
-        this.billeteSeleccionado === "otro"
-          ? this.billeteOtro
-          : this.billeteSeleccionado;
-      alert(
-        "Compra finalizada con los siguientes detalles:\n" +
-          `Método de Pago: ${this.metodoPago.efectivo ? "Efectivo" : ""} ${
-            this.metodoPago.terminal ? "Terminal" : ""
-          }\n` +
-          `Billete Seleccionado: ${billete || "N/A"}\n` +
-          `Comentarios: ${this.comentarios}`
-      );
+      const timestamp = new Date().getTime();
+      const orderId = `Pedido-${timestamp}`;
+
+      const carts = JSON.parse(localStorage.getItem("carts")) || {};
+      const customerOpenCarts = JSON.parse(localStorage.getItem("customerOpenCarts")) || {};
+
+      const orderData = {
+        orderId: orderId,
+        cliente: this.cliente,
+        products: this.carrito.products,
+        subtotal: this.subtotal,
+        envio: this.envio,
+        total: this.total,
+        metodoPago: this.metodoPago.efectivo
+          ? "Efectivo"
+          : this.metodoPago.terminal
+          ? "Terminal"
+          : "No definido",
+        billete:
+          this.billeteSeleccionado === "otro"
+            ? this.billeteOtro
+            : this.billeteSeleccionado,
+        comentarios: this.comentarios,
+        timeSolicitud: timestamp,
+        customerData: customerOpenCarts[this.customerUID] || {},
+        cartData: carts[this.customerUID] || {}
+      };
+
+      // Usa `set` para guardar el pedido con un ID específico
+      set(
+        ref(db, `/projects/superkomprasBackoffice/pedidos/${orderId}`),
+        orderData
+      )
+        .then(() => {
+          Swal.fire(
+            "Compra Finalizada",
+            "El pedido ha sido guardado con éxito en Firebase.",
+            "success"
+          );
+          this.vaciarCarrito();
+        })
+        .catch((error) => {
+          console.error("Error al guardar el pedido en Firebase:", error);
+          Swal.fire(
+            "Error",
+            "No se pudo guardar el pedido en Firebase.",
+            "error"
+          );
+        });
     },
   },
 };

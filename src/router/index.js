@@ -29,6 +29,7 @@ import edit_Client from "@/components/application/orders/order_shop/edit_Client.
 import order_Search from "@/components/application/orders/order_cart/order_Search.vue";
 import order_Continue from "@/components/application/orders/order_cart/oder_Continue.vue";
 import order_CheckCart from "@/components/application/orders/order_cart/order_CheckCart.vue";
+import listUserTable from "@/components/general/users/allUsers/listUserTable.vue";
 
 // Declaración de las rutas
 const routes = [
@@ -70,6 +71,16 @@ const routes = [
       layout: layout1,
       breadcrumb: { type: 2, title: "Detalles de usuario" },
       roles: ["Administrador", "Sistemas", "Sucursal"],
+    },
+  },
+  {
+    path: "/user/all-user-table",
+    name: "listUserTable",
+    component: listUserTable,
+    meta: {
+      layout: layout1,
+      breadcrumb: { type: 2, title: "Total de usuarios" },
+      roles: ["Sucursal"],
     },
   },
   {
@@ -241,7 +252,7 @@ const routes = [
     meta: {
       layout: layout1,
       breadcrumb: { type: 2, title: "Total Sucursales" },
-      roles: ["Administrador", "Sistemas"],
+      roles: ["Administrador", "Sistemas", "Sucursal"],
     },
   },
   {
@@ -298,9 +309,10 @@ router.beforeEach((to, from, next) => {
   let user = null;
 
   try {
-    user = isAuthenticated && isAuthenticated !== "[object Object]"
-      ? JSON.parse(isAuthenticated)
-      : null;
+    user =
+      isAuthenticated && isAuthenticated !== "[object Object]"
+        ? JSON.parse(isAuthenticated)
+        : null;
   } catch (e) {
     console.error("Error al parsear el usuario desde localStorage:", e);
     user = null;

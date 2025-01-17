@@ -115,15 +115,24 @@ export default {
           );
           get(userRef).then((userSnapshot) => {
             if (userSnapshot.exists()) {
-              const userData = userSnapshot.val();
+              const { hashedPassword, ...safeUserData } = userSnapshot.val(); // Excluye el hashedPassword
               this.$store.dispatch("functionalities/setUser", {
                 user: {
                   uid: user.uid,
-                  email: user.email,
-                  rol: userData.rol,
-                  permissions: userData.permissions,
+                  rol: safeUserData.rol,
+                  defaultStore: safeUserData.defaultStore,
+                  name: safeUserData.name,
+                  permissions: safeUserData.permissions,
                 },
               });
+              localStorage.setItem(
+                "user",
+                JSON.stringify({
+                  rol: safeUserData.rol,
+                  defaultStore: safeUserData.defaultStore,
+                  name: safeUserData.name,
+                })
+              );
               Swal.fire({
                 icon: "success",
                 title: "¡Inicio de sesión exitoso!",

@@ -13,7 +13,9 @@
       <!-- Ícono del carrito -->
       <div class="cart-icon" @click="openCart">
         🛒
-        <span class="cart-counter">{{ cartItemCount }}</span>
+        <span v-if="cartItemCount > 0" class="cart-count">{{
+          cartItemCount
+        }}</span>
       </div>
     </div>
 
@@ -190,52 +192,36 @@ export default {
       cartItems: JSON.parse(localStorage.getItem("carts")) || [],
     };
   },
-  watch: {
-    selectedStore(newStore, oldStore) {
-      if (newStore && newStore !== oldStore) {
-        this.divisionSuffix = newStore.division; // Asignación de divisionSuffix al cambiar de sucursal
-        this.resetAndSearch(); // Reinicia la búsqueda con la nueva sucursal
+  computed: {
+    cartItemCount() {
+      const carts = JSON.parse(localStorage.getItem("carts")) || {};
+      const customerOperCarts =
+        JSON.parse(localStorage.getItem("customerOpenCarts")) || {};
+      const customerId = customerOperCarts.customerUID;
+
+      if (customerId && carts[customerId]?.products) {
+        return Object.keys(carts[customerId].products).length;
       }
+      return 0;
     },
   },
   created() {
-    // Intenta obtener la división desde localStorage
     const customerOpenCarts =
       JSON.parse(localStorage.getItem("customerOpenCarts")) || {};
-    const activeCustomerUID = customerOpenCarts.customerUID; // El cliente activo
+    const activeCustomerUID = customerOpenCarts.customerUID;
 
     if (
       activeCustomerUID &&
       customerOpenCarts[activeCustomerUID]?.store?.division
     ) {
-      // Asigna la división desde el localStorage
       this.divisionSuffix = customerOpenCarts[activeCustomerUID].store.division;
     } else {
       console.warn(
         "No se pudo encontrar la división en customerOpenCarts. Usando valor predeterminado."
       );
-      this.divisionSuffix = ""; // Valor predeterminado
+      this.divisionSuffix = "";
     }
     this.searchProducts();
-    this.updateCartCount();
-  },
-
-  computed: {
-    cartItemCount() {
-      const customerOperCarts =
-        JSON.parse(localStorage.getItem("customerOpenCarts")) || {};
-      const customerId = customerOperCarts.customerUID;
-
-      if (!customerId) {
-        return 0;
-      }
-
-      const carts = JSON.parse(localStorage.getItem("carts")) || {};
-      if (carts[customerId] && carts[customerId].products) {
-        return Object.keys(carts[customerId].products).length;
-      }
-      return 0;
-    },
   },
   methods: {
     calcularPrecioPorPeso(precioPorKilo, cantidadEnGramos) {
@@ -252,20 +238,34 @@ export default {
         JSON.parse(localStorage.getItem("customerOpenCarts")) || {};
       const customerId = customerOperCarts.customerUID;
 
-      if (customerId) {
-        this.router
-          .push({ name: "cart", params: { customerUID: customerId } })
-          .catch((err) => {
-            console.error("Routing error:", err);
-          });
-      } else {
+      if (!customerId) {
         Swal.fire({
           title: "Error",
           text: "No se pudo encontrar el ID del cliente.",
           icon: "error",
           confirmButtonText: "OK",
         });
+        return;
       }
+
+      const carts = JSON.parse(localStorage.getItem("carts")) || {};
+      const cartItems = carts[customerId]?.products;
+
+      if (!cartItems || Object.keys(cartItems).length === 0) {
+        Swal.fire({
+          title: "Carrito vacío",
+          text: "No puedes abrir el carrito si no hay productos seleccionados.",
+          icon: "warning",
+          confirmButtonText: "OK",
+        });
+        return;
+      }
+
+      this.router
+        .push({ name: "cart", params: { customerUID: customerId } })
+        .catch((err) => {
+          console.error("Routing error:", err);
+        });
     },
     hasOffer(product) {
       const tipoOfertaKey = `TIPOOFERTA_${this.divisionSuffix}`;
@@ -352,38 +352,23 @@ export default {
         this.searchProducts();
       }
     },
-    updateCartCount() {
-      const customerOperCarts =
-        JSON.parse(localStorage.getItem("customerOpenCarts")) || {};
-      const customerId = customerOperCarts.customerUID;
-
-      if (!customerId) {
-        console.log(
-          "No se encontró customerUID. No se puede actualizar el conteo."
-        );
-        return;
-      }
-
-      const carts = JSON.parse(localStorage.getItem("carts")) || {};
-      if (carts[customerId] && carts[customerId].products) {
-        return Object.keys(carts[customerId].products).length;
-      }
-      return 0;
-    },
     addToCart() {
-      // Determinar si el producto tiene oferta y usar el precio de oferta si es aplicable
-      let productPrice =
-        this.isOffer101(this.selectedProduct) ||
-        this.isOffer103(this.selectedProduct)
-          ? parseFloat(
-              this.selectedProduct[`PRECIOOFERTA_${this.divisionSuffix}`]
-            )
-          : parseFloat(this.selectedProduct[`PRECIO_${this.divisionSuffix}`]);
+      let productPrice = parseFloat(
+        this.selectedProduct[`PRECIO_${this.divisionSuffix}`]
+      );
+      let cantidadFinal =
+        this.selectedUnit === "KG" ? this.quantity : `${this.quantity}PZ`;
 
-      if (this.selectedUnit === "KG") {
-        productPrice = this.calcularPrecioPorPeso(productPrice, this.quantity);
-      } else {
-        productPrice *= this.quantity; // Precio total por la cantidad de unidades ST
+      if (this.hasOffer(this.selectedProduct)) {
+        if (this.isOffer101(this.selectedProduct)) {
+          productPrice = parseFloat(
+            this.selectedProduct[`PRECIOOFERTA_${this.divisionSuffix}`]
+          );
+        } else if (this.isOffer103(this.selectedProduct)) {
+          productPrice = parseFloat(
+            this.selectedProduct[`PRECIOOFERTA_${this.divisionSuffix}`]
+          );
+        }
       }
 
       const cartItem = {
@@ -391,29 +376,24 @@ export default {
         picture:
           this.selectedProduct.URLS512 || "https://via.placeholder.com/150",
         price: productPrice,
-        quantity: this.quantity,
+        quantity: cantidadFinal,
         unit: this.selectedUnit,
+        categoriaApp: this.selectedProduct.CATEGORIAAPP,
       };
 
       let carts = JSON.parse(localStorage.getItem("carts")) || {};
       const customerOperCarts =
         JSON.parse(localStorage.getItem("customerOpenCarts")) || {};
       const customerId = customerOperCarts.customerUID;
+
       if (!carts[customerId]) {
         carts[customerId] = { products: {} };
       }
 
       const productCode = this.selectedProduct.CODIGO;
-      if (carts[customerId].products[productCode]) {
-        const existingProduct = carts[customerId].products[productCode];
-        existingProduct.quantity += this.quantity;
-        existingProduct.price += productPrice;
-      } else {
-        carts[customerId].products[productCode] = cartItem;
-      }
+      carts[customerId].products[productCode] = cartItem;
 
       localStorage.setItem("carts", JSON.stringify(carts));
-      this.updateCartCount();
 
       Swal.fire({
         title: "Producto agregado",
@@ -426,9 +406,8 @@ export default {
     },
     openModal(product) {
       this.selectedProduct = product;
-      // Determinar la unidad inicial y cantidad según si el producto se maneja en KG o GR
       this.selectedUnit = product.UNIDAD.includes("KG") ? "KG" : "ST";
-      this.quantity = this.selectedUnit === "KG" ? 500 : 1; // Inicia con 500 gr si es KG, o 1 si es ST
+      this.quantity = this.selectedUnit === "KG" ? 500 : 1;
       this.showModal = true;
     },
     closeModal() {
@@ -438,6 +417,10 @@ export default {
     selectUnit(unit) {
       this.selectedUnit = unit;
       this.quantity = unit === "KG" ? 50 : 1;
+      if (unit === "PZ" && this.selectedProduct.UNIDAD.includes("KG")) {
+        // Ajustar cantidad inicial cuando se selecciona por piezas y la unidad es KG
+        this.quantity = 1; // o cualquier otro valor inicial para piezas
+      }
     },
     incrementQty() {
       const incrementAmount = this.selectedUnit === "KG" ? 50 : 1; // Incremento en 50 gramos o 1 unidad
@@ -781,6 +764,22 @@ export default {
 
 .unit-buttons button:hover {
   background-color: #8092d8;
+}
+.cart-icon {
+  position: relative;
+  cursor: pointer;
+  font-size: 24px;
+}
+
+.cart-count {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background-color: red;
+  color: white;
+  border-radius: 50%;
+  padding: 2px 6px;
+  font-size: 14px;
 }
 
 .counter button {

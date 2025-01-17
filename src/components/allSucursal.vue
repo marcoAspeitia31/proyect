@@ -8,9 +8,6 @@
         <li class="breadcrumb-item">
           <router-link to="#">Gestion de Sucursales</router-link>
         </li>
-        <li class="breadcrumb-item">
-          <router-link to= "/stores/create-store">Crear Sucursales</router-link>
-        </li>
         <li class="breadcrumb-item active" aria-current="page">Total de sucursales</li>
       </ol>
     </nav>

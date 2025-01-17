@@ -49,7 +49,7 @@ export default {
     const searchQuery = ref("");
     const router = useRouter();
 
-    const clientsRef = dbRef(db, "/projects/superkomprasBackoffice/customer");
+    const clientsRef = dbRef(db, "/projects/superkomprasBackoffice/clienteSAD");
 
     const fetchClients = () => {
       onValue(clientsRef, (snapshot) => {
@@ -84,7 +84,7 @@ export default {
       if (result.isConfirmed) {
         const clientRef = dbRef(
           db,
-          `/projects/superkomprasBackoffice/customer/${id}`
+          `/projects/superkomprasBackoffice/ClienteSAD/${id}`
         );
         await remove(clientRef);
         Swal.fire("Eliminado!", "El cliente ha sido eliminado.", "success");

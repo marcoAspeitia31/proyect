@@ -20,6 +20,7 @@
 
 <script>
 import usersTable from "@/components/general/users/allUsers/listUser.vue";
+import usersTable from "@/components/general/users/allUsers/listUserTable.vue";
 import pagination from "@/layouts/elements/pagination.vue";
 import Users from "@/data/users.json";
 export default {

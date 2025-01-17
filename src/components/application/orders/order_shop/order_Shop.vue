@@ -119,10 +119,39 @@ export default {
     },
   },
   mounted() {
-    this.fetchStores();
+    this.initializeUserData();
     this.fetchCustomers();
   },
   methods: {
+    initializeUserData() {
+      const userInfo = JSON.parse(localStorage.getItem("user"));
+      if (userInfo && userInfo.rol === "Sucursal" && userInfo.defaultStore) {
+        this.fetchStoreForBranchUser(userInfo.defaultStore);
+      } else {
+        this.fetchStores();
+      }
+    },
+
+    fetchStoreForBranchUser(divisionId) {
+      const db = getDatabase();
+      const dbRef = ref(db, `/projects/superkomprasBackoffice/stores`);
+      onValue(
+        dbRef,
+        (snapshot) => {
+          snapshot.forEach((childSnapshot) => {
+            const store = childSnapshot.val();
+            if (store.division === divisionId && store.status === "activo") {
+              this.selectedStore = { ...store, id: childSnapshot.key };
+              //console.log("Sucursal seleccionada automáticamente:",this.selectedStore);
+            }
+          });
+        },
+        {
+          onlyOnce: true,
+        }
+      );
+    },
+
     saveNewOrderToLocalStorage() {
       if (
         this.selectedStore.name !== "Seleccione una sucursal" &&
@@ -130,9 +159,7 @@ export default {
       ) {
         const customerOpenCarts =
           JSON.parse(localStorage.getItem("customerOpenCarts")) || {};
-
         const customerId = this.selectedCustomer.id;
-        console.log("ID del cliente seleccionado:", customerId);
 
         if (!customerId) {
           Swal.fire({
@@ -144,28 +171,15 @@ export default {
           return;
         }
 
-        // Guardar datos en `customerOpenCarts` y asignar `customerUID`
-        customerOpenCarts.customerUID = customerId;
         customerOpenCarts[customerId] = {
-          store: {
-            address: this.selectedStore.address,
-            division: this.selectedStore.division,
-            name: this.selectedStore.name,
-            phone: this.selectedStore.phone,
-          },
-          customer: {
-            address: this.selectedCustomer.address,
-            name: this.selectedCustomer.name,
-            phone: this.selectedCustomer.phone,
-          },
+          store: this.selectedStore,
+          customer: this.selectedCustomer,
         };
 
-        console.log("Datos guardados en localStorage:", customerOpenCarts);
         localStorage.setItem(
           "customerOpenCarts",
           JSON.stringify(customerOpenCarts)
         );
-
         Swal.fire({
           title: "Pedido iniciado",
           text: "Se ha creado un nuevo pedido para este cliente y sucursal.",
@@ -183,27 +197,54 @@ export default {
     },
 
     selectStore(store) {
-      this.selectedStore = store;
+      this.selectedStore = {
+        id: store.id,
+        name: store.name,
+        address: store.address,
+        phone: store.phone,
+        division: store.division,
+        latitude: store.latitude,
+        longitude: store.longitude,
+      };
+      //console.log("Sucursal seleccionada:", this.selectedStore);
       this.closeModal();
     },
-
     selectCustomer(customer) {
       this.selectedCustomer = {
         id: customer.id,
         name: customer.name,
         address: customer.address,
         phone: customer.phone,
+        additionalPhone: customer.additionalPhone,
+        clubCard: customer.clubCard,
+        latitude: customer.latitude,
+        longitude: customer.longitude,
+        references: customer.references,
       };
-      console.log("Cliente seleccionado:", this.selectedCustomer);
+      //console.log("Cliente seleccionado:", this.selectedCustomer);
       this.closeCustomerModal();
     },
 
     openModal() {
+      const userInfo = JSON.parse(localStorage.getItem("user"));
+      if (userInfo && userInfo.rol === "Sucursal") {
+        return;
+      }
       this.isModalOpen = true;
     },
+
     closeModal() {
       this.isModalOpen = false;
     },
+
+    openCustomerModal() {
+      this.isCustomerModalOpen = true;
+    },
+
+    closeCustomerModal() {
+      this.isCustomerModalOpen = false;
+    },
+
     fetchStores() {
       const db = getDatabase();
       const dbRef = ref(db, "/projects/superkomprasBackoffice/stores");
@@ -213,8 +254,10 @@ export default {
           this.stores = [];
           snapshot.forEach((childSnapshot) => {
             const store = childSnapshot.val();
-            store.id = childSnapshot.key;
-            this.stores.push(store);
+            if (store.status === "activo") {
+              store.id = childSnapshot.key;
+              this.stores.push(store);
+            }
           });
         },
         {
@@ -222,15 +265,10 @@ export default {
         }
       );
     },
-    openCustomerModal() {
-      this.isCustomerModalOpen = true;
-    },
-    closeCustomerModal() {
-      this.isCustomerModalOpen = false;
-    },
+
     fetchCustomers() {
       const db = getDatabase();
-      const dbRef = ref(db, "/projects/superkomprasBackoffice/customer");
+      const dbRef = ref(db, "/projects/superkomprasBackoffice/clienteSAD");
       onValue(
         dbRef,
         (snapshot) => {
@@ -240,7 +278,6 @@ export default {
             customer.id = childSnapshot.key;
             this.customers.push(customer);
           });
-          console.log("Clientes cargados:", this.customers);
         },
         {
           onlyOnce: true,
@@ -270,8 +307,13 @@ export default {
         this.saveNewOrderToLocalStorage();
       }
     },
-
     goToNewOrder() {
+      const userInfo = JSON.parse(localStorage.getItem("user"));
+      //console.log("Información del usuario:", userInfo);
+      if (userInfo.rol === "Sistemas" || userInfo.rol === "Administrador") {
+        this.proceedToCreateOrder();
+        return;
+      }
       if (
         this.selectedStore.name === "Seleccione una sucursal" ||
         this.selectedCustomer.name === "Cliente no seleccionado"
@@ -279,14 +321,28 @@ export default {
         this.validateSelection();
         return;
       }
-
-      // Guardar los datos en localStorage antes de redirigir
+      if (userInfo.rol === "Sucursal") {
+        const storeIdAsString = String(this.selectedStore.division);
+        const defaultStoreAsString = String(userInfo.defaultStore);
+        if (storeIdAsString !== defaultStoreAsString) {
+          Swal.fire({
+            title: "Acceso denegado",
+            text: "No puedes crear pedidos para esta sucursal.",
+            icon: "error",
+            confirmButtonText: "OK",
+          });
+          return;
+        }
+        this.proceedToCreateOrder();
+        return;
+      }
+    },
+    proceedToCreateOrder() {
       this.saveNewOrderToLocalStorage();
-
       const customerOpenCarts =
         JSON.parse(localStorage.getItem("customerOpenCarts")) || {};
-
-      if (!customerOpenCarts.customerUID) {
+      const customerUID = this.selectedCustomer.id;
+      if (!customerOpenCarts[customerUID]) {
         Swal.fire({
           title: "Error",
           text: "No se pudo iniciar un nuevo pedido. Faltan datos importantes.",
@@ -295,13 +351,12 @@ export default {
         });
         return;
       }
-
-      // Redirigir a la ruta del nuevo pedido
       this.$router.push({
         name: "order_search",
-        params: { customerUID: customerOpenCarts.customerUID },
+        params: { customerUID: customerUID },
       });
     },
+
     continueOrder() {
       const customerOpenCarts =
         JSON.parse(localStorage.getItem("customerOpenCarts")) || {};
@@ -315,8 +370,6 @@ export default {
         });
         return;
       }
-
-      // Redirigir a la ruta del pedido en curso
       this.$router.push({ name: "order_continue" });
     },
   },
